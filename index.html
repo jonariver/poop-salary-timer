@@ -8,7 +8,2222 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@500;700&display=swap">
 </head>
 <body>
-PLACEHOLDER_BODY_CONTENT
+<style>
+/* ============================================================
+   Poop Salary Timer — "Stilles Örtchen, laufende Kasse"
+   Palette (light): Porzellan #F6F3EC · Fuge #E7E1D4 · Tinte #2B2620
+   Gold #A87B0F · Braun #8A5A33 · Karte #FFFDF8
+   ============================================================ */
+:root {
+  --porcelain: #F6F3EC;
+  --tile-line: rgba(138, 106, 51, 0.10);
+  --card: #FFFDF8;
+  --card-edge: #E7E1D4;
+  --ink: #2B2620;
+  --ink-soft: #6E6355;
+  --ink-faint: #9C8F7D;
+  --gold: #A87B0F;
+  --gold-strong: #8A6508;
+  --gold-soft: rgba(168, 123, 15, 0.12);
+  --brown: #8A5A33;
+  --danger: #A8422B;
+  --danger-soft: rgba(168, 66, 43, 0.12);
+  --btn-primary-bg: #2B2620;
+  --btn-primary-fg: #F9F6EE;
+  --field-bg: #FFFFFF;
+  --shadow: 0 2px 6px rgba(63, 51, 33, 0.06), 0 10px 28px rgba(63, 51, 33, 0.08);
+  --ring-track: #EAE3D4;
+}
+:root:not([data-theme="light"]) { }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --porcelain: #1C1915;
+    --tile-line: rgba(214, 186, 132, 0.06);
+    --card: #26221C;
+    --card-edge: #3A342A;
+    --ink: #EDE6D8;
+    --ink-soft: #B0A48F;
+    --ink-faint: #7D7261;
+    --gold: #D9A72E;
+    --gold-strong: #E8BC52;
+    --gold-soft: rgba(217, 167, 46, 0.14);
+    --brown: #C08A55;
+    --danger: #D96A4F;
+    --danger-soft: rgba(217, 106, 79, 0.16);
+    --btn-primary-bg: #EDE6D8;
+    --btn-primary-fg: #221E18;
+    --field-bg: #1E1B16;
+    --shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.35);
+    --ring-track: #3A342A;
+  }
+}
+:root[data-theme="dark"] {
+  --porcelain: #1C1915;
+  --tile-line: rgba(214, 186, 132, 0.06);
+  --card: #26221C;
+  --card-edge: #3A342A;
+  --ink: #EDE6D8;
+  --ink-soft: #B0A48F;
+  --ink-faint: #7D7261;
+  --gold: #D9A72E;
+  --gold-strong: #E8BC52;
+  --gold-soft: rgba(217, 167, 46, 0.14);
+  --brown: #C08A55;
+  --danger: #D96A4F;
+  --danger-soft: rgba(217, 106, 79, 0.16);
+  --btn-primary-bg: #EDE6D8;
+  --btn-primary-fg: #221E18;
+  --field-bg: #1E1B16;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 0 10px 28px rgba(0, 0, 0, 0.35);
+  --ring-track: #3A342A;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background:
+    linear-gradient(var(--tile-line) 1px, transparent 1px) 0 -1px / 100% 56px,
+    linear-gradient(90deg, var(--tile-line) 1px, transparent 1px) -1px 0 / 56px 100%,
+    var(--porcelain);
+  color: var(--ink);
+  font-family: "Spline Sans", "Segoe UI", system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.shell {
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 20px 18px 96px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ---------- Language switch ---------- */
+.lang-switch {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  display: flex;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  padding: 3px;
+  box-shadow: var(--shadow);
+  z-index: 10;
+}
+.lang-switch button {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.lang-switch button[aria-pressed="true"] {
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+}
+
+/* ---------- Header ---------- */
+header.app { text-align: center; margin: 8px 0 20px; }
+h1 {
+  font-family: "Bricolage Grotesque", Georgia, serif;
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 .coin { color: var(--gold); }
+.tagline {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 14px;
+}
+
+/* ---------- Rate chip ---------- */
+.rate-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+.rate-chip:hover { filter: brightness(0.96); }
+.rate-chip svg { flex: none; }
+
+/* ---------- Activity picker ---------- */
+.activity-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--porcelain);
+  border: 1px solid var(--card-edge);
+  border-radius: 14px;
+  padding: 5px;
+  margin: 0 0 14px;
+  transition: opacity 0.15s ease;
+}
+.activity-picker.locked { opacity: 0.5; pointer-events: none; }
+.act-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 4px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.act-btn .act-emoji { font-size: 1.3rem; line-height: 1; }
+.act-btn .act-name { font-size: 0.72rem; font-weight: 600; }
+.act-btn[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* ---------- Timer screen ---------- */
+.timer-wrap { text-align: center; padding: 28px 20px 24px; }
+.state-label {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  min-height: 1em;
+}
+.money {
+  font-family: "Spline Sans Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 11vw, 3.2rem);
+  line-height: 1.1;
+  color: var(--gold);
+  letter-spacing: -0.02em;
+}
+.money.zero { color: var(--ink-faint); }
+.elapsed {
+  font-family: "Spline Sans Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
+}
+button.btn {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 30px;
+  cursor: pointer;
+  transition: transform 0.08s ease, filter 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+button.btn:active { transform: scale(0.97); }
+.btn-start { background: var(--btn-primary-bg); color: var(--btn-primary-fg); }
+.btn-stop {
+  background: var(--danger-soft);
+  color: var(--danger);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.btn-stop .fill {
+  position: absolute;
+  inset: 0;
+  background: var(--danger);
+  opacity: 0.28;
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+.btn-stop.holding .fill {
+  transform: scaleX(1);
+  transition: transform 0.9s linear;
+}
+.hold-hint {
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* ---------- Setup / settings form ---------- */
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: var(--porcelain);
+  border: 1px solid var(--card-edge);
+  border-radius: 12px;
+  padding: 5px;
+  margin-bottom: 18px;
+}
+.mode-switch button {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 6px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.mode-switch button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.field { margin-bottom: 14px; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.field input {
+  width: 100%;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 1.05rem;
+  padding: 11px 13px;
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  background: var(--field-bg);
+  color: var(--ink);
+}
+.field input:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: transparent; }
+.derived {
+  background: var(--gold-soft);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 0.88rem;
+  color: var(--gold-strong);
+  margin-bottom: 16px;
+}
+.derived strong { font-family: "Spline Sans Mono", monospace; font-weight: 700; }
+.privacy-note {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin-top: 14px;
+  line-height: 1.5;
+}
+.form-error { color: var(--danger); font-size: 0.82rem; margin-bottom: 10px; display: none; }
+.tax-section {
+  border-top: 1px dashed var(--card-edge);
+  margin-top: 18px;
+  padding-top: 16px;
+}
+.tax-section h3 {
+  font-family: "Bricolage Grotesque", Georgia, serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 12px;
+}
+.field select {
+  width: 100%;
+  font-family: "Spline Sans Mono", monospace;
+  font-size: 1rem;
+  padding: 11px 13px;
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  background: var(--field-bg);
+  color: var(--ink);
+}
+.field select:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: transparent; }
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.check-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--gold); }
+.check-row select { width: auto; padding: 5px 9px; font-size: 0.85rem; }
+.tax-hint {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.net-live {
+  font-family: "Spline Sans Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.net-live strong { color: var(--gold); font-weight: 700; }
+.ded-block {
+  background: var(--danger-soft);
+  border-radius: 12px;
+  padding: 13px 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.ded-block .ded-head {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--danger);
+  margin-bottom: 7px;
+}
+.ded-block .ded-parts {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+.funded {
+  background: var(--gold-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+.funded .funded-title { font-weight: 700; font-size: 0.85rem; color: var(--gold-strong); margin-bottom: 6px; }
+.funded ul { margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--gold-strong); line-height: 1.7; }
+.funded .disclaimer { font-size: 0.7rem; color: var(--ink-faint); margin-top: 8px; font-style: italic; }
+
+/* ---------- Summary ---------- */
+.summary-emoji { font-size: 2.6rem; line-height: 1; }
+.summary-title {
+  font-family: "Bricolage Grotesque", Georgia, serif;
+  font-weight: 800;
+  font-size: 1.45rem;
+  margin: 10px 0 2px;
+  text-wrap: balance;
+}
+.summary-sub { color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 18px; }
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.stat-tile {
+  background: var(--porcelain);
+  border: 1px solid var(--card-edge);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.stat-tile .k {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+.stat-tile .v {
+  font-family: "Spline Sans Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-top: 3px;
+}
+.stat-tile .v.gold { color: var(--gold); }
+.fun-fact {
+  background: var(--gold-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.87rem;
+  color: var(--gold-strong);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.summary-actions { display: flex; flex-direction: column; gap: 9px; }
+.btn-secondary {
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--card-edge) !important;
+}
+
+/* ---------- History ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.session-list { list-style: none; margin: 0; padding: 0; }
+.session-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--card-edge);
+}
+.session-list li:last-child { border-bottom: none; }
+.session-when { flex: 1; min-width: 0; }
+.session-when .d { font-weight: 600; font-size: 0.9rem; }
+.session-when .t { font-size: 0.76rem; color: var(--ink-faint); }
+.session-dur {
+  font-family: "Spline Sans Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+.session-earn {
+  font-family: "Spline Sans Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 0.95rem;
+}
+.session-del {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.session-del:hover { color: var(--danger); background: var(--danger-soft); }
+.session-activity { font-size: 1.15rem; flex: none; line-height: 1; }
+.empty-state {
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 0.88rem;
+  padding: 26px 10px;
+  line-height: 1.6;
+}
+.empty-state .big { font-size: 2rem; }
+.btn-add-session {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.82rem;
+  border: 1px dashed var(--card-edge);
+  background: transparent;
+  color: var(--gold-strong);
+  border-radius: 999px;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.btn-add-session:hover { background: var(--gold-soft); }
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.section-head h2.section { margin: 0; }
+.backfill-form {
+  background: var(--porcelain);
+  border: 1px solid var(--card-edge);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.backfill-form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.backfill-form .actions { display: flex; gap: 8px; margin-top: 4px; }
+.backfill-form .actions .btn { padding: 10px 20px; font-size: 0.9rem; flex: 1; }
+/* ---------- Achievements ---------- */
+.ach-grid { display: flex; flex-direction: column; gap: 8px; }
+.ach {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--card-edge);
+  border-radius: 12px;
+  padding: 11px 13px;
+  background: var(--porcelain);
+}
+.ach.unlocked {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--card-edge));
+  background: var(--gold-soft);
+}
+.ach .badge {
+  font-size: 1.55rem;
+  line-height: 1;
+  flex: none;
+  width: 40px;
+  text-align: center;
+}
+.ach.locked .badge { filter: grayscale(1); opacity: 0.45; }
+.ach .info { flex: 1; min-width: 0; }
+.ach .name { font-weight: 600; font-size: 0.9rem; }
+.ach.locked .name { color: var(--ink-soft); }
+.ach .desc { font-size: 0.76rem; color: var(--ink-faint); margin-top: 1px; line-height: 1.4; }
+.ach .status {
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+  text-align: right;
+}
+.ach.unlocked .status { color: var(--gold-strong); }
+.ach-count {
+  font-family: "Spline Sans Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gold-strong);
+  background: var(--gold-soft);
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+.ach-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 86px;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-width: min(90vw, 380px);
+  z-index: 50;
+}
+.ach-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.ach-toast .badge { font-size: 1.4rem; }
+.ach-toast .small { display: block; font-size: 0.7rem; font-weight: 500; opacity: 0.7; }
+@media (prefers-reduced-motion: reduce) {
+  .ach-toast { transition: opacity 0.25s ease; transform: translateX(-50%); }
+  .ach-toast.show { transform: translateX(-50%); }
+}
+/* ---------- Share ---------- */
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 16, 10, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+.share-modal {
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+  width: 100%;
+  max-width: 380px;
+}
+.share-modal h3 {
+  font-family: "Bricolage Grotesque", Georgia, serif;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.share-modal textarea {
+  width: 100%;
+  min-height: 130px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--porcelain);
+  border: 1px solid var(--card-edge);
+  border-radius: 10px;
+  padding: 10px 12px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+.share-modal .actions { display: flex; gap: 8px; }
+.share-modal .actions .btn { flex: 1; padding: 11px 16px; font-size: 0.9rem; }
+.csv-actions { display: flex; gap: 8px; margin-top: 14px; }
+.csv-actions .btn { flex: 1; padding: 10px 12px; font-size: 0.85rem; }
+.share-modal input[type="file"] {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.share-modal .modal-hint {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.session-tag {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+
+/* ---------- Tab bar ---------- */
+nav.tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--card-edge);
+}
+nav.tabs button {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.82rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  border-radius: 999px;
+  padding: 9px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+nav.tabs button[aria-current="true"] {
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+}
+
+h2.section {
+  font-family: "Bricolage Grotesque", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 0 0 14px;
+}
+.hidden { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-stop.holding .fill { transition: none; }
+  button.btn:active { transform: none; }
+}
+</style>
+
+<div class="shell">
+  <div class="lang-switch" role="group" aria-label="Sprache / Language">
+    <button id="lang-de" aria-pressed="true">DE</button>
+    <button id="lang-en" aria-pressed="false">EN</button>
+  </div>
+  <header class="app">
+    <h1>Poop Salary Timer <span class="coin">💩</span></h1>
+    <p class="tagline">Zeit ist Geld. Auch hier.</p>
+  </header>
+
+  <!-- ============ SETUP / SETTINGS ============ -->
+  <section id="view-setup" class="card hidden" aria-label="Verdienst einstellen">
+    <h2 class="section">Was verdienst du eigentlich?</h2>
+    <div class="mode-switch" role="group" aria-label="Eingabemodus">
+      <button id="mode-monthly" aria-pressed="true">Monatslohn</button>
+      <button id="mode-hourly" aria-pressed="false">Stundenlohn</button>
+    </div>
+    <div id="fields-monthly">
+      <div class="field">
+        <label for="inp-monthly">Monatslohn (brutto oder netto — deine Wahl) in €</label>
+        <input id="inp-monthly" type="number" inputmode="decimal" min="0" step="50" placeholder="z. B. 3200">
+      </div>
+      <div class="field">
+        <label for="inp-hours">Arbeitsstunden pro Woche</label>
+        <input id="inp-hours" type="number" inputmode="decimal" min="1" max="100" step="0.5" placeholder="z. B. 40">
+      </div>
+    </div>
+    <div id="fields-hourly" class="hidden">
+      <div class="field">
+        <label for="inp-rate">Stundenlohn in €</label>
+        <input id="inp-rate" type="number" inputmode="decimal" min="0" step="0.5" placeholder="z. B. 18,50">
+      </div>
+    </div>
+    <div class="tax-section">
+      <h3 id="tax-title">Netto-Schätzung (optional) 🧾</h3>
+      <div class="field">
+        <label for="inp-taxclass" id="lbl-taxclass">Steuerklasse</label>
+        <select id="inp-taxclass">
+          <option value="">– (nur Brutto)</option>
+          <option value="1">I</option>
+          <option value="2">II</option>
+          <option value="3">III</option>
+          <option value="4">IV</option>
+          <option value="5">V</option>
+          <option value="6">VI</option>
+        </select>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="inp-church">
+        <label for="inp-church" id="lbl-church">Kirchensteuer</label>
+        <select id="inp-church-rate">
+          <option value="9">9 %</option>
+          <option value="8">8 %</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="inp-dedlabel" id="lbl-dedlabel">Überschrift für den Abzugsblock</label>
+        <input id="inp-dedlabel" type="text" maxlength="60" placeholder="Davon schnappt sich der Staat:">
+      </div>
+      <p class="tax-hint" id="tax-hint">Vereinfachte Näherung (Steuertarif-Schätzung + pauschal 20,5 % Sozialabgaben), keine amtliche Lohnsteuertabelle. Beim Stundenlohn-Modus wird eine 40-Stunden-Woche angenommen, falls keine Wochenstunden bekannt sind.</p>
+    </div>
+    <div class="derived hidden" id="derived-rate"><span id="derived-pre">Das macht </span><strong id="derived-value">–</strong><span id="derived-post"> pro Stunde. Jede Minute dort drin: bares Geld.</span></div>
+    <p class="form-error" id="form-error">Bitte gib gültige Werte ein.</p>
+    <button class="btn btn-start" id="btn-save-settings" style="width:100%">Speichern &amp; loslegen</button>
+    <p class="privacy-note">🔒 Alles bleibt auf deinem Gerät. Dein Lohn wird nur lokal im Browser gespeichert — kein Server, kein Konto, keine neugierigen Blicke.</p>
+  </section>
+
+  <!-- ============ TIMER ============ -->
+  <section id="view-timer" class="hidden" aria-label="Timer">
+    <div style="text-align:center; margin-bottom:14px;">
+      <button class="rate-chip" id="chip-rate" title="Verdienst ändern">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z"></path><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"></path></svg>
+        <span id="chip-rate-text">– €/h</span>
+      </button>
+    </div>
+    <div class="activity-picker" id="activity-picker" role="group" aria-label="Aktivität wählen">
+      <button type="button" class="act-btn" id="act-poop" data-activity="poop" aria-pressed="true">
+        <span class="act-emoji">💩</span><span class="act-name">Kacken</span>
+      </button>
+      <button type="button" class="act-btn" id="act-smoke" data-activity="smoke" aria-pressed="false">
+        <span class="act-emoji">🚬</span><span class="act-name">Rauchen</span>
+      </button>
+      <button type="button" class="act-btn" id="act-coffee" data-activity="coffee" aria-pressed="false">
+        <span class="act-emoji">☕</span><span class="act-name">Kaffee</span>
+      </button>
+    </div>
+    <div class="card timer-wrap">
+      <div class="state-label" id="state-label">Bereit</div>
+      <div class="money zero" id="money-display">0,0000&nbsp;€</div>
+      <div class="net-live hidden" id="net-display"></div>
+      <div class="elapsed" id="elapsed-display">00:00</div>
+      <div class="controls">
+        <button class="btn btn-start" id="btn-start">Start</button>
+        <button class="btn btn-stop hidden" id="btn-stop">
+          <span class="fill"></span>
+          <span style="position:relative">Stop</span>
+        </button>
+      </div>
+      <p class="hold-hint" id="hold-hint">&nbsp;</p>
+    </div>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section id="view-summary" class="card hidden" style="text-align:center" aria-label="Zusammenfassung">
+    <div class="summary-emoji" id="summary-emoji">🧻</div>
+    <h2 class="summary-title" id="summary-title">Sauberes Geschäft.</h2>
+    <p class="summary-sub" id="summary-sub"></p>
+    <div class="summary-stats">
+      <div class="stat-tile">
+        <div class="k" id="sum-k-duration">Sitzungsdauer</div>
+        <div class="v" id="summary-duration">–</div>
+      </div>
+      <div class="stat-tile">
+        <div class="k" id="sum-k-earned">Verdient</div>
+        <div class="v gold" id="summary-earned">–</div>
+      </div>
+      <div class="stat-tile hidden" id="sum-tile-net">
+        <div class="k" id="sum-k-net">Netto</div>
+        <div class="v gold" id="summary-net">–</div>
+      </div>
+      <div class="stat-tile hidden" id="sum-tile-ded">
+        <div class="k" id="sum-k-ded">Abzug</div>
+        <div class="v" id="summary-ded">–</div>
+      </div>
+    </div>
+    <div class="ded-block hidden" id="ded-block">
+      <div class="ded-head" id="ded-headline"></div>
+      <div class="ded-parts" id="ded-parts"></div>
+    </div>
+    <div class="funded hidden" id="funded-block">
+      <div class="funded-title" id="funded-title"></div>
+      <ul id="funded-list"></ul>
+      <div class="disclaimer" id="funded-disclaimer"></div>
+    </div>
+    <div class="fun-fact" id="summary-fact"></div>
+    <div class="summary-actions">
+      <button class="btn btn-start" id="btn-save-session">Session speichern</button>
+      <button class="btn btn-secondary" id="btn-share-session">📤 Teilen</button>
+      <button class="btn btn-secondary" id="btn-discard-session">Verwerfen</button>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section id="view-history" class="hidden" aria-label="Verlauf">
+    <div class="card">
+      <h2 class="section" id="h2-balance">Deine Bilanz 📈</h2>
+      <div class="stats-grid">
+        <div class="stat-tile">
+          <div class="k" id="stat-k-total">Gesamt verdient</div>
+          <div class="v gold" id="stat-total-earned">0,00&nbsp;€</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-time">Gesamtzeit</div>
+          <div class="v" id="stat-total-time">0 min</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-count">Sitzungen</div>
+          <div class="v" id="stat-count">0</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-avg">Ø pro Sitzung</div>
+          <div class="v" id="stat-avg">–</div>
+        </div>
+        <div class="stat-tile hidden" id="stat-tile-net">
+          <div class="k" id="stat-k-net">Netto gesamt</div>
+          <div class="v gold" id="stat-total-net">–</div>
+        </div>
+        <div class="stat-tile hidden" id="stat-tile-ded">
+          <div class="k" id="stat-k-ded">Abzug gesamt</div>
+          <div class="v" id="stat-total-ded">–</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section" id="h2-sessions">Sitzungen</h2>
+        <button class="btn-add-session" id="btn-show-backfill">+ Nachtragen</button>
+      </div>
+      <div class="backfill-form hidden" id="backfill-form">
+        <div class="row">
+          <div class="field">
+            <label for="bf-date">Datum</label>
+            <input id="bf-date" type="date">
+          </div>
+          <div class="field">
+            <label for="bf-time">Uhrzeit</label>
+            <input id="bf-time" type="time">
+          </div>
+        </div>
+        <div class="field">
+          <label for="bf-duration">Dauer in Minuten</label>
+          <input id="bf-duration" type="number" inputmode="decimal" min="0.5" max="720" step="0.5" placeholder="z. B. 12">
+        </div>
+        <div class="derived hidden" id="bf-derived"><span id="bf-derived-pre">Macht </span><strong id="bf-derived-value">–</strong><span id="bf-derived-post"> — nachträglich, aber verdient.</span></div>
+        <p class="form-error" id="bf-error">Bitte Datum, Uhrzeit und Dauer angeben.</p>
+        <div class="actions">
+          <button class="btn btn-start" id="bf-save">Eintragen</button>
+          <button class="btn btn-secondary" id="bf-cancel">Abbrechen</button>
+        </div>
+      </div>
+      <ul class="session-list" id="session-list"></ul>
+      <div class="empty-state hidden" id="empty-history">
+        <div class="big">🚽</div>
+        <span id="empty-history-text">Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.</span>
+      </div>
+      <div class="csv-actions">
+        <button class="btn btn-secondary" id="btn-export-csv">⬇️ CSV exportieren</button>
+        <button class="btn btn-secondary" id="btn-import-csv">⬆️ CSV importieren</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACHIEVEMENTS ============ -->
+  <section id="view-achievements" class="hidden" aria-label="Erfolge">
+    <div class="card">
+      <div class="section-head">
+        <h2 class="section" id="h2-achievements">Erfolge 🏆</h2>
+        <span class="ach-count" id="ach-count">0 / 10</span>
+      </div>
+      <div class="ach-grid" id="ach-grid"></div>
+      <button class="btn btn-secondary" id="btn-share-achievements" style="width:100%; margin-top:14px">📤 Erfolge teilen</button>
+    </div>
+  </section>
+</div>
+
+<div class="ach-toast" id="ach-toast" role="status" aria-live="polite">
+  <span class="badge" id="ach-toast-badge">🏆</span>
+  <span><span class="small" id="ach-toast-label">Erfolg freigeschaltet</span><span id="ach-toast-name"></span></span>
+</div>
+
+<div class="ach-toast" id="info-toast" role="status" aria-live="polite"></div>
+
+<div class="share-overlay hidden" id="import-overlay">
+  <div class="share-modal" role="dialog" aria-label="CSV importieren">
+    <h3 id="import-title">CSV importieren ⬆️</h3>
+    <input type="file" id="import-file" accept=".csv,text/csv,text/plain">
+    <p class="modal-hint" id="import-hint">Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen</p>
+    <textarea id="import-text" placeholder="2026-08-27;07:30:00;720;3,4600;17,31;nein"></textarea>
+    <p class="form-error" id="import-error">Keine gültigen Zeilen gefunden.</p>
+    <div class="actions">
+      <button class="btn btn-start" id="import-run">Importieren</button>
+      <button class="btn btn-secondary" id="import-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div class="share-overlay hidden" id="share-overlay">
+  <div class="share-modal" role="dialog" aria-label="Teilen">
+    <h3 id="share-title">Zum Teilen kopieren 📤</h3>
+    <textarea id="share-text" readonly></textarea>
+    <div class="actions">
+      <button class="btn btn-start" id="share-copy">Kopieren</button>
+      <button class="btn btn-secondary" id="share-close">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs" id="tab-bar">
+  <button id="tab-timer" aria-current="true">⏱️ Timer</button>
+  <button id="tab-history" aria-current="false">📊 Verlauf</button>
+  <button id="tab-achievements" aria-current="false">🏆 Erfolge</button>
+  <button id="tab-settings" aria-current="false">⚙️ Daten</button>
+</nav>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- Storage (best-effort, all local) ----------
+  var LS_SETTINGS = 'pst_settings';
+  var LS_SESSIONS = 'pst_sessions';
+  var LS_ACTIVE = 'pst_active';
+  function lsGet(key) {
+    try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+  }
+  function lsSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* private mode etc. */ }
+  }
+  function lsDel(key) {
+    try { localStorage.removeItem(key); } catch (e) {}
+  }
+
+  // ---------- Aktivität (Kacken / Rauchen / Kaffee) ----------
+  var LS_ACTIVITY = 'pst_activity';
+  var ACT_EMOJI = { poop: '💩', smoke: '🚬', coffee: '☕' };
+  var SUMMARY_EMOJI = { poop: '🧻', smoke: '🚬', coffee: '☕' };
+  function actKeyOf(x) { return (x === 'smoke' || x === 'coffee') ? x : 'poop'; }
+  var activity = actKeyOf(lsGet(LS_ACTIVITY));
+
+  // ---------- Sprache / i18n ----------
+  var LS_LANG = 'pst_lang';
+  var lang = lsGet(LS_LANG) === 'en' ? 'en' : 'de';
+  var STR = {
+    de: {
+      tagline: 'Zeit ist Geld. Auch hier.',
+      setupTitle: 'Was verdienst du eigentlich?',
+      modeMonthly: 'Monatslohn', modeHourly: 'Stundenlohn',
+      lblMonthly: 'Monatslohn (brutto oder netto — deine Wahl) in €',
+      lblHours: 'Arbeitsstunden pro Woche',
+      lblRate: 'Stundenlohn in €',
+      phMonthly: 'z. B. 3200', phHours: 'z. B. 40', phRate: 'z. B. 18,50',
+      derivedPre: 'Das macht ', derivedPost: ' pro Stunde. Jede Minute dort drin: bares Geld.',
+      formError: 'Bitte gib gültige Werte ein.',
+      btnSaveFirst: 'Speichern & loslegen', btnSaveChanges: 'Änderungen speichern',
+      privacyNote: '🔒 Alles bleibt auf deinem Gerät. Dein Lohn wird nur lokal im Browser gespeichert — kein Server, kein Konto, keine neugierigen Blicke.',
+      chipTitle: 'Verdienst ändern',
+      activityPickerLabel: 'Aktivität wählen',
+      activityPoop: 'Kacken', activitySmoke: 'Rauchen', activityCoffee: 'Kaffee',
+      stateReady: 'Bereit', stateRunning: 'Es läuft 💸', statePaused: 'Pausiert',
+      btnStart: 'Start', btnResume: 'Weiter',
+      holdHint: 'Kurz drücken: Pause &nbsp;·&nbsp; Gedrückt halten: Sitzung beenden',
+      sumKDuration: 'Sitzungsdauer', sumKEarned: 'Verdient',
+      btnSaveSession: 'Session speichern', btnShareSession: '📤 Teilen', btnDiscard: 'Verwerfen',
+      h2Balance: 'Deine Bilanz 📈',
+      statKTotal: 'Gesamt verdient', statKTime: 'Gesamtzeit', statKCount: 'Sitzungen', statKAvg: 'Ø pro Sitzung',
+      h2Sessions: 'Sitzungen', btnBackfill: '+ Nachtragen',
+      lblDate: 'Datum', lblTime: 'Uhrzeit', lblDuration: 'Dauer in Minuten', phDuration: 'z. B. 12',
+      bfDerivedPre: 'Macht ', bfDerivedPost: ' — nachträglich, aber verdient.',
+      bfError: 'Bitte Datum, Uhrzeit und Dauer angeben.',
+      btnBfSave: 'Eintragen', btnCancel: 'Abbrechen',
+      emptyHistory: 'Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.',
+      btnExport: '⬇️ CSV exportieren', btnImport: '⬆️ CSV importieren',
+      h2Achievements: 'Erfolge 🏆', btnShareAch: '📤 Erfolge teilen',
+      importTitle: 'CSV importieren ⬆️',
+      importHint: 'Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen',
+      importError: 'Keine gültigen Zeilen gefunden.',
+      btnImportRun: 'Importieren',
+      shareTitleDefault: 'Zum Teilen kopieren 📤', btnCopy: 'Kopieren', btnClose: 'Schließen',
+      toastUnlocked: 'Erfolg freigeschaltet',
+      toastCopied: 'In die Zwischenablage kopiert 📋',
+      toastNoExport: 'Keine Sitzungen zum Exportieren 🤷',
+      csvExportTitle: 'CSV-Export 📄',
+      csvHeader: 'Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen;Netto (EUR);Abzug (EUR);Aktivität',
+      csvYes: 'ja', csvNo: 'nein',
+      tabTimer: '⏱️ Timer', tabHistory: '📊 Verlauf', tabAchievements: '🏆 Erfolge', tabSettings: '⚙️ Daten',
+      tagBackfilled: 'nachgetragen', clockSuffix: ' Uhr', delAria: 'Sitzung löschen',
+      unitSec: ' Sek.', unitMin: ' Min.', unitHour: ' Std. ',
+      unitDays: 'Tagen', unitMinShort: 'Min.', bestTime: 'Bestzeit ',
+      unitHourShort: ' Std.', unitDaysShort: ' Tage',
+      taxTitle: 'Netto-Schätzung (optional) 🧾',
+      lblTaxClass: 'Steuerklasse', taxNone: '– (nur Brutto)',
+      lblChurch: 'Kirchensteuer',
+      lblDedLabel: 'Überschrift für den Abzugsblock',
+      dedLabelDefault: 'Davon schnappt sich der Staat:',
+      taxHint: 'Vereinfachte Näherung (Steuertarif-Schätzung + pauschal 20,5 % Sozialabgaben), keine amtliche Lohnsteuertabelle. Beim Stundenlohn-Modus wird eine 40-Stunden-Woche angenommen, falls keine Wochenstunden bekannt sind.',
+      netLabel: 'Netto', sumKGross: 'Brutto', sumKNet: 'Netto', sumKDed: 'Abzug',
+      statKNet: 'Netto gesamt', statKDed: 'Abzug gesamt',
+      dedLst: 'Lohnsteuer', dedSoli: 'Soli', dedChurch: 'Kirchensteuer', dedSv: 'Sozialversicherung',
+      fundedTitle: 'Damit hast du finanziert:',
+      fundedDisclaimer: 'Augenzwinkernde Schätzung, kein echter Haushaltsbezug.',
+      fundedItems: ['Bürgergeld-Regelsatz (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Deutschland gesamt)'],
+      summarySub: function (dur) { return 'Du warst ' + dur + ' auf Firmenkosten unterwegs.'; },
+      titles: {
+        poop: ['Sauberes Geschäft.', 'Sitzung erfolgreich beendet.', 'Das lief sauber durch.', 'Feierabend auf dem Thron.', 'Erledigt. Im besten Sinne.'],
+        smoke: ['Kurze Pause, gut bezahlt.', 'Rauchpause abgerechnet.', 'Das ging in Rauch auf — profitabel.', 'Feierabend am Aschenbecher.', 'Erledigt. Im besten Sinne.'],
+        coffee: ['Kaffeepause abgerechnet.', 'Kurzer Break, voller Lohn.', 'Tasse leer, Konto voller.', 'Feierabend an der Kaffeemaschine.', 'Erledigt. Im besten Sinne.']
+      },
+      factNothing: 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
+      factPct: function (pct, item) { return 'Das sind schon ' + pct + ' % von ' + item + '. Dranbleiben!'; },
+      factOne: function (item) { return 'Dafür gibt es ' + item + '. Wohl verdient!'; },
+      factMany: function (n, items) { return 'Dafür gibt es ' + n + ' ' + items + '. Wohl verdient!'; },
+      comparisons: [
+        { price: 0.75, singular: 'ein Brötchen', plural: 'Brötchen' },
+        { price: 1.5,  singular: 'eine Butterbrezel', plural: 'Butterbrezeln' },
+        { price: 2.2,  singular: 'einen Espresso', plural: 'Espressi' },
+        { price: 4.5,  singular: 'einen Cappuccino to go', plural: 'Cappuccini to go' },
+        { price: 8,    singular: 'einen Döner', plural: 'Döner' },
+        { price: 13,   singular: 'ein Kinoticket', plural: 'Kinotickets' }
+      ],
+      shareSession: function (activity, dur, money, fact) {
+        var line = activity === 'smoke'
+          ? 'Ich war ' + dur + ' rauchen und habe dabei ' + money + ' verdient. 💸'
+          : activity === 'coffee'
+            ? 'Ich war ' + dur + ' Kaffee trinken und habe dabei ' + money + ' verdient. 💸'
+            : 'Ich war ' + dur + ' auf dem Thron und habe dabei ' + money + ' verdient. 💸';
+        return '💩 Poop Salary Timer\n' + line + '\n' + fact;
+      },
+      shareAchTitle: function (n, total) { return '🏆 Meine Klo-Erfolge (' + n + '/' + total + '):\n'; },
+      shareAchNone: 'Noch keine — aber das Sitzungsjahr ist noch lang.',
+      shareAchFooter: '\n— gemessen mit dem Poop Salary Timer 💩',
+      toastImported: function (added, skipped) { return added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅'; }
+    },
+    en: {
+      tagline: 'Time is money. Even here.',
+      setupTitle: 'So, what do you earn?',
+      modeMonthly: 'Monthly salary', modeHourly: 'Hourly wage',
+      lblMonthly: 'Monthly salary (gross or net — your call) in €',
+      lblHours: 'Working hours per week',
+      lblRate: 'Hourly wage in €',
+      phMonthly: 'e.g. 3200', phHours: 'e.g. 40', phRate: 'e.g. 18.50',
+      derivedPre: 'That makes ', derivedPost: ' per hour. Every minute in there: cold, hard cash.',
+      formError: 'Please enter valid values.',
+      btnSaveFirst: 'Save & get going', btnSaveChanges: 'Save changes',
+      privacyNote: '🔒 Everything stays on your device. Your salary is stored only locally in your browser — no server, no account, no prying eyes.',
+      chipTitle: 'Change earnings',
+      activityPickerLabel: 'Choose activity',
+      activityPoop: 'Pooping', activitySmoke: 'Smoking', activityCoffee: 'Coffee',
+      stateReady: 'Ready', stateRunning: 'Earning 💸', statePaused: 'Paused',
+      btnStart: 'Start', btnResume: 'Resume',
+      holdHint: 'Tap: pause &nbsp;·&nbsp; Press and hold: end session',
+      sumKDuration: 'Session length', sumKEarned: 'Earned',
+      btnSaveSession: 'Save session', btnShareSession: '📤 Share', btnDiscard: 'Discard',
+      h2Balance: 'Your balance 📈',
+      statKTotal: 'Total earned', statKTime: 'Total time', statKCount: 'Sessions', statKAvg: 'Avg per session',
+      h2Sessions: 'Sessions', btnBackfill: '+ Add missed one',
+      lblDate: 'Date', lblTime: 'Time', lblDuration: 'Duration in minutes', phDuration: 'e.g. 12',
+      bfDerivedPre: 'Makes ', bfDerivedPost: ' — belated, but well earned.',
+      bfError: 'Please provide date, time and duration.',
+      btnBfSave: 'Add session', btnCancel: 'Cancel',
+      emptyHistory: 'No saved sessions yet.<br>Your first business awaits.',
+      btnExport: '⬇️ Export CSV', btnImport: '⬆️ Import CSV',
+      h2Achievements: 'Achievements 🏆', btnShareAch: '📤 Share achievements',
+      importTitle: 'Import CSV ⬆️',
+      importHint: 'Pick a file or paste CSV content below. Expected format matches the export: Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled',
+      importError: 'No valid rows found.',
+      btnImportRun: 'Import',
+      shareTitleDefault: 'Copy to share 📤', btnCopy: 'Copy', btnClose: 'Close',
+      toastUnlocked: 'Achievement unlocked',
+      toastCopied: 'Copied to clipboard 📋',
+      toastNoExport: 'No sessions to export 🤷',
+      csvExportTitle: 'CSV export 📄',
+      csvHeader: 'Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled;Net (EUR);Deduction (EUR);Activity',
+      csvYes: 'yes', csvNo: 'no',
+      tabTimer: '⏱️ Timer', tabHistory: '📊 History', tabAchievements: '🏆 Awards', tabSettings: '⚙️ Data',
+      tagBackfilled: 'backfilled', clockSuffix: '', delAria: 'Delete session',
+      unitSec: ' sec', unitMin: ' min', unitHour: ' h ',
+      unitDays: 'days', unitMinShort: 'min', bestTime: 'Best time ',
+      unitHourShort: ' h', unitDaysShort: ' days',
+      taxTitle: 'Net estimate (optional) 🧾',
+      lblTaxClass: 'Tax class (Germany)', taxNone: '– (gross only)',
+      lblChurch: 'Church tax',
+      lblDedLabel: 'Headline for the deduction block',
+      dedLabelDefault: "The taxman's cut:",
+      taxHint: 'Simplified approximation (estimated tax tariff + flat 20.5% social contributions), not an official payroll tax table. In hourly mode a 40-hour week is assumed if no weekly hours are known.',
+      netLabel: 'Net', sumKGross: 'Gross', sumKNet: 'Net', sumKDed: 'Deducted',
+      statKNet: 'Total net', statKDed: 'Total deducted',
+      dedLst: 'Income tax', dedSoli: 'Solidarity surcharge', dedChurch: 'Church tax', dedSv: 'Social security',
+      fundedTitle: 'With that you funded:',
+      fundedDisclaimer: 'Tongue-in-cheek estimate, no actual budget reference.',
+      fundedItems: ["Citizen's benefit rate (1 person)", 'NGO project position', 'Ukraine aid (Germany total)'],
+      summarySub: function (dur) { return 'You spent ' + dur + ' on company time.'; },
+      titles: {
+        poop: ['Clean business.', 'Session completed successfully.', 'That went smoothly.', 'Clocking out of the throne room.', 'Done. In the best sense.'],
+        smoke: ['Short break, well paid.', 'Smoke break, invoiced.', 'That went up in smoke — profitably.', 'Clocking out at the ashtray.', 'Done. In the best sense.'],
+        coffee: ['Coffee break, invoiced.', 'Short break, full pay.', 'Cup empty, wallet fuller.', 'Clocking out at the coffee machine.', 'Done. In the best sense.']
+      },
+      factNothing: "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
+      factPct: function (pct, item) { return "That's already " + pct + '% of ' + item + '. Keep going!'; },
+      factOne: function (item) { return 'That buys you ' + item + '. Well earned!'; },
+      factMany: function (n, items) { return 'That buys you ' + n + ' ' + items + '. Well earned!'; },
+      comparisons: [
+        { price: 0.75, singular: 'a bread roll', plural: 'bread rolls' },
+        { price: 1.5,  singular: 'a soft pretzel', plural: 'soft pretzels' },
+        { price: 2.2,  singular: 'an espresso', plural: 'espressos' },
+        { price: 4.5,  singular: 'a cappuccino to go', plural: 'cappuccinos to go' },
+        { price: 8,    singular: 'a kebab', plural: 'kebabs' },
+        { price: 13,   singular: 'a movie ticket', plural: 'movie tickets' }
+      ],
+      shareSession: function (activity, dur, money, fact) {
+        var line = activity === 'smoke'
+          ? 'I spent ' + dur + ' smoking and earned ' + money + '. 💸'
+          : activity === 'coffee'
+            ? 'I spent ' + dur + ' on a coffee break and earned ' + money + '. 💸'
+            : 'I spent ' + dur + ' on the throne and earned ' + money + '. 💸';
+        return '💩 Poop Salary Timer\n' + line + '\n' + fact;
+      },
+      shareAchTitle: function (n, total) { return '🏆 My toilet achievements (' + n + '/' + total + '):\n'; },
+      shareAchNone: 'None yet — but the fiscal year on the throne is long.',
+      shareAchFooter: '\n— measured with the Poop Salary Timer 💩',
+      toastImported: function (added, skipped) { return added + ' session' + (added === 1 ? '' : 's') + ' imported' + (skipped ? ' · ' + skipped + ' skipped' : '') + ' ✅'; }
+    }
+  };
+  function t(key) { return (STR[lang] && STR[lang][key] !== undefined ? STR[lang] : STR.de)[key]; }
+
+  // ---------- Formatting (sprachabhaengig) ----------
+  var fmt2, fmt4, dateFmt, timeFmt, achDateFmt;
+  function buildFormatters() {
+    var loc = lang === 'en' ? 'en-GB' : 'de-DE';
+    fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
+    fmt4 = new Intl.NumberFormat(loc, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    dateFmt = new Intl.DateTimeFormat(loc, { weekday: 'short', day: 'numeric', month: 'short' });
+    timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
+    achDateFmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' });
+  }
+  buildFormatters();
+  function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
+  function fmtMoney(v) { return fmt2.format(v); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtElapsed(ms) {
+    var s = Math.floor(ms / 1000);
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h > 0 ? h + ':' + pad(m) + ':' + pad(sec) : pad(m) + ':' + pad(sec);
+  }
+  function fmtDurationWords(ms) {
+    var totalMin = Math.round(ms / 60000);
+    if (totalMin < 1) return Math.round(ms / 1000) + t('unitSec');
+    var h = Math.floor(totalMin / 60), m = totalMin % 60;
+    if (h > 0) return h + t('unitHour') + m + t('unitMin');
+    return totalMin + t('unitMin');
+  }
+
+  // ---------- Settings ----------
+  var settings = lsGet(LS_SETTINGS); // {mode:'monthly'|'hourly', monthly, hoursPerWeek, hourly, rate}
+  function computeRate(s) {
+    if (!s) return 0;
+    if (s.mode === 'hourly') return s.hourly || 0;
+    var weeklyHours = s.hoursPerWeek || 0;
+    var monthlyHours = weeklyHours * 52 / 12; // Ø Wochen pro Monat: 4,33
+    return monthlyHours > 0 ? (s.monthly || 0) / monthlyHours : 0;
+  }
+
+  // ---------- Netto-Schätzung (vereinfachte Näherung, keine amtliche Tabelle) ----------
+  function computeTaxRates(s) {
+    if (!s || !s.taxClass) return null;
+    var annualGross = s.mode === 'hourly'
+      ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
+      : (s.monthly || 0) * 12;
+    if (!(annualGross > 0)) return null;
+    var GF = 12096; // Grundfreibetrag (Näherung)
+    function T(z) { // Einkommensteuer-Tarif (Näherung, Formel 2025)
+      if (z <= GF) return 0;
+      if (z <= 17443) { var y = (z - GF) / 10000; return (932.30 * y + 1400) * y; }
+      if (z <= 68480) { var q = (z - 17443) / 10000; return (176.64 * q + 2397) * q + 1015.13; }
+      if (z <= 277825) return 0.42 * z - 10911.92;
+      return 0.45 * z - 19246.67;
+    }
+    var zvE = Math.max(0, annualGross * 0.86 - 1230); // grob: Vorsorge + Werbungskosten
+    var cls = String(s.taxClass);
+    var lstAnnual;
+    if (cls === '3') lstAnnual = 2 * T(zvE / 2);
+    else if (cls === '2') lstAnnual = T(Math.max(0, zvE - 4260));
+    else if (cls === '5' || cls === '6') lstAnnual = T(zvE + GF);
+    else lstAnnual = T(zvE);
+    var lstRate = Math.max(0, Math.min(0.45, lstAnnual / annualGross));
+    var soliRate = lstAnnual > 19950 ? lstRate * 0.055 : 0;
+    var churchRate = s.church ? lstRate * ((Number(s.churchRate) === 8 ? 8 : 9) / 100) : 0;
+    var svRate = 0.205;
+    var total = Math.min(0.9, svRate + lstRate + soliRate + churchRate);
+    return { sv: svRate, lst: lstRate, soli: soliRate, church: churchRate, total: total };
+  }
+  function computeNet(gross) {
+    var r = computeTaxRates(settings);
+    if (!r) return null;
+    return {
+      net: gross * (1 - r.total),
+      ded: gross * r.total,
+      lst: gross * r.lst,
+      soli: gross * r.soli,
+      church: gross * r.church,
+      sv: gross * r.sv
+    };
+  }
+  // "Damit finanziert": Euro pro Sekunde der Referenzgrößen (grobe Werte, siehe Disclaimer)
+  var FUND_RATES = [563 / 2592000, 60000 / 31536000, 8000000000 / 31536000];
+  function fmtFunded(sec) {
+    function num(v, d) { var o = v.toFixed(d); return lang === 'de' ? o.replace('.', ',') : o; }
+    if (sec < 1) return num(sec, 2) + t('unitSec');
+    if (sec < 90) return Math.round(sec) + t('unitSec');
+    if (sec < 5400) return Math.round(sec / 60) + t('unitMin');
+    if (sec < 172800) return num(sec / 3600, 1) + t('unitHourShort');
+    return Math.round(sec / 86400) + t('unitDaysShort');
+  }
+
+  // ---------- Timer state ----------
+  // active = {accumulatedMs, startTs|null}  — startTs !== null means running
+  var active = lsGet(LS_ACTIVE) || null;
+  var pendingSummary = null; // {durationMs, earned}
+  var tickHandle = null;
+
+  function elapsedMs() {
+    if (!active) return 0;
+    return active.accumulatedMs + (active.startTs ? (Date.now() - active.startTs) : 0);
+  }
+  function persistActive() {
+    if (active) lsSet(LS_ACTIVE, active); else lsDel(LS_ACTIVE);
+  }
+
+  // ---------- Elements ----------
+  function $(id) { return document.getElementById(id); }
+  var views = { setup: $('view-setup'), timer: $('view-timer'), summary: $('view-summary'), history: $('view-history'), achievements: $('view-achievements') };
+  var tabBar = $('tab-bar');
+
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].classList.toggle('hidden', k !== name); });
+    var firstRun = name === 'setup' && !settings;
+    tabBar.classList.toggle('hidden', firstRun || name === 'summary');
+    $('tab-timer').setAttribute('aria-current', String(name === 'timer'));
+    $('tab-history').setAttribute('aria-current', String(name === 'history'));
+    $('tab-achievements').setAttribute('aria-current', String(name === 'achievements'));
+    $('tab-settings').setAttribute('aria-current', String(name === 'setup'));
+    $('btn-save-settings').textContent = settings ? t('btnSaveChanges') : t('btnSaveFirst');
+  }
+
+  // ---------- Setup form ----------
+  var mode = (settings && settings.mode) || 'monthly';
+  function renderModeSwitch() {
+    $('mode-monthly').setAttribute('aria-pressed', String(mode === 'monthly'));
+    $('mode-hourly').setAttribute('aria-pressed', String(mode === 'hourly'));
+    $('fields-monthly').classList.toggle('hidden', mode !== 'monthly');
+    $('fields-hourly').classList.toggle('hidden', mode !== 'hourly');
+    updateDerived();
+  }
+  $('mode-monthly').addEventListener('click', function () { mode = 'monthly'; renderModeSwitch(); });
+  $('mode-hourly').addEventListener('click', function () { mode = 'hourly'; renderModeSwitch(); });
+
+  function parseNum(el) {
+    var v = parseFloat(String(el.value).replace(',', '.'));
+    return isFinite(v) ? v : NaN;
+  }
+  function updateDerived() {
+    var box = $('derived-rate');
+    if (mode !== 'monthly') { box.classList.add('hidden'); return; }
+    var m = parseNum($('inp-monthly')), h = parseNum($('inp-hours'));
+    if (m > 0 && h > 0) {
+      var r = m / (h * 52 / 12);
+      $('derived-value').textContent = fmtMoney(r);
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+    }
+  }
+  $('inp-monthly').addEventListener('input', updateDerived);
+  $('inp-hours').addEventListener('input', updateDerived);
+
+  function fillSetupForm() {
+    if (!settings) return;
+    mode = settings.mode || mode;
+    if (settings.monthly) $('inp-monthly').value = settings.monthly;
+    if (settings.hoursPerWeek) $('inp-hours').value = settings.hoursPerWeek;
+    if (settings.hourly) $('inp-rate').value = settings.hourly;
+    $('inp-taxclass').value = settings.taxClass || '';
+    $('inp-church').checked = !!settings.church;
+    $('inp-church-rate').value = String(Number(settings.churchRate) === 8 ? 8 : 9);
+    $('inp-dedlabel').value = settings.dedLabel || '';
+    renderModeSwitch();
+  }
+
+  $('btn-save-settings').addEventListener('click', function () {
+    var err = $('form-error');
+    var s = { mode: mode };
+    if (mode === 'monthly') {
+      s.monthly = parseNum($('inp-monthly'));
+      s.hoursPerWeek = parseNum($('inp-hours'));
+      if (!(s.monthly > 0) || !(s.hoursPerWeek > 0)) { err.style.display = 'block'; return; }
+    } else {
+      s.hourly = parseNum($('inp-rate'));
+      if (!(s.hourly > 0)) { err.style.display = 'block'; return; }
+    }
+    err.style.display = 'none';
+    s.rate = computeRate(s);
+    s.taxClass = $('inp-taxclass').value || null;
+    s.church = $('inp-church').checked;
+    s.churchRate = Number($('inp-church-rate').value) === 8 ? 8 : 9;
+    s.dedLabel = $('inp-dedlabel').value.trim();
+    settings = s;
+    lsSet(LS_SETTINGS, s);
+    renderRateChip();
+    show('timer');
+    renderTimer();
+  });
+
+  $('chip-rate').addEventListener('click', function () {
+    fillSetupForm();
+    show('setup');
+  });
+  function renderRateChip() {
+    var r = settings ? settings.rate : 0;
+    $('chip-rate-text').textContent = fmt2.format(r) + '/h';
+  }
+
+  // ---------- Timer rendering ----------
+  var stateLabel = $('state-label'), moneyEl = $('money-display'), elapsedEl = $('elapsed-display');
+  var btnStart = $('btn-start'), btnStop = $('btn-stop'), holdHint = $('hold-hint');
+
+  function renderTimer() {
+    var ms = elapsedMs();
+    var earned = settings ? (ms / 3600000) * settings.rate : 0;
+    moneyEl.textContent = fmtMoneyLive(earned);
+    moneyEl.classList.toggle('zero', ms === 0);
+    var netInfo = computeNet(earned);
+    var netEl = $('net-display');
+    netEl.classList.toggle('hidden', !netInfo);
+    if (netInfo) netEl.innerHTML = t('netLabel') + ' <strong>' + fmtMoneyLive(netInfo.net) + '</strong>';
+    elapsedEl.textContent = fmtElapsed(ms);
+    var running = !!(active && active.startTs);
+    var paused = !!(active && !active.startTs && active.accumulatedMs > 0);
+    var actKey = actKeyOf(active ? active.activity : activity);
+    stateLabel.textContent = ACT_EMOJI[actKey] + ' ' + (running ? t('stateRunning') : (paused ? t('statePaused') : t('stateReady')));
+    btnStart.textContent = paused ? t('btnResume') : t('btnStart');
+    btnStart.classList.toggle('hidden', running);
+    btnStop.classList.toggle('hidden', !running && !paused);
+    holdHint.innerHTML = (running || paused) ? t('holdHint') : '&nbsp;';
+  }
+  function renderActivityPicker() {
+    var current = actKeyOf(active ? active.activity : activity);
+    ['poop', 'smoke', 'coffee'].forEach(function (k) {
+      $('act-' + k).setAttribute('aria-pressed', String(k === current));
+    });
+    $('activity-picker').classList.toggle('locked', !!active);
+  }
+  ['poop', 'smoke', 'coffee'].forEach(function (k) {
+    $('act-' + k).addEventListener('click', function () {
+      if (active) return;
+      activity = k;
+      lsSet(LS_ACTIVITY, k);
+      renderActivityPicker();
+      renderTimer();
+    });
+  });
+  function startTicking() {
+    if (tickHandle) return;
+    tickHandle = setInterval(renderTimer, 60);
+  }
+  function stopTicking() {
+    if (tickHandle) { clearInterval(tickHandle); tickHandle = null; }
+  }
+
+  btnStart.addEventListener('click', function () {
+    if (!active) active = { accumulatedMs: 0, startTs: Date.now(), activity: activity };
+    else active.startTs = Date.now();
+    persistActive();
+    startTicking();
+    renderTimer();
+    renderActivityPicker();
+  });
+
+  // ---------- Stop: short press = pause, long press = end ----------
+  var HOLD_MS = 900;
+  var holdTimer = null, heldToEnd = false;
+
+  function beginHold() {
+    heldToEnd = false;
+    btnStop.classList.add('holding');
+    holdTimer = setTimeout(function () {
+      heldToEnd = true;
+      endSession();
+    }, HOLD_MS);
+  }
+  function cancelHold(firePause) {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    btnStop.classList.remove('holding');
+    if (firePause && !heldToEnd) pauseTimer();
+    heldToEnd = false;
+  }
+  function pauseTimer() {
+    if (active && active.startTs) {
+      active.accumulatedMs += Date.now() - active.startTs;
+      active.startTs = null;
+      persistActive();
+    }
+    stopTicking();
+    renderTimer();
+  }
+  btnStop.addEventListener('pointerdown', function (e) { e.preventDefault(); beginHold(); });
+  btnStop.addEventListener('pointerup', function () { cancelHold(true); });
+  btnStop.addEventListener('pointerleave', function () { cancelHold(false); });
+  btnStop.addEventListener('pointercancel', function () { cancelHold(false); });
+  btnStop.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+  btnStop.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pauseTimer(); }
+    if (e.key === 'e' || e.key === 'E') { endSession(); } // Tastatur-Alternative zum Halten
+  });
+
+  // ---------- Summary ----------
+  function funFact(earned) {
+    if (earned < 0.05) return t('factNothing');
+    var comparisons = t('comparisons');
+    var best = null;
+    for (var i = 0; i < comparisons.length; i++) {
+      var c = comparisons[i];
+      if (earned >= c.price) best = c;
+    }
+    if (!best) {
+      var cheapest = comparisons[0];
+      var pct = Math.round((earned / cheapest.price) * 100);
+      return t('factPct')(pct, cheapest.singular);
+    }
+    var n = Math.floor(earned / best.price);
+    return n === 1 ? t('factOne')(best.singular) : t('factMany')(n, best.plural);
+  }
+
+  function endSession() {
+    cancelHold(false);
+    var ms = elapsedMs();
+    var earned = settings ? (ms / 3600000) * settings.rate : 0;
+    var sessActivity = actKeyOf(active ? active.activity : activity);
+    stopTicking();
+    active = null;
+    persistActive();
+    pendingSummary = { durationMs: ms, earned: earned, ts: Date.now(), tax: computeNet(earned), activity: sessActivity };
+    lastSummary = pendingSummary;
+    var titleList = t('titles')[sessActivity] || t('titles').poop;
+    lastTitleIdx = Math.floor(Math.random() * titleList.length);
+    renderSummary();
+    show('summary');
+    renderActivityPicker();
+  }
+
+  function renderSummary() {
+    if (!lastSummary) return;
+    var sessActivity = actKeyOf(lastSummary.activity);
+    $('summary-emoji').textContent = SUMMARY_EMOJI[sessActivity];
+    var titleList = t('titles')[sessActivity] || t('titles').poop;
+    $('summary-title').textContent = titleList[lastTitleIdx % titleList.length];
+    $('summary-sub').textContent = t('summarySub')(fmtDurationWords(lastSummary.durationMs));
+    $('summary-duration').textContent = fmtElapsed(lastSummary.durationMs);
+    $('summary-earned').textContent = fmtMoney(lastSummary.earned);
+    $('summary-fact').textContent = funFact(lastSummary.earned);
+    var tax = lastSummary.tax;
+    $('sum-k-earned').textContent = tax ? t('sumKGross') : t('sumKEarned');
+    $('sum-tile-net').classList.toggle('hidden', !tax);
+    $('sum-tile-ded').classList.toggle('hidden', !tax);
+    $('ded-block').classList.toggle('hidden', !tax);
+    $('funded-block').classList.toggle('hidden', !tax);
+    if (!tax) return;
+    $('summary-net').textContent = fmtMoney(tax.net);
+    $('summary-ded').textContent = fmtMoney(tax.ded);
+    var label = (settings && settings.dedLabel) ? settings.dedLabel : t('dedLabelDefault');
+    $('ded-headline').textContent = label + ' ' + fmtMoney(tax.ded);
+    var parts = [[t('dedLst'), tax.lst], [t('dedSoli'), tax.soli], [t('dedChurch'), tax.church], [t('dedSv'), tax.sv]];
+    $('ded-parts').textContent = parts
+      .filter(function (p) { return p[1] > 0.00005; })
+      .map(function (p) { return p[0] + ' ' + fmtMoney(p[1]); })
+      .join(' · ');
+    $('funded-title').textContent = t('fundedTitle');
+    $('funded-disclaimer').textContent = t('fundedDisclaimer');
+    var list = $('funded-list');
+    list.innerHTML = '';
+    t('fundedItems').forEach(function (name, i) {
+      var li = document.createElement('li');
+      li.textContent = fmtFunded(tax.ded / FUND_RATES[i]) + ' ' + name;
+      list.appendChild(li);
+    });
+  }
+
+  $('btn-save-session').addEventListener('click', function () {
+    if (pendingSummary) {
+      var sessions = lsGet(LS_SESSIONS) || [];
+      var entry = {
+        id: pendingSummary.ts,
+        ts: pendingSummary.ts,
+        durationMs: pendingSummary.durationMs,
+        earned: pendingSummary.earned,
+        rate: settings ? settings.rate : 0,
+        activity: actKeyOf(pendingSummary.activity)
+      };
+      if (pendingSummary.tax) { entry.net = pendingSummary.tax.net; entry.ded = pendingSummary.tax.ded; }
+      sessions.unshift(entry);
+      lsSet(LS_SESSIONS, sessions);
+      pendingSummary = null;
+    }
+    renderHistory();
+    show('history');
+    renderTimer();
+  });
+  $('btn-discard-session').addEventListener('click', function () {
+    pendingSummary = null;
+    show('timer');
+    renderTimer();
+  });
+
+  // ---------- History ----------
+  function renderHistory() {
+    var sessions = lsGet(LS_SESSIONS) || [];
+    sessions.sort(function (a, b) { return b.ts - a.ts; });
+
+    var ach = checkAchievements(sessions);
+    renderAchievements(ach.unlocked, ach.stats);
+    if (ach.newly.length) showToasts(ach.newly);
+
+    var list = $('session-list');
+    list.innerHTML = '';
+    $('empty-history').classList.toggle('hidden', sessions.length > 0);
+
+    var totalEarned = 0, totalMs = 0, totalNet = 0, totalDed = 0;
+    sessions.forEach(function (s) {
+      totalEarned += s.earned;
+      totalMs += s.durationMs;
+      if (typeof s.net === 'number') totalNet += s.net;
+      if (typeof s.ded === 'number') totalDed += s.ded;
+    });
+    var showTax = totalDed > 0 || !!computeTaxRates(settings);
+    $('stat-tile-net').classList.toggle('hidden', !showTax);
+    $('stat-tile-ded').classList.toggle('hidden', !showTax);
+    $('stat-total-net').textContent = fmtMoney(totalNet);
+    $('stat-total-ded').textContent = fmtMoney(totalDed);
+    $('stat-total-earned').textContent = fmtMoney(totalEarned);
+    $('stat-total-time').textContent = fmtDurationWords(totalMs);
+    $('stat-count').textContent = String(sessions.length);
+    $('stat-avg').textContent = sessions.length
+      ? fmtMoney(totalEarned / sessions.length) + ' / ' + fmtDurationWords(totalMs / sessions.length)
+      : '–';
+
+    sessions.forEach(function (s) {
+      var li = document.createElement('li');
+      var d = new Date(s.ts);
+      var actEl = document.createElement('span');
+      actEl.className = 'session-activity';
+      actEl.textContent = ACT_EMOJI[actKeyOf(s.activity)];
+      var when = document.createElement('div');
+      when.className = 'session-when';
+      var dEl = document.createElement('div'); dEl.className = 'd'; dEl.textContent = dateFmt.format(d);
+      if (s.manual) {
+        var tag = document.createElement('span');
+        tag.className = 'session-tag';
+        tag.textContent = t('tagBackfilled');
+        dEl.appendChild(tag);
+      }
+      var tEl = document.createElement('div'); tEl.className = 't'; tEl.textContent = timeFmt.format(d) + t('clockSuffix');
+      when.appendChild(dEl); when.appendChild(tEl);
+      var dur = document.createElement('span'); dur.className = 'session-dur'; dur.textContent = fmtElapsed(s.durationMs);
+      var earn = document.createElement('span'); earn.className = 'session-earn'; earn.textContent = fmtMoney(s.earned);
+      var del = document.createElement('button');
+      del.className = 'session-del';
+      del.setAttribute('aria-label', t('delAria'));
+      del.textContent = '✕';
+      del.addEventListener('click', function () {
+        var all = (lsGet(LS_SESSIONS) || []).filter(function (x) { return x.id !== s.id; });
+        lsSet(LS_SESSIONS, all);
+        renderHistory();
+      });
+      li.appendChild(actEl); li.appendChild(when); li.appendChild(dur); li.appendChild(earn); li.appendChild(del);
+      list.appendChild(li);
+    });
+  }
+
+  // ---------- Achievements ----------
+  var LS_ACHIEVEMENTS = 'pst_achievements';
+
+  function sessionStats(sessions) {
+    var totalEarned = 0, maxDuration = 0, hasEarly = false, hasNight = false, totalDed = 0;
+    var minEligibleMs = Infinity; // kürzeste Sitzung ab 30 Sek. (gegen Versehens-Klicks)
+    var days = {}, perDay = {}, maxSameDay = 0;
+    sessions.forEach(function (s) {
+      totalEarned += s.earned;
+      if (typeof s.ded === 'number') totalDed += s.ded;
+      if (s.durationMs > maxDuration) maxDuration = s.durationMs;
+      if (s.durationMs >= 30000 && s.durationMs < minEligibleMs) minEligibleMs = s.durationMs;
+      var d = new Date(s.ts);
+      var h = d.getHours();
+      if (h < 9) hasEarly = true;
+      if (h >= 22 || h < 5) hasNight = true;
+      var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+      days[key] = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      perDay[key] = (perDay[key] || 0) + 1;
+      if (perDay[key] > maxSameDay) maxSameDay = perDay[key];
+    });
+    var dayTs = Object.keys(days).map(function (k) { return days[k]; }).sort(function (a, b) { return a - b; });
+    var bestStreak = dayTs.length ? 1 : 0, cur = 1;
+    for (var i = 1; i < dayTs.length; i++) {
+      if (Math.round((dayTs[i] - dayTs[i - 1]) / 86400000) === 1) { cur++; if (cur > bestStreak) bestStreak = cur; }
+      else cur = 1;
+    }
+    return {
+      count: sessions.length, totalEarned: totalEarned, maxDuration: maxDuration,
+      hasEarly: hasEarly, hasNight: hasNight, bestStreak: bestStreak,
+      minEligibleMs: minEligibleMs, maxSameDay: maxSameDay, totalDed: totalDed
+    };
+  }
+
+  var ACHIEVEMENTS = [
+    {
+      id: 'first', badge: '🎉',
+      name: { de: 'Das erste Geschäft', en: 'The First Business' },
+      desc: { de: 'Deine erste Sitzung gespeichert. Jeder Cent zählt.', en: 'Your first session saved. Every cent counts.' },
+      test: function (st) { return st.count >= 1; },
+      progress: function (st) { return st.count + '/1'; }
+    },
+    {
+      id: 'streak', badge: '🔥',
+      name: { de: 'Pooping Streak', en: 'Pooping Streak' },
+      desc: { de: 'An 3 Tagen hintereinander eine Sitzung. Routine ist alles.', en: 'A session on 3 days in a row. Routine is everything.' },
+      test: function (st) { return st.bestStreak >= 3; },
+      progress: function (st) { return st.bestStreak + '/3 ' + t('unitDays'); }
+    },
+    {
+      id: 'sitzfleisch', badge: '🪩',
+      name: { de: 'Sitzfleisch', en: 'Marathon Sitter' },
+      desc: { de: 'Eine einzelne Sitzung von 15 Minuten oder mehr. Respekt.', en: 'A single session of 15 minutes or more. Respect.' },
+      test: function (st) { return st.maxDuration >= 15 * 60000; },
+      progress: function (st) { return Math.floor(st.maxDuration / 60000) + '/15 ' + t('unitMinShort'); }
+    },
+    {
+      id: 'gold', badge: '💰',
+      name: { de: 'Goldene Schüssel', en: 'Golden Bowl' },
+      desc: { de: 'Insgesamt 10 € auf dem Thron verdient.', en: 'Earned €10 in total on the throne.' },
+      test: function (st) { return st.totalEarned >= 10; },
+      progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 10)) + '/10 €'; }
+    },
+    {
+      id: 'early', badge: '🌅',
+      name: { de: 'Frühschicht', en: 'Early Shift' },
+      desc: { de: 'Eine Sitzung vor 9 Uhr morgens. Der frühe Vogel verdient mit.', en: 'A session before 9 a.m. The early bird earns extra.' },
+      test: function (st) { return st.hasEarly; },
+      progress: function () { return '–'; }
+    },
+    {
+      id: 'fast', badge: '⚡',
+      name: { de: 'Schnell-Scheißer', en: 'Speed Pooper' },
+      desc: { de: 'Eine Sitzung unter 2 Minuten. Rein, raus, Geld mitgenommen.', en: 'A session under 2 minutes. In, out, money in the bank.' },
+      test: function (st) { return st.minEligibleMs < 2 * 60000; },
+      progress: function (st) { return st.minEligibleMs === Infinity ? '–' : t('bestTime') + fmtElapsed(st.minEligibleMs); }
+    },
+    {
+      id: 'night', badge: '🦉',
+      name: { de: 'Nachteule', en: 'Night Owl' },
+      desc: { de: 'Eine Sitzung zwischen 22 und 5 Uhr. Das Geschäft schläft nie.', en: 'A session between 10 p.m. and 5 a.m. Business never sleeps.' },
+      test: function (st) { return st.hasNight; },
+      progress: function () { return '–'; }
+    },
+    {
+      id: 'double', badge: '🔁',
+      name: { de: 'Doppelschicht', en: 'Double Shift' },
+      desc: { de: 'Zwei Sitzungen an einem Tag. Wer fleißig ist, darf auch zweimal.', en: 'Two sessions in one day. The diligent may go twice.' },
+      test: function (st) { return st.maxSameDay >= 2; },
+      progress: function (st) { return st.maxSameDay + '/2'; }
+    },
+    {
+      id: 'regular', badge: '🚽',
+      name: { de: 'Stammgast', en: 'Regular' },
+      desc: { de: '10 gespeicherte Sitzungen. Man kennt dich hier.', en: '10 saved sessions. They know you here.' },
+      test: function (st) { return st.count >= 10; },
+      progress: function (st) { return Math.min(st.count, 10) + '/10'; }
+    },
+    {
+      id: 'kroesus', badge: '👑',
+      name: { de: 'Klo-Krösus', en: 'Throne Tycoon' },
+      desc: { de: 'Insgesamt 50 € verdient. Der Thron trägt seinen Namen zu Recht.', en: 'Earned €50 in total. The throne earns its name.' },
+      test: function (st) { return st.totalEarned >= 50; },
+      progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 50)) + '/50 €'; }
+    },
+    {
+      id: 'tax', badge: '🧾',
+      name: { de: 'Steuerzahler des Monats', en: 'Taxpayer of the Month' },
+      desc: { de: 'Insgesamt 10 € an Abzügen „gespendet". Der Finanzminister dankt.', en: 'A total of €10 "donated" in deductions. The treasury thanks you.' },
+      test: function (st) { return st.totalDed >= 10; },
+      progress: function (st) { return fmtMoney(Math.min(st.totalDed, 10)) + '/10 €'; }
+    }
+  ];
+
+  function checkAchievements(sessions) {
+    var unlocked = lsGet(LS_ACHIEVEMENTS) || {};
+    var st = sessionStats(sessions);
+    var newly = [];
+    ACHIEVEMENTS.forEach(function (a) {
+      if (!unlocked[a.id] && a.test(st)) {
+        unlocked[a.id] = Date.now();
+        newly.push(a);
+      }
+    });
+    if (newly.length) lsSet(LS_ACHIEVEMENTS, unlocked);
+    return { unlocked: unlocked, newly: newly, stats: st };
+  }
+
+  function renderAchievements(unlocked, st) {
+    var grid = $('ach-grid');
+    grid.innerHTML = '';
+    var openCount = ACHIEVEMENTS.filter(function (a) { return unlocked[a.id]; }).length;
+    $('ach-count').textContent = openCount + ' / ' + ACHIEVEMENTS.length;
+    ACHIEVEMENTS.forEach(function (a) {
+      var isOpen = !!unlocked[a.id];
+      var el = document.createElement('div');
+      el.className = 'ach ' + (isOpen ? 'unlocked' : 'locked');
+      var badge = document.createElement('div'); badge.className = 'badge'; badge.textContent = a.badge;
+      var info = document.createElement('div'); info.className = 'info';
+      var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = a.name[lang] || a.name.de;
+      var ds = document.createElement('div'); ds.className = 'desc'; ds.textContent = a.desc[lang] || a.desc.de;
+      info.appendChild(nm); info.appendChild(ds);
+      var status = document.createElement('div'); status.className = 'status';
+      status.textContent = isOpen ? '✓ ' + achDateFmt.format(new Date(unlocked[a.id])) : a.progress(st);
+      el.appendChild(badge); el.appendChild(info); el.appendChild(status);
+      grid.appendChild(el);
+    });
+  }
+
+  var toastQueue = [], toastBusy = false;
+  function showToasts(list) {
+    list.forEach(function (a) { toastQueue.push(a); });
+    if (!toastBusy) nextToast();
+  }
+  function nextToast() {
+    var a = toastQueue.shift();
+    var toast = $('ach-toast');
+    if (!a) { toastBusy = false; return; }
+    toastBusy = true;
+    $('ach-toast-badge').textContent = a.badge;
+    $('ach-toast-name').textContent = a.name[lang] || a.name.de;
+    toast.classList.add('show');
+    setTimeout(function () {
+      toast.classList.remove('show');
+      setTimeout(nextToast, 350);
+    }, 2600);
+  }
+
+  // ---------- Teilen ----------
+  var lastSummary = null;
+  var lastTitleIdx = 0;
+  var infoToastTimer = null;
+  function infoToast(msg) {
+    var t = $('info-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if (infoToastTimer) clearTimeout(infoToastTimer);
+    infoToastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+  function openShareModal(text, title) {
+    $('share-title').textContent = title || t('shareTitleDefault');
+    $('share-text').value = text;
+    $('share-overlay').classList.remove('hidden');
+  }
+  $('share-close').addEventListener('click', function () { $('share-overlay').classList.add('hidden'); });
+  $('share-overlay').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+  });
+  $('share-copy').addEventListener('click', function () {
+    var ta = $('share-text');
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); infoToast(t('toastCopied')); } catch (e) {}
+    $('share-overlay').classList.add('hidden');
+  });
+  function copyFallback(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { infoToast(t('toastCopied')); },
+        function () { openShareModal(text); }
+      );
+    } else {
+      openShareModal(text);
+    }
+  }
+  function shareContent(text) {
+    if (navigator.share) {
+      navigator.share({ text: text }).catch(function (err) {
+        if (err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
+        copyFallback(text);
+      });
+    } else {
+      copyFallback(text);
+    }
+  }
+  function buildTaxShareText(tax) {
+    if (!tax) return '';
+    var label = (settings && settings.dedLabel) ? settings.dedLabel : t('dedLabelDefault');
+    var parts = [[t('dedLst'), tax.lst], [t('dedSoli'), tax.soli], [t('dedChurch'), tax.church], [t('dedSv'), tax.sv]]
+      .filter(function (p) { return p[1] > 0.00005; })
+      .map(function (p) { return p[0] + ' ' + fmtMoney(p[1]); })
+      .join(' · ');
+    var funded = t('fundedItems').map(function (name, i) {
+      return fmtFunded(tax.ded / FUND_RATES[i]) + ' ' + name;
+    }).join('\n');
+    return '\n\n' + label + ' ' + fmtMoney(tax.ded) + '\n' + parts +
+      '\n' + t('fundedTitle') + '\n' + funded +
+      '\n' + t('fundedDisclaimer');
+  }
+  $('btn-share-session').addEventListener('click', function () {
+    if (!lastSummary) return;
+    var text = t('shareSession')(actKeyOf(lastSummary.activity), fmtDurationWords(lastSummary.durationMs), fmtMoney(lastSummary.earned), funFact(lastSummary.earned));
+    text += buildTaxShareText(lastSummary.tax);
+    shareContent(text);
+  });
+  $('btn-share-achievements').addEventListener('click', function () {
+    var unlocked = lsGet(LS_ACHIEVEMENTS) || {};
+    var open = ACHIEVEMENTS.filter(function (a) { return unlocked[a.id]; });
+    var text = t('shareAchTitle')(open.length, ACHIEVEMENTS.length);
+    text += open.length
+      ? open.map(function (a) { return a.badge + ' ' + (a.name[lang] || a.name.de); }).join('\n')
+      : t('shareAchNone');
+    text += t('shareAchFooter');
+    shareContent(text);
+  });
+
+  // ---------- Backfill: vergessene Sessions nachtragen ----------
+  var bfForm = $('backfill-form');
+  $('btn-show-backfill').addEventListener('click', function () {
+    var willShow = bfForm.classList.contains('hidden');
+    bfForm.classList.toggle('hidden', !willShow);
+    if (willShow) {
+      var now = new Date();
+      $('bf-date').value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+      $('bf-time').value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      $('bf-duration').value = '';
+      $('bf-error').style.display = 'none';
+      updateBfDerived();
+      $('bf-duration').focus();
+    }
+  });
+  function updateBfDerived() {
+    var mins = parseNum($('bf-duration'));
+    var box = $('bf-derived');
+    if (mins > 0 && settings) {
+      $('bf-derived-value').textContent = fmtMoney((mins / 60) * settings.rate);
+      box.classList.remove('hidden');
+    } else {
+      box.classList.add('hidden');
+    }
+  }
+  $('bf-duration').addEventListener('input', updateBfDerived);
+  $('bf-cancel').addEventListener('click', function () { bfForm.classList.add('hidden'); });
+  $('bf-save').addEventListener('click', function () {
+    var dateStr = $('bf-date').value, timeStr = $('bf-time').value;
+    var mins = parseNum($('bf-duration'));
+    var ts = (dateStr && timeStr) ? new Date(dateStr + 'T' + timeStr).getTime() : NaN;
+    if (!isFinite(ts) || !(mins > 0)) { $('bf-error').style.display = 'block'; return; }
+    $('bf-error').style.display = 'none';
+    var rate = settings ? settings.rate : 0;
+    var durationMs = mins * 60000;
+    var bfEarned = (durationMs / 3600000) * rate;
+    var bfTax = computeNet(bfEarned);
+    var sessions = lsGet(LS_SESSIONS) || [];
+    var bfEntry = {
+      id: 'm' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
+      ts: ts,
+      durationMs: durationMs,
+      earned: bfEarned,
+      rate: rate,
+      manual: true,
+      activity: activity
+    };
+    if (bfTax) { bfEntry.net = bfTax.net; bfEntry.ded = bfTax.ded; }
+    sessions.push(bfEntry);
+    lsSet(LS_SESSIONS, sessions);
+    bfForm.classList.add('hidden');
+    renderHistory();
+  });
+
+  // ---------- CSV Export / Import ----------
+  function csvNum(v, dec) {
+    var out = v.toFixed(dec);
+    return lang === 'de' ? out.replace('.', ',') : out;
+  }
+  function actName(key) {
+    return key === 'smoke' ? t('activitySmoke') : key === 'coffee' ? t('activityCoffee') : t('activityPoop');
+  }
+  function actFromLabel(x) {
+    var s = String(x || '').trim().toLowerCase();
+    if (/^(rauchen|smoking|smoke)$/.test(s)) return 'smoke';
+    if (/^(kaffee|coffee)$/.test(s)) return 'coffee';
+    return 'poop';
+  }
+  function csvFromSessions(sessions) {
+    var lines = [t('csvHeader')];
+    sessions.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (s) {
+      var d = new Date(s.ts);
+      lines.push(
+        d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ';' +
+        pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ';' +
+        Math.round(s.durationMs / 1000) + ';' +
+        csvNum(s.earned, 4) + ';' +
+        csvNum(s.rate || 0, 2) + ';' +
+        (s.manual ? t('csvYes') : t('csvNo')) + ';' +
+        (typeof s.net === 'number' ? csvNum(s.net, 4) : '') + ';' +
+        (typeof s.ded === 'number' ? csvNum(s.ded, 4) : '') + ';' +
+        actName(actKeyOf(s.activity))
+      );
+    });
+    return lines.join('\n');
+  }
+  $('btn-export-csv').addEventListener('click', function () {
+    var sessions = lsGet(LS_SESSIONS) || [];
+    if (!sessions.length) { infoToast(t('toastNoExport')); return; }
+    openShareModal(csvFromSessions(sessions), t('csvExportTitle'));
+  });
+
+  function parseCsvNumber(x) { return parseFloat(String(x).trim().replace(',', '.')); }
+  function parseCsv(text) {
+    var rows = [];
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var sep = line.indexOf(';') >= 0 ? ';' : ',';
+      var cells = line.split(sep).map(function (c) { return c.trim(); });
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(cells[0])) continue; // Kopfzeile oder unlesbar
+      if (cells.length < 3) continue;
+      var ts = new Date(cells[0] + 'T' + (cells[1] || '12:00')).getTime();
+      var durSec = parseCsvNumber(cells[2]);
+      if (!isFinite(ts) || !(durSec > 0)) continue;
+      var rate = parseCsvNumber(cells[4]);
+      if (!isFinite(rate) || rate < 0) rate = settings ? settings.rate : 0;
+      var earned = parseCsvNumber(cells[3]);
+      if (!isFinite(earned) || earned < 0) earned = (durSec / 3600) * rate;
+      var row = {
+        ts: ts,
+        durationMs: Math.round(durSec * 1000),
+        earned: earned,
+        rate: rate,
+        manual: /^(ja|yes)$/i.test(String(cells[5] || '').trim()),
+        activity: actFromLabel(cells[8])
+      };
+      var net = parseCsvNumber(cells[6]);
+      var ded = parseCsvNumber(cells[7]);
+      if (isFinite(net) && net >= 0) row.net = net;
+      if (isFinite(ded) && ded >= 0) row.ded = ded;
+      rows.push(row);
+    }
+    return rows;
+  }
+  function sessionKey(ts, durationMs) { return Math.round(ts / 1000) + '_' + Math.round(durationMs / 1000); }
+  $('btn-import-csv').addEventListener('click', function () {
+    $('import-file').value = '';
+    $('import-text').value = '';
+    $('import-error').style.display = 'none';
+    $('import-overlay').classList.remove('hidden');
+  });
+  $('import-cancel').addEventListener('click', function () { $('import-overlay').classList.add('hidden'); });
+  $('import-overlay').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+  });
+  $('import-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { $('import-text').value = String(reader.result || ''); };
+    reader.readAsText(f);
+  });
+  $('import-run').addEventListener('click', function () {
+    var rows = parseCsv($('import-text').value);
+    if (!rows.length) { $('import-error').style.display = 'block'; return; }
+    var sessions = lsGet(LS_SESSIONS) || [];
+    var existing = {};
+    sessions.forEach(function (s) { existing[sessionKey(s.ts, s.durationMs)] = true; });
+    var added = 0, skipped = 0;
+    rows.forEach(function (row) {
+      var key = sessionKey(row.ts, row.durationMs);
+      if (existing[key]) { skipped++; return; }
+      existing[key] = true;
+      var imp = {
+        id: 'i' + row.ts + '-' + Math.floor(Math.random() * 1e6),
+        ts: row.ts,
+        durationMs: row.durationMs,
+        earned: row.earned,
+        rate: row.rate,
+        manual: row.manual,
+        activity: actKeyOf(row.activity)
+      };
+      if (typeof row.net === 'number') imp.net = row.net;
+      if (typeof row.ded === 'number') imp.ded = row.ded;
+      sessions.push(imp);
+      added++;
+    });
+    lsSet(LS_SESSIONS, sessions);
+    $('import-overlay').classList.add('hidden');
+    renderHistory();
+    infoToast(t('toastImported')(added, skipped));
+  });
+
+  // ---------- Sprachumschalter ----------
+  var BINDINGS = [
+    ['.tagline', 'tagline'],
+    ['#view-setup h2', 'setupTitle'],
+    ['#mode-monthly', 'modeMonthly'],
+    ['#mode-hourly', 'modeHourly'],
+    ['label[for="inp-monthly"]', 'lblMonthly'],
+    ['label[for="inp-hours"]', 'lblHours'],
+    ['label[for="inp-rate"]', 'lblRate'],
+    ['#inp-monthly', 'phMonthly', 'placeholder'],
+    ['#inp-hours', 'phHours', 'placeholder'],
+    ['#inp-rate', 'phRate', 'placeholder'],
+    ['#act-poop .act-name', 'activityPoop'],
+    ['#act-smoke .act-name', 'activitySmoke'],
+    ['#act-coffee .act-name', 'activityCoffee'],
+    ['#derived-pre', 'derivedPre'],
+    ['#derived-post', 'derivedPost'],
+    ['#form-error', 'formError'],
+    ['#tax-title', 'taxTitle'],
+    ['#lbl-taxclass', 'lblTaxClass'],
+    ['#inp-taxclass option[value=""]', 'taxNone'],
+    ['#lbl-church', 'lblChurch'],
+    ['#lbl-dedlabel', 'lblDedLabel'],
+    ['#inp-dedlabel', 'dedLabelDefault', 'placeholder'],
+    ['#tax-hint', 'taxHint'],
+    ['#stat-k-net', 'statKNet'],
+    ['#stat-k-ded', 'statKDed'],
+    ['#sum-k-net', 'sumKNet'],
+    ['#sum-k-ded', 'sumKDed'],
+    ['.privacy-note', 'privacyNote'],
+    ['#chip-rate', 'chipTitle', 'title'],
+    ['#sum-k-duration', 'sumKDuration'],
+    ['#sum-k-earned', 'sumKEarned'],
+    ['#btn-save-session', 'btnSaveSession'],
+    ['#btn-share-session', 'btnShareSession'],
+    ['#btn-discard-session', 'btnDiscard'],
+    ['#h2-balance', 'h2Balance'],
+    ['#stat-k-total', 'statKTotal'],
+    ['#stat-k-time', 'statKTime'],
+    ['#stat-k-count', 'statKCount'],
+    ['#stat-k-avg', 'statKAvg'],
+    ['#h2-sessions', 'h2Sessions'],
+    ['#btn-show-backfill', 'btnBackfill'],
+    ['label[for="bf-date"]', 'lblDate'],
+    ['label[for="bf-time"]', 'lblTime'],
+    ['label[for="bf-duration"]', 'lblDuration'],
+    ['#bf-duration', 'phDuration', 'placeholder'],
+    ['#bf-derived-pre', 'bfDerivedPre'],
+    ['#bf-derived-post', 'bfDerivedPost'],
+    ['#bf-error', 'bfError'],
+    ['#bf-save', 'btnBfSave'],
+    ['#bf-cancel', 'btnCancel'],
+    ['#empty-history-text', 'emptyHistory', 'html'],
+    ['#btn-export-csv', 'btnExport'],
+    ['#btn-import-csv', 'btnImport'],
+    ['#h2-achievements', 'h2Achievements'],
+    ['#btn-share-achievements', 'btnShareAch'],
+    ['#import-title', 'importTitle'],
+    ['#import-hint', 'importHint'],
+    ['#import-error', 'importError'],
+    ['#import-run', 'btnImportRun'],
+    ['#import-cancel', 'btnCancel'],
+    ['#share-copy', 'btnCopy'],
+    ['#share-close', 'btnClose'],
+    ['#ach-toast-label', 'toastUnlocked'],
+    ['#tab-timer', 'tabTimer'],
+    ['#tab-history', 'tabHistory'],
+    ['#tab-achievements', 'tabAchievements'],
+    ['#tab-settings', 'tabSettings']
+  ];
+  function applyLang() {
+    document.documentElement.lang = lang;
+    $('lang-de').setAttribute('aria-pressed', String(lang === 'de'));
+    $('lang-en').setAttribute('aria-pressed', String(lang === 'en'));
+    BINDINGS.forEach(function (b) {
+      var el = document.querySelector(b[0]);
+      if (!el) return;
+      var val = t(b[1]);
+      if (b[2] === 'placeholder' || b[2] === 'title') el.setAttribute(b[2], val);
+      else if (b[2] === 'html') el.innerHTML = val;
+      else el.textContent = val;
+    });
+    $('activity-picker').setAttribute('aria-label', t('activityPickerLabel'));
+    buildFormatters();
+    $('btn-save-settings').textContent = settings ? t('btnSaveChanges') : t('btnSaveFirst');
+    renderRateChip();
+    renderTimer();
+    renderActivityPicker();
+    renderHistory();
+    if (!views.summary.classList.contains('hidden')) renderSummary();
+  }
+  function setLang(l) {
+    if (l === lang) return;
+    lang = l;
+    lsSet(LS_LANG, l);
+    applyLang();
+  }
+  $('lang-de').addEventListener('click', function () { setLang('de'); });
+  $('lang-en').addEventListener('click', function () { setLang('en'); });
+
+  // ---------- Tabs ----------
+  $('tab-timer').addEventListener('click', function () { show('timer'); renderTimer(); renderActivityPicker(); });
+  $('tab-history').addEventListener('click', function () { renderHistory(); show('history'); });
+  $('tab-achievements').addEventListener('click', function () {
+    var sessions = lsGet(LS_SESSIONS) || [];
+    var ach = checkAchievements(sessions);
+    renderAchievements(ach.unlocked, ach.stats);
+    if (ach.newly.length) showToasts(ach.newly);
+    show('achievements');
+  });
+  $('tab-settings').addEventListener('click', function () { fillSetupForm(); show('setup'); });
+
+  // ---------- Boot ----------
+  applyLang();
+  if (!settings) {
+    show('setup');
+    renderModeSwitch();
+  } else {
+    fillSetupForm();
+    show('timer');
+    renderTimer();
+    renderActivityPicker();
+    if (active && active.startTs) startTicking();
+  }
+})();
+</script>
 
 </body>
 </html>
