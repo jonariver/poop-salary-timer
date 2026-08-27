@@ -95,6 +95,38 @@ body {
   margin: 0 auto;
   padding: 20px 18px 96px;
   min-height: 100vh;
+  position: relative;
+}
+
+/* ---------- Language switch ---------- */
+.lang-switch {
+  position: absolute;
+  top: 20px;
+  right: 16px;
+  display: flex;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  padding: 3px;
+  box-shadow: var(--shadow);
+  z-index: 10;
+}
+.lang-switch button {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: none;
+  background: transparent;
+  color: var(--ink-faint);
+  padding: 4px 9px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.lang-switch button[aria-pressed="true"] {
+  background: var(--gold-soft);
+  color: var(--gold-strong);
 }
 
 /* ---------- Header ---------- */
@@ -607,6 +639,10 @@ h2.section {
 </style>
 
 <div class="shell">
+  <div class="lang-switch" role="group" aria-label="Sprache / Language">
+    <button id="lang-de" aria-pressed="true">DE</button>
+    <button id="lang-en" aria-pressed="false">EN</button>
+  </div>
   <header class="app">
     <h1>Poop Salary Timer <span class="coin">💩</span></h1>
     <p class="tagline">Zeit ist Geld. Auch hier.</p>
@@ -635,7 +671,7 @@ h2.section {
         <input id="inp-rate" type="number" inputmode="decimal" min="0" step="0.5" placeholder="z. B. 18,50">
       </div>
     </div>
-    <div class="derived hidden" id="derived-rate">Das macht <strong id="derived-value">–</strong> pro Stunde. Jede Minute dort drin: bares Geld.</div>
+    <div class="derived hidden" id="derived-rate"><span id="derived-pre">Das macht </span><strong id="derived-value">–</strong><span id="derived-post"> pro Stunde. Jede Minute dort drin: bares Geld.</span></div>
     <p class="form-error" id="form-error">Bitte gib gültige Werte ein.</p>
     <button class="btn btn-start" id="btn-save-settings" style="width:100%">Speichern &amp; loslegen</button>
     <p class="privacy-note">🔒 Alles bleibt auf deinem Gerät. Dein Lohn wird nur lokal im Browser gespeichert — kein Server, kein Konto, keine neugierigen Blicke.</p>
@@ -671,11 +707,11 @@ h2.section {
     <p class="summary-sub" id="summary-sub"></p>
     <div class="summary-stats">
       <div class="stat-tile">
-        <div class="k">Sitzungsdauer</div>
+        <div class="k" id="sum-k-duration">Sitzungsdauer</div>
         <div class="v" id="summary-duration">–</div>
       </div>
       <div class="stat-tile">
-        <div class="k">Verdient</div>
+        <div class="k" id="sum-k-earned">Verdient</div>
         <div class="v gold" id="summary-earned">–</div>
       </div>
     </div>
@@ -690,29 +726,29 @@ h2.section {
   <!-- ============ HISTORY ============ -->
   <section id="view-history" class="hidden" aria-label="Verlauf">
     <div class="card">
-      <h2 class="section">Deine Bilanz 📈</h2>
+      <h2 class="section" id="h2-balance">Deine Bilanz 📈</h2>
       <div class="stats-grid">
         <div class="stat-tile">
-          <div class="k">Gesamt verdient</div>
+          <div class="k" id="stat-k-total">Gesamt verdient</div>
           <div class="v gold" id="stat-total-earned">0,00&nbsp;€</div>
         </div>
         <div class="stat-tile">
-          <div class="k">Gesamtzeit</div>
+          <div class="k" id="stat-k-time">Gesamtzeit</div>
           <div class="v" id="stat-total-time">0 min</div>
         </div>
         <div class="stat-tile">
-          <div class="k">Sitzungen</div>
+          <div class="k" id="stat-k-count">Sitzungen</div>
           <div class="v" id="stat-count">0</div>
         </div>
         <div class="stat-tile">
-          <div class="k">Ø pro Sitzung</div>
+          <div class="k" id="stat-k-avg">Ø pro Sitzung</div>
           <div class="v" id="stat-avg">–</div>
         </div>
       </div>
     </div>
     <div class="card">
       <div class="section-head">
-        <h2 class="section">Sitzungen</h2>
+        <h2 class="section" id="h2-sessions">Sitzungen</h2>
         <button class="btn-add-session" id="btn-show-backfill">+ Nachtragen</button>
       </div>
       <div class="backfill-form hidden" id="backfill-form">
@@ -730,7 +766,7 @@ h2.section {
           <label for="bf-duration">Dauer in Minuten</label>
           <input id="bf-duration" type="number" inputmode="decimal" min="0.5" max="720" step="0.5" placeholder="z. B. 12">
         </div>
-        <div class="derived hidden" id="bf-derived">Macht <strong id="bf-derived-value">–</strong> — nachträglich, aber verdient.</div>
+        <div class="derived hidden" id="bf-derived"><span id="bf-derived-pre">Macht </span><strong id="bf-derived-value">–</strong><span id="bf-derived-post"> — nachträglich, aber verdient.</span></div>
         <p class="form-error" id="bf-error">Bitte Datum, Uhrzeit und Dauer angeben.</p>
         <div class="actions">
           <button class="btn btn-start" id="bf-save">Eintragen</button>
@@ -740,7 +776,7 @@ h2.section {
       <ul class="session-list" id="session-list"></ul>
       <div class="empty-state hidden" id="empty-history">
         <div class="big">🚽</div>
-        Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.
+        <span id="empty-history-text">Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.</span>
       </div>
       <div class="csv-actions">
         <button class="btn btn-secondary" id="btn-export-csv">⬇️ CSV exportieren</button>
@@ -753,7 +789,7 @@ h2.section {
   <section id="view-achievements" class="hidden" aria-label="Erfolge">
     <div class="card">
       <div class="section-head">
-        <h2 class="section">Erfolge 🏆</h2>
+        <h2 class="section" id="h2-achievements">Erfolge 🏆</h2>
         <span class="ach-count" id="ach-count">0 / 10</span>
       </div>
       <div class="ach-grid" id="ach-grid"></div>
@@ -764,16 +800,16 @@ h2.section {
 
 <div class="ach-toast" id="ach-toast" role="status" aria-live="polite">
   <span class="badge" id="ach-toast-badge">🏆</span>
-  <span><span class="small">Erfolg freigeschaltet</span><span id="ach-toast-name"></span></span>
+  <span><span class="small" id="ach-toast-label">Erfolg freigeschaltet</span><span id="ach-toast-name"></span></span>
 </div>
 
 <div class="ach-toast" id="info-toast" role="status" aria-live="polite"></div>
 
 <div class="share-overlay hidden" id="import-overlay">
   <div class="share-modal" role="dialog" aria-label="CSV importieren">
-    <h3>CSV importieren ⬆️</h3>
+    <h3 id="import-title">CSV importieren ⬆️</h3>
     <input type="file" id="import-file" accept=".csv,text/csv,text/plain">
-    <p class="modal-hint">Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen</p>
+    <p class="modal-hint" id="import-hint">Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen</p>
     <textarea id="import-text" placeholder="2026-08-27;07:30:00;720;3,4600;17,31;nein"></textarea>
     <p class="form-error" id="import-error">Keine gültigen Zeilen gefunden.</p>
     <div class="actions">
@@ -820,10 +856,151 @@ h2.section {
     try { localStorage.removeItem(key); } catch (e) {}
   }
 
-  // ---------- Formatting ----------
-  var fmt2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
-  var fmt4 = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
-  function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
+  // ---------- Sprache / i18n ----------
+  var LS_LANG = 'pst_lang';
+  var lang = lsGet(LS_LANG) === 'en' ? 'en' : 'de';
+  var STR = {
+    de: {
+      tagline: 'Zeit ist Geld. Auch hier.',
+      setupTitle: 'Was verdienst du eigentlich?',
+      modeMonthly: 'Monatslohn', modeHourly: 'Stundenlohn',
+      lblMonthly: 'Monatslohn (brutto oder netto — deine Wahl) in €',
+      lblHours: 'Arbeitsstunden pro Woche',
+      lblRate: 'Stundenlohn in €',
+      phMonthly: 'z. B. 3200', phHours: 'z. B. 40', phRate: 'z. B. 18,50',
+      derivedPre: 'Das macht ', derivedPost: ' pro Stunde. Jede Minute dort drin: bares Geld.',
+      formError: 'Bitte gib gültige Werte ein.',
+      btnSaveFirst: 'Speichern & loslegen', btnSaveChanges: 'Änderungen speichern',
+      privacyNote: '🔒 Alles bleibt auf deinem Gerät. Dein Lohn wird nur lokal im Browser gespeichert — kein Server, kein Konto, keine neugierigen Blicke.',
+      chipTitle: 'Verdienst ändern',
+      stateReady: 'Bereit', stateRunning: 'Es läuft 💸', statePaused: 'Pausiert',
+      btnStart: 'Start', btnResume: 'Weiter',
+      holdHint: 'Kurz drücken: Pause &nbsp;·&nbsp; Gedrückt halten: Sitzung beenden',
+      sumKDuration: 'Sitzungsdauer', sumKEarned: 'Verdient',
+      btnSaveSession: 'Session speichern', btnShareSession: '📤 Teilen', btnDiscard: 'Verwerfen',
+      h2Balance: 'Deine Bilanz 📈',
+      statKTotal: 'Gesamt verdient', statKTime: 'Gesamtzeit', statKCount: 'Sitzungen', statKAvg: 'Ø pro Sitzung',
+      h2Sessions: 'Sitzungen', btnBackfill: '+ Nachtragen',
+      lblDate: 'Datum', lblTime: 'Uhrzeit', lblDuration: 'Dauer in Minuten', phDuration: 'z. B. 12',
+      bfDerivedPre: 'Macht ', bfDerivedPost: ' — nachträglich, aber verdient.',
+      bfError: 'Bitte Datum, Uhrzeit und Dauer angeben.',
+      btnBfSave: 'Eintragen', btnCancel: 'Abbrechen',
+      emptyHistory: 'Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.',
+      btnExport: '⬇️ CSV exportieren', btnImport: '⬆️ CSV importieren',
+      h2Achievements: 'Erfolge 🏆', btnShareAch: '📤 Erfolge teilen',
+      importTitle: 'CSV importieren ⬆️',
+      importHint: 'Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen',
+      importError: 'Keine gültigen Zeilen gefunden.',
+      btnImportRun: 'Importieren',
+      shareTitleDefault: 'Zum Teilen kopieren 📤', btnCopy: 'Kopieren', btnClose: 'Schließen',
+      toastUnlocked: 'Erfolg freigeschaltet',
+      toastCopied: 'In die Zwischenablage kopiert 📋',
+      toastNoExport: 'Keine Sitzungen zum Exportieren 🤷',
+      csvExportTitle: 'CSV-Export 📄',
+      csvHeader: 'Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen',
+      csvYes: 'ja', csvNo: 'nein',
+      tabTimer: '⏱️ Timer', tabHistory: '📊 Verlauf', tabAchievements: '🏆 Erfolge', tabSettings: '⚙️ Daten',
+      tagBackfilled: 'nachgetragen', clockSuffix: ' Uhr', delAria: 'Sitzung löschen',
+      unitSec: ' Sek.', unitMin: ' Min.', unitHour: ' Std. ',
+      unitDays: 'Tagen', unitMinShort: 'Min.', bestTime: 'Bestzeit ',
+      summarySub: function (dur) { return 'Du warst ' + dur + ' auf Firmenkosten unterwegs.'; },
+      titles: ['Sauberes Geschäft.', 'Sitzung erfolgreich beendet.', 'Das lief sauber durch.', 'Feierabend auf dem Thron.', 'Erledigt. Im besten Sinne.'],
+      factNothing: 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
+      factPct: function (pct, item) { return 'Das sind schon ' + pct + ' % von ' + item + '. Dranbleiben!'; },
+      factOne: function (item) { return 'Dafür gibt es ' + item + '. Wohl verdient!'; },
+      factMany: function (n, items) { return 'Dafür gibt es ' + n + ' ' + items + '. Wohl verdient!'; },
+      comparisons: [
+        { price: 0.75, singular: 'ein Brötchen', plural: 'Brötchen' },
+        { price: 1.5,  singular: 'eine Butterbrezel', plural: 'Butterbrezeln' },
+        { price: 2.2,  singular: 'einen Espresso', plural: 'Espressi' },
+        { price: 4.5,  singular: 'einen Cappuccino to go', plural: 'Cappuccini to go' },
+        { price: 8,    singular: 'einen Döner', plural: 'Döner' },
+        { price: 13,   singular: 'ein Kinoticket', plural: 'Kinotickets' }
+      ],
+      shareSession: function (dur, money, fact) { return '💩 Poop Salary Timer\nIch war ' + dur + ' auf dem Thron und habe dabei ' + money + ' verdient. 💸\n' + fact; },
+      shareAchTitle: function (n, total) { return '🏆 Meine Klo-Erfolge (' + n + '/' + total + '):\n'; },
+      shareAchNone: 'Noch keine — aber das Sitzungsjahr ist noch lang.',
+      shareAchFooter: '\n— gemessen mit dem Poop Salary Timer 💩',
+      toastImported: function (added, skipped) { return added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅'; }
+    },
+    en: {
+      tagline: 'Time is money. Even here.',
+      setupTitle: 'So, what do you earn?',
+      modeMonthly: 'Monthly salary', modeHourly: 'Hourly wage',
+      lblMonthly: 'Monthly salary (gross or net — your call) in €',
+      lblHours: 'Working hours per week',
+      lblRate: 'Hourly wage in €',
+      phMonthly: 'e.g. 3200', phHours: 'e.g. 40', phRate: 'e.g. 18.50',
+      derivedPre: 'That makes ', derivedPost: ' per hour. Every minute in there: cold, hard cash.',
+      formError: 'Please enter valid values.',
+      btnSaveFirst: 'Save & get going', btnSaveChanges: 'Save changes',
+      privacyNote: '🔒 Everything stays on your device. Your salary is stored only locally in your browser — no server, no account, no prying eyes.',
+      chipTitle: 'Change earnings',
+      stateReady: 'Ready', stateRunning: 'Earning 💸', statePaused: 'Paused',
+      btnStart: 'Start', btnResume: 'Resume',
+      holdHint: 'Tap: pause &nbsp;·&nbsp; Press and hold: end session',
+      sumKDuration: 'Session length', sumKEarned: 'Earned',
+      btnSaveSession: 'Save session', btnShareSession: '📤 Share', btnDiscard: 'Discard',
+      h2Balance: 'Your balance 📈',
+      statKTotal: 'Total earned', statKTime: 'Total time', statKCount: 'Sessions', statKAvg: 'Avg per session',
+      h2Sessions: 'Sessions', btnBackfill: '+ Add missed one',
+      lblDate: 'Date', lblTime: 'Time', lblDuration: 'Duration in minutes', phDuration: 'e.g. 12',
+      bfDerivedPre: 'Makes ', bfDerivedPost: ' — belated, but well earned.',
+      bfError: 'Please provide date, time and duration.',
+      btnBfSave: 'Add session', btnCancel: 'Cancel',
+      emptyHistory: 'No saved sessions yet.<br>Your first business awaits.',
+      btnExport: '⬇️ Export CSV', btnImport: '⬆️ Import CSV',
+      h2Achievements: 'Achievements 🏆', btnShareAch: '📤 Share achievements',
+      importTitle: 'Import CSV ⬆️',
+      importHint: 'Pick a file or paste CSV content below. Expected format matches the export: Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled',
+      importError: 'No valid rows found.',
+      btnImportRun: 'Import',
+      shareTitleDefault: 'Copy to share 📤', btnCopy: 'Copy', btnClose: 'Close',
+      toastUnlocked: 'Achievement unlocked',
+      toastCopied: 'Copied to clipboard 📋',
+      toastNoExport: 'No sessions to export 🤷',
+      csvExportTitle: 'CSV export 📄',
+      csvHeader: 'Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled',
+      csvYes: 'yes', csvNo: 'no',
+      tabTimer: '⏱️ Timer', tabHistory: '📊 History', tabAchievements: '🏆 Awards', tabSettings: '⚙️ Data',
+      tagBackfilled: 'backfilled', clockSuffix: '', delAria: 'Delete session',
+      unitSec: ' sec', unitMin: ' min', unitHour: ' h ',
+      unitDays: 'days', unitMinShort: 'min', bestTime: 'Best time ',
+      summarySub: function (dur) { return 'You spent ' + dur + ' on company time.'; },
+      titles: ['Clean business.', 'Session completed successfully.', 'That went smoothly.', 'Clocking out of the throne room.', 'Done. In the best sense.'],
+      factNothing: "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
+      factPct: function (pct, item) { return "That's already " + pct + '% of ' + item + '. Keep going!'; },
+      factOne: function (item) { return 'That buys you ' + item + '. Well earned!'; },
+      factMany: function (n, items) { return 'That buys you ' + n + ' ' + items + '. Well earned!'; },
+      comparisons: [
+        { price: 0.75, singular: 'a bread roll', plural: 'bread rolls' },
+        { price: 1.5,  singular: 'a soft pretzel', plural: 'soft pretzels' },
+        { price: 2.2,  singular: 'an espresso', plural: 'espressos' },
+        { price: 4.5,  singular: 'a cappuccino to go', plural: 'cappuccinos to go' },
+        { price: 8,    singular: 'a kebab', plural: 'kebabs' },
+        { price: 13,   singular: 'a movie ticket', plural: 'movie tickets' }
+      ],
+      shareSession: function (dur, money, fact) { return '💩 Poop Salary Timer\nI spent ' + dur + ' on the throne and earned ' + money + '. 💸\n' + fact; },
+      shareAchTitle: function (n, total) { return '🏆 My toilet achievements (' + n + '/' + total + '):\n'; },
+      shareAchNone: 'None yet — but the fiscal year on the throne is long.',
+      shareAchFooter: '\n— measured with the Poop Salary Timer 💩',
+      toastImported: function (added, skipped) { return added + ' session' + (added === 1 ? '' : 's') + ' imported' + (skipped ? ' · ' + skipped + ' skipped' : '') + ' ✅'; }
+    }
+  };
+  function t(key) { return (STR[lang] && STR[lang][key] !== undefined ? STR[lang] : STR.de)[key]; }
+
+  // ---------- Formatting (sprachabhaengig) ----------
+  var fmt2, fmt4, dateFmt, timeFmt, achDateFmt;
+  function buildFormatters() {
+    var loc = lang === 'en' ? 'en-GB' : 'de-DE';
+    fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
+    fmt4 = new Intl.NumberFormat(loc, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    dateFmt = new Intl.DateTimeFormat(loc, { weekday: 'short', day: 'numeric', month: 'short' });
+    timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
+    achDateFmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' });
+  }
+  buildFormatters();
+  function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
   function fmtMoney(v) { return fmt2.format(v); }
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function fmtElapsed(ms) {
@@ -833,10 +1010,10 @@ h2.section {
   }
   function fmtDurationWords(ms) {
     var totalMin = Math.round(ms / 60000);
-    if (totalMin < 1) return Math.round(ms / 1000) + ' Sek.';
+    if (totalMin < 1) return Math.round(ms / 1000) + t('unitSec');
     var h = Math.floor(totalMin / 60), m = totalMin % 60;
-    if (h > 0) return h + ' Std. ' + m + ' Min.';
-    return totalMin + ' Min.';
+    if (h > 0) return h + t('unitHour') + m + t('unitMin');
+    return totalMin + t('unitMin');
   }
 
   // ---------- Settings ----------
@@ -876,7 +1053,7 @@ h2.section {
     $('tab-history').setAttribute('aria-current', String(name === 'history'));
     $('tab-achievements').setAttribute('aria-current', String(name === 'achievements'));
     $('tab-settings').setAttribute('aria-current', String(name === 'setup'));
-    $('btn-save-settings').textContent = settings ? 'Änderungen speichern' : 'Speichern & loslegen';
+    $('btn-save-settings').textContent = settings ? t('btnSaveChanges') : t('btnSaveFirst');
   }
 
   // ---------- Setup form ----------
@@ -960,13 +1137,11 @@ h2.section {
     elapsedEl.textContent = fmtElapsed(ms);
     var running = !!(active && active.startTs);
     var paused = !!(active && !active.startTs && active.accumulatedMs > 0);
-    stateLabel.textContent = running ? 'Es läuft 💸' : (paused ? 'Pausiert' : 'Bereit');
-    btnStart.textContent = paused ? 'Weiter' : 'Start';
+    stateLabel.textContent = running ? t('stateRunning') : (paused ? t('statePaused') : t('stateReady'));
+    btnStart.textContent = paused ? t('btnResume') : t('btnStart');
     btnStart.classList.toggle('hidden', running);
     btnStop.classList.toggle('hidden', !running && !paused);
-    holdHint.innerHTML = (running || paused)
-      ? 'Kurz drücken: Pause &nbsp;·&nbsp; Gedrückt halten: Sitzung beenden'
-      : '&nbsp;';
+    holdHint.innerHTML = (running || paused) ? t('holdHint') : '&nbsp;';
   }
   function startTicking() {
     if (tickHandle) return;
@@ -1022,37 +1197,21 @@ h2.section {
   });
 
   // ---------- Summary ----------
-  var TITLES = [
-    'Sauberes Geschäft.',
-    'Sitzung erfolgreich beendet.',
-    'Das lief sauber durch.',
-    'Feierabend auf dem Thron.',
-    'Erledigt. Im besten Sinne.'
-  ];
-  var COMPARISONS = [
-    { price: 0.75, singular: 'ein Brötchen', plural: 'Brötchen' },
-    { price: 1.5,  singular: 'eine Butterbrezel', plural: 'Butterbrezeln' },
-    { price: 2.2,  singular: 'einen Espresso', plural: 'Espressi' },
-    { price: 4.5,  singular: 'einen Cappuccino to go', plural: 'Cappuccini to go' },
-    { price: 8,    singular: 'einen Döner', plural: 'Döner' },
-    { price: 13,   singular: 'ein Kinoticket', plural: 'Kinotickets' }
-  ];
   function funFact(earned) {
-    if (earned < 0.05) return 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.';
+    if (earned < 0.05) return t('factNothing');
+    var comparisons = t('comparisons');
     var best = null;
-    for (var i = 0; i < COMPARISONS.length; i++) {
-      var c = COMPARISONS[i];
+    for (var i = 0; i < comparisons.length; i++) {
+      var c = comparisons[i];
       if (earned >= c.price) best = c;
     }
     if (!best) {
-      var cheapest = COMPARISONS[0];
+      var cheapest = comparisons[0];
       var pct = Math.round((earned / cheapest.price) * 100);
-      return 'Das sind schon ' + pct + ' % von ' + cheapest.singular + '. Dranbleiben!';
+      return t('factPct')(pct, cheapest.singular);
     }
     var n = Math.floor(earned / best.price);
-    return n === 1
-      ? 'Dafür gibt es ' + best.singular + '. Wohl verdient!'
-      : 'Dafür gibt es ' + n + ' ' + best.plural + '. Wohl verdient!';
+    return n === 1 ? t('factOne')(best.singular) : t('factMany')(n, best.plural);
   }
 
   function endSession() {
@@ -1064,12 +1223,18 @@ h2.section {
     persistActive();
     pendingSummary = { durationMs: ms, earned: earned, ts: Date.now() };
     lastSummary = pendingSummary;
-    $('summary-title').textContent = TITLES[Math.floor(Math.random() * TITLES.length)];
-    $('summary-sub').textContent = 'Du warst ' + fmtDurationWords(ms) + ' auf Firmenkosten unterwegs.';
-    $('summary-duration').textContent = fmtElapsed(ms);
-    $('summary-earned').textContent = fmtMoney(earned);
-    $('summary-fact').textContent = funFact(earned);
+    lastTitleIdx = Math.floor(Math.random() * t('titles').length);
+    renderSummary();
     show('summary');
+  }
+
+  function renderSummary() {
+    if (!lastSummary) return;
+    $('summary-title').textContent = t('titles')[lastTitleIdx % t('titles').length];
+    $('summary-sub').textContent = t('summarySub')(fmtDurationWords(lastSummary.durationMs));
+    $('summary-duration').textContent = fmtElapsed(lastSummary.durationMs);
+    $('summary-earned').textContent = fmtMoney(lastSummary.earned);
+    $('summary-fact').textContent = funFact(lastSummary.earned);
   }
 
   $('btn-save-session').addEventListener('click', function () {
@@ -1096,9 +1261,6 @@ h2.section {
   });
 
   // ---------- History ----------
-  var dateFmt = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
-  var timeFmt = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' });
-
   function renderHistory() {
     var sessions = lsGet(LS_SESSIONS) || [];
     sessions.sort(function (a, b) { return b.ts - a.ts; });
@@ -1129,16 +1291,16 @@ h2.section {
       if (s.manual) {
         var tag = document.createElement('span');
         tag.className = 'session-tag';
-        tag.textContent = 'nachgetragen';
+        tag.textContent = t('tagBackfilled');
         dEl.appendChild(tag);
       }
-      var tEl = document.createElement('div'); tEl.className = 't'; tEl.textContent = timeFmt.format(d) + ' Uhr';
+      var tEl = document.createElement('div'); tEl.className = 't'; tEl.textContent = timeFmt.format(d) + t('clockSuffix');
       when.appendChild(dEl); when.appendChild(tEl);
       var dur = document.createElement('span'); dur.className = 'session-dur'; dur.textContent = fmtElapsed(s.durationMs);
       var earn = document.createElement('span'); earn.className = 'session-earn'; earn.textContent = fmtMoney(s.earned);
       var del = document.createElement('button');
       del.className = 'session-del';
-      del.setAttribute('aria-label', 'Sitzung löschen');
+      del.setAttribute('aria-label', t('delAria'));
       del.textContent = '✕';
       del.addEventListener('click', function () {
         var all = (lsGet(LS_SESSIONS) || []).filter(function (x) { return x.id !== s.id; });
@@ -1185,68 +1347,76 @@ h2.section {
 
   var ACHIEVEMENTS = [
     {
-      id: 'first', badge: '🎉', name: 'Das erste Geschäft',
-      desc: 'Deine erste Sitzung gespeichert. Jeder Cent zählt.',
+      id: 'first', badge: '🎉',
+      name: { de: 'Das erste Geschäft', en: 'The First Business' },
+      desc: { de: 'Deine erste Sitzung gespeichert. Jeder Cent zählt.', en: 'Your first session saved. Every cent counts.' },
       test: function (st) { return st.count >= 1; },
       progress: function (st) { return st.count + '/1'; }
     },
     {
-      id: 'streak', badge: '🔥', name: 'Pooping Streak',
-      desc: 'An 3 Tagen hintereinander eine Sitzung. Routine ist alles.',
+      id: 'streak', badge: '🔥',
+      name: { de: 'Pooping Streak', en: 'Pooping Streak' },
+      desc: { de: 'An 3 Tagen hintereinander eine Sitzung. Routine ist alles.', en: 'A session on 3 days in a row. Routine is everything.' },
       test: function (st) { return st.bestStreak >= 3; },
-      progress: function (st) { return st.bestStreak + '/3 Tagen'; }
+      progress: function (st) { return st.bestStreak + '/3 ' + t('unitDays'); }
     },
     {
-      id: 'sitzfleisch', badge: '🪑', name: 'Sitzfleisch',
-      desc: 'Eine einzelne Sitzung von 15 Minuten oder mehr. Respekt.',
+      id: 'sitzfleisch', badge: '🪑',
+      name: { de: 'Sitzfleisch', en: 'Marathon Sitter' },
+      desc: { de: 'Eine einzelne Sitzung von 15 Minuten oder mehr. Respekt.', en: 'A single session of 15 minutes or more. Respect.' },
       test: function (st) { return st.maxDuration >= 15 * 60000; },
-      progress: function (st) { return Math.floor(st.maxDuration / 60000) + '/15 Min.'; }
+      progress: function (st) { return Math.floor(st.maxDuration / 60000) + '/15 ' + t('unitMinShort'); }
     },
     {
-      id: 'gold', badge: '💰', name: 'Goldene Schüssel',
-      desc: 'Insgesamt 10 € auf dem Thron verdient.',
+      id: 'gold', badge: '💰',
+      name: { de: 'Goldene Schüssel', en: 'Golden Bowl' },
+      desc: { de: 'Insgesamt 10 € auf dem Thron verdient.', en: 'Earned €10 in total on the throne.' },
       test: function (st) { return st.totalEarned >= 10; },
       progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 10)) + '/10 €'; }
     },
     {
-      id: 'early', badge: '🌅', name: 'Frühschicht',
-      desc: 'Eine Sitzung vor 9 Uhr morgens. Der frühe Vogel verdient mit.',
+      id: 'early', badge: '🌅',
+      name: { de: 'Frühschicht', en: 'Early Shift' },
+      desc: { de: 'Eine Sitzung vor 9 Uhr morgens. Der frühe Vogel verdient mit.', en: 'A session before 9 a.m. The early bird earns extra.' },
       test: function (st) { return st.hasEarly; },
       progress: function () { return '–'; }
     },
     {
-      id: 'fast', badge: '⚡', name: 'Schnell-Scheißer',
-      desc: 'Eine Sitzung unter 2 Minuten. Rein, raus, Geld mitgenommen.',
+      id: 'fast', badge: '⚡',
+      name: { de: 'Schnell-Scheißer', en: 'Speed Pooper' },
+      desc: { de: 'Eine Sitzung unter 2 Minuten. Rein, raus, Geld mitgenommen.', en: 'A session under 2 minutes. In, out, money in the bank.' },
       test: function (st) { return st.minEligibleMs < 2 * 60000; },
-      progress: function (st) { return st.minEligibleMs === Infinity ? '–' : 'Bestzeit ' + fmtElapsed(st.minEligibleMs); }
+      progress: function (st) { return st.minEligibleMs === Infinity ? '–' : t('bestTime') + fmtElapsed(st.minEligibleMs); }
     },
     {
-      id: 'night', badge: '🦉', name: 'Nachteule',
-      desc: 'Eine Sitzung zwischen 22 und 5 Uhr. Das Geschäft schläft nie.',
+      id: 'night', badge: '🦉',
+      name: { de: 'Nachteule', en: 'Night Owl' },
+      desc: { de: 'Eine Sitzung zwischen 22 und 5 Uhr. Das Geschäft schläft nie.', en: 'A session between 10 p.m. and 5 a.m. Business never sleeps.' },
       test: function (st) { return st.hasNight; },
       progress: function () { return '–'; }
     },
     {
-      id: 'double', badge: '🔁', name: 'Doppelschicht',
-      desc: 'Zwei Sitzungen an einem Tag. Wer fleißig ist, darf auch zweimal.',
+      id: 'double', badge: '🔁',
+      name: { de: 'Doppelschicht', en: 'Double Shift' },
+      desc: { de: 'Zwei Sitzungen an einem Tag. Wer fleißig ist, darf auch zweimal.', en: 'Two sessions in one day. The diligent may go twice.' },
       test: function (st) { return st.maxSameDay >= 2; },
       progress: function (st) { return st.maxSameDay + '/2'; }
     },
     {
-      id: 'regular', badge: '🚽', name: 'Stammgast',
-      desc: '10 gespeicherte Sitzungen. Man kennt dich hier.',
+      id: 'regular', badge: '🚽',
+      name: { de: 'Stammgast', en: 'Regular' },
+      desc: { de: '10 gespeicherte Sitzungen. Man kennt dich hier.', en: '10 saved sessions. They know you here.' },
       test: function (st) { return st.count >= 10; },
       progress: function (st) { return Math.min(st.count, 10) + '/10'; }
     },
     {
-      id: 'kroesus', badge: '👑', name: 'Klo-Krösus',
-      desc: 'Insgesamt 50 € verdient. Der Thron trägt seinen Namen zu Recht.',
+      id: 'kroesus', badge: '👑',
+      name: { de: 'Klo-Krösus', en: 'Throne Tycoon' },
+      desc: { de: 'Insgesamt 50 € verdient. Der Thron trägt seinen Namen zu Recht.', en: 'Earned €50 in total. The throne earns its name.' },
       test: function (st) { return st.totalEarned >= 50; },
       progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 50)) + '/50 €'; }
     }
   ];
-
-  var achDateFmt = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' });
 
   function checkAchievements(sessions) {
     var unlocked = lsGet(LS_ACHIEVEMENTS) || {};
@@ -1273,8 +1443,8 @@ h2.section {
       el.className = 'ach ' + (isOpen ? 'unlocked' : 'locked');
       var badge = document.createElement('div'); badge.className = 'badge'; badge.textContent = a.badge;
       var info = document.createElement('div'); info.className = 'info';
-      var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = a.name;
-      var ds = document.createElement('div'); ds.className = 'desc'; ds.textContent = a.desc;
+      var nm = document.createElement('div'); nm.className = 'name'; nm.textContent = a.name[lang] || a.name.de;
+      var ds = document.createElement('div'); ds.className = 'desc'; ds.textContent = a.desc[lang] || a.desc.de;
       info.appendChild(nm); info.appendChild(ds);
       var status = document.createElement('div'); status.className = 'status';
       status.textContent = isOpen ? '✓ ' + achDateFmt.format(new Date(unlocked[a.id])) : a.progress(st);
@@ -1294,7 +1464,7 @@ h2.section {
     if (!a) { toastBusy = false; return; }
     toastBusy = true;
     $('ach-toast-badge').textContent = a.badge;
-    $('ach-toast-name').textContent = a.name;
+    $('ach-toast-name').textContent = a.name[lang] || a.name.de;
     toast.classList.add('show');
     setTimeout(function () {
       toast.classList.remove('show');
@@ -1304,6 +1474,7 @@ h2.section {
 
   // ---------- Teilen ----------
   var lastSummary = null;
+  var lastTitleIdx = 0;
   var infoToastTimer = null;
   function infoToast(msg) {
     var t = $('info-toast');
@@ -1313,7 +1484,7 @@ h2.section {
     infoToastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
   }
   function openShareModal(text, title) {
-    $('share-title').textContent = title || 'Zum Teilen kopieren 📤';
+    $('share-title').textContent = title || t('shareTitleDefault');
     $('share-text').value = text;
     $('share-overlay').classList.remove('hidden');
   }
@@ -1325,13 +1496,13 @@ h2.section {
     var ta = $('share-text');
     ta.focus();
     ta.select();
-    try { document.execCommand('copy'); infoToast('In die Zwischenablage kopiert 📋'); } catch (e) {}
+    try { document.execCommand('copy'); infoToast(t('toastCopied')); } catch (e) {}
     $('share-overlay').classList.add('hidden');
   });
   function copyFallback(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(
-        function () { infoToast('In die Zwischenablage kopiert 📋'); },
+        function () { infoToast(t('toastCopied')); },
         function () { openShareModal(text); }
       );
     } else {
@@ -1350,20 +1521,16 @@ h2.section {
   }
   $('btn-share-session').addEventListener('click', function () {
     if (!lastSummary) return;
-    var text = '💩 Poop Salary Timer\n' +
-      'Ich war ' + fmtDurationWords(lastSummary.durationMs) + ' auf dem Thron und habe dabei ' +
-      fmtMoney(lastSummary.earned) + ' verdient. 💸\n' +
-      funFact(lastSummary.earned);
-    shareContent(text);
+    shareContent(t('shareSession')(fmtDurationWords(lastSummary.durationMs), fmtMoney(lastSummary.earned), funFact(lastSummary.earned)));
   });
   $('btn-share-achievements').addEventListener('click', function () {
     var unlocked = lsGet(LS_ACHIEVEMENTS) || {};
     var open = ACHIEVEMENTS.filter(function (a) { return unlocked[a.id]; });
-    var text = '🏆 Meine Klo-Erfolge (' + open.length + '/' + ACHIEVEMENTS.length + '):\n';
+    var text = t('shareAchTitle')(open.length, ACHIEVEMENTS.length);
     text += open.length
-      ? open.map(function (a) { return a.badge + ' ' + a.name; }).join('\n')
-      : 'Noch keine — aber das Sitzungsjahr ist noch lang.';
-    text += '\n— gemessen mit dem Poop Salary Timer 💩';
+      ? open.map(function (a) { return a.badge + ' ' + (a.name[lang] || a.name.de); }).join('\n')
+      : t('shareAchNone');
+    text += t('shareAchFooter');
     shareContent(text);
   });
 
@@ -1417,25 +1584,29 @@ h2.section {
   });
 
   // ---------- CSV Export / Import ----------
+  function csvNum(v, dec) {
+    var out = v.toFixed(dec);
+    return lang === 'de' ? out.replace('.', ',') : out;
+  }
   function csvFromSessions(sessions) {
-    var lines = ['Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen'];
+    var lines = [t('csvHeader')];
     sessions.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (s) {
       var d = new Date(s.ts);
       lines.push(
         d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ';' +
         pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ';' +
         Math.round(s.durationMs / 1000) + ';' +
-        s.earned.toFixed(4).replace('.', ',') + ';' +
-        (s.rate || 0).toFixed(2).replace('.', ',') + ';' +
-        (s.manual ? 'ja' : 'nein')
+        csvNum(s.earned, 4) + ';' +
+        csvNum(s.rate || 0, 2) + ';' +
+        (s.manual ? t('csvYes') : t('csvNo'))
       );
     });
     return lines.join('\n');
   }
   $('btn-export-csv').addEventListener('click', function () {
     var sessions = lsGet(LS_SESSIONS) || [];
-    if (!sessions.length) { infoToast('Keine Sitzungen zum Exportieren 🤷'); return; }
-    openShareModal(csvFromSessions(sessions), 'CSV-Export 📄');
+    if (!sessions.length) { infoToast(t('toastNoExport')); return; }
+    openShareModal(csvFromSessions(sessions), t('csvExportTitle'));
   });
 
   function parseCsvNumber(x) { return parseFloat(String(x).trim().replace(',', '.')); }
@@ -1461,7 +1632,7 @@ h2.section {
         durationMs: Math.round(durSec * 1000),
         earned: earned,
         rate: rate,
-        manual: String(cells[5] || '').toLowerCase() === 'ja'
+        manual: /^(ja|yes)$/i.test(String(cells[5] || '').trim())
       });
     }
     return rows;
@@ -1508,8 +1679,92 @@ h2.section {
     lsSet(LS_SESSIONS, sessions);
     $('import-overlay').classList.add('hidden');
     renderHistory();
-    infoToast(added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅');
+    infoToast(t('toastImported')(added, skipped));
   });
+
+  // ---------- Sprachumschalter ----------
+  var BINDINGS = [
+    ['.tagline', 'tagline'],
+    ['#view-setup h2', 'setupTitle'],
+    ['#mode-monthly', 'modeMonthly'],
+    ['#mode-hourly', 'modeHourly'],
+    ['label[for="inp-monthly"]', 'lblMonthly'],
+    ['label[for="inp-hours"]', 'lblHours'],
+    ['label[for="inp-rate"]', 'lblRate'],
+    ['#inp-monthly', 'phMonthly', 'placeholder'],
+    ['#inp-hours', 'phHours', 'placeholder'],
+    ['#inp-rate', 'phRate', 'placeholder'],
+    ['#derived-pre', 'derivedPre'],
+    ['#derived-post', 'derivedPost'],
+    ['#form-error', 'formError'],
+    ['.privacy-note', 'privacyNote'],
+    ['#chip-rate', 'chipTitle', 'title'],
+    ['#sum-k-duration', 'sumKDuration'],
+    ['#sum-k-earned', 'sumKEarned'],
+    ['#btn-save-session', 'btnSaveSession'],
+    ['#btn-share-session', 'btnShareSession'],
+    ['#btn-discard-session', 'btnDiscard'],
+    ['#h2-balance', 'h2Balance'],
+    ['#stat-k-total', 'statKTotal'],
+    ['#stat-k-time', 'statKTime'],
+    ['#stat-k-count', 'statKCount'],
+    ['#stat-k-avg', 'statKAvg'],
+    ['#h2-sessions', 'h2Sessions'],
+    ['#btn-show-backfill', 'btnBackfill'],
+    ['label[for="bf-date"]', 'lblDate'],
+    ['label[for="bf-time"]', 'lblTime'],
+    ['label[for="bf-duration"]', 'lblDuration'],
+    ['#bf-duration', 'phDuration', 'placeholder'],
+    ['#bf-derived-pre', 'bfDerivedPre'],
+    ['#bf-derived-post', 'bfDerivedPost'],
+    ['#bf-error', 'bfError'],
+    ['#bf-save', 'btnBfSave'],
+    ['#bf-cancel', 'btnCancel'],
+    ['#empty-history-text', 'emptyHistory', 'html'],
+    ['#btn-export-csv', 'btnExport'],
+    ['#btn-import-csv', 'btnImport'],
+    ['#h2-achievements', 'h2Achievements'],
+    ['#btn-share-achievements', 'btnShareAch'],
+    ['#import-title', 'importTitle'],
+    ['#import-hint', 'importHint'],
+    ['#import-error', 'importError'],
+    ['#import-run', 'btnImportRun'],
+    ['#import-cancel', 'btnCancel'],
+    ['#share-copy', 'btnCopy'],
+    ['#share-close', 'btnClose'],
+    ['#ach-toast-label', 'toastUnlocked'],
+    ['#tab-timer', 'tabTimer'],
+    ['#tab-history', 'tabHistory'],
+    ['#tab-achievements', 'tabAchievements'],
+    ['#tab-settings', 'tabSettings']
+  ];
+  function applyLang() {
+    document.documentElement.lang = lang;
+    $('lang-de').setAttribute('aria-pressed', String(lang === 'de'));
+    $('lang-en').setAttribute('aria-pressed', String(lang === 'en'));
+    BINDINGS.forEach(function (b) {
+      var el = document.querySelector(b[0]);
+      if (!el) return;
+      var val = t(b[1]);
+      if (b[2] === 'placeholder' || b[2] === 'title') el.setAttribute(b[2], val);
+      else if (b[2] === 'html') el.innerHTML = val;
+      else el.textContent = val;
+    });
+    buildFormatters();
+    $('btn-save-settings').textContent = settings ? t('btnSaveChanges') : t('btnSaveFirst');
+    renderRateChip();
+    renderTimer();
+    renderHistory();
+    if (!views.summary.classList.contains('hidden')) renderSummary();
+  }
+  function setLang(l) {
+    if (l === lang) return;
+    lang = l;
+    lsSet(LS_LANG, l);
+    applyLang();
+  }
+  $('lang-de').addEventListener('click', function () { setLang('de'); });
+  $('lang-en').addEventListener('click', function () { setLang('en'); });
 
   // ---------- Tabs ----------
   $('tab-timer').addEventListener('click', function () { show('timer'); renderTimer(); });
@@ -1524,11 +1779,11 @@ h2.section {
   $('tab-settings').addEventListener('click', function () { fillSetupForm(); show('setup'); });
 
   // ---------- Boot ----------
+  applyLang();
   if (!settings) {
     show('setup');
     renderModeSwitch();
   } else {
-    renderRateChip();
     fillSetupForm();
     show('timer');
     renderTimer();
