@@ -1784,9 +1784,25 @@ h2.section {
       copyFallback(text);
     }
   }
+  function buildTaxShareText(tax) {
+    if (!tax) return '';
+    var label = (settings && settings.dedLabel) ? settings.dedLabel : t('dedLabelDefault');
+    var parts = [[t('dedLst'), tax.lst], [t('dedSoli'), tax.soli], [t('dedChurch'), tax.church], [t('dedSv'), tax.sv]]
+      .filter(function (p) { return p[1] > 0.00005; })
+      .map(function (p) { return p[0] + ' ' + fmtMoney(p[1]); })
+      .join(' · ');
+    var funded = t('fundedItems').map(function (name, i) {
+      return fmtFunded(tax.ded / FUND_RATES[i]) + ' ' + name;
+    }).join('\n');
+    return '\n\n' + label + ' ' + fmtMoney(tax.ded) + '\n' + parts +
+      '\n' + t('fundedTitle') + '\n' + funded +
+      '\n' + t('fundedDisclaimer');
+  }
   $('btn-share-session').addEventListener('click', function () {
     if (!lastSummary) return;
-    shareContent(t('shareSession')(fmtDurationWords(lastSummary.durationMs), fmtMoney(lastSummary.earned), funFact(lastSummary.earned)));
+    var text = t('shareSession')(fmtDurationWords(lastSummary.durationMs), fmtMoney(lastSummary.earned), funFact(lastSummary.earned));
+    text += buildTaxShareText(lastSummary.tax);
+    shareContent(text);
   });
   $('btn-share-achievements').addEventListener('click', function () {
     var unlocked = lsGet(LS_ACHIEVEMENTS) || {};
