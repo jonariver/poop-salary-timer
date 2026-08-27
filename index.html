@@ -534,6 +534,21 @@ button.btn:active { transform: scale(0.97); }
 }
 .share-modal .actions { display: flex; gap: 8px; }
 .share-modal .actions .btn { flex: 1; padding: 11px 16px; font-size: 0.9rem; }
+.csv-actions { display: flex; gap: 8px; margin-top: 14px; }
+.csv-actions .btn { flex: 1; padding: 10px 12px; font-size: 0.85rem; }
+.share-modal input[type="file"] {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+}
+.share-modal .modal-hint {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
 .session-tag {
   display: inline-block;
   font-size: 0.66rem;
@@ -727,6 +742,10 @@ h2.section {
         <div class="big">🚽</div>
         Noch keine gespeicherten Sitzungen.<br>Dein erstes Geschäft wartet.
       </div>
+      <div class="csv-actions">
+        <button class="btn btn-secondary" id="btn-export-csv">⬇️ CSV exportieren</button>
+        <button class="btn btn-secondary" id="btn-import-csv">⬆️ CSV importieren</button>
+      </div>
     </div>
   </section>
 
@@ -750,9 +769,23 @@ h2.section {
 
 <div class="ach-toast" id="info-toast" role="status" aria-live="polite"></div>
 
+<div class="share-overlay hidden" id="import-overlay">
+  <div class="share-modal" role="dialog" aria-label="CSV importieren">
+    <h3>CSV importieren ⬆️</h3>
+    <input type="file" id="import-file" accept=".csv,text/csv,text/plain">
+    <p class="modal-hint">Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen</p>
+    <textarea id="import-text" placeholder="2026-08-27;07:30:00;720;3,4600;17,31;nein"></textarea>
+    <p class="form-error" id="import-error">Keine gültigen Zeilen gefunden.</p>
+    <div class="actions">
+      <button class="btn btn-start" id="import-run">Importieren</button>
+      <button class="btn btn-secondary" id="import-cancel">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <div class="share-overlay hidden" id="share-overlay">
   <div class="share-modal" role="dialog" aria-label="Teilen">
-    <h3>Zum Teilen kopieren 📤</h3>
+    <h3 id="share-title">Zum Teilen kopieren 📤</h3>
     <textarea id="share-text" readonly></textarea>
     <div class="actions">
       <button class="btn btn-start" id="share-copy">Kopieren</button>
@@ -1279,7 +1312,8 @@ h2.section {
     if (infoToastTimer) clearTimeout(infoToastTimer);
     infoToastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
   }
-  function openShareModal(text) {
+  function openShareModal(text, title) {
+    $('share-title').textContent = title || 'Zum Teilen kopieren 📤';
     $('share-text').value = text;
     $('share-overlay').classList.remove('hidden');
   }
@@ -1380,6 +1414,101 @@ h2.section {
     lsSet(LS_SESSIONS, sessions);
     bfForm.classList.add('hidden');
     renderHistory();
+  });
+
+  // ---------- CSV Export / Import ----------
+  function csvFromSessions(sessions) {
+    var lines = ['Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen'];
+    sessions.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (s) {
+      var d = new Date(s.ts);
+      lines.push(
+        d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ';' +
+        pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ';' +
+        Math.round(s.durationMs / 1000) + ';' +
+        s.earned.toFixed(4).replace('.', ',') + ';' +
+        (s.rate || 0).toFixed(2).replace('.', ',') + ';' +
+        (s.manual ? 'ja' : 'nein')
+      );
+    });
+    return lines.join('\n');
+  }
+  $('btn-export-csv').addEventListener('click', function () {
+    var sessions = lsGet(LS_SESSIONS) || [];
+    if (!sessions.length) { infoToast('Keine Sitzungen zum Exportieren 🤷'); return; }
+    openShareModal(csvFromSessions(sessions), 'CSV-Export 📄');
+  });
+
+  function parseCsvNumber(x) { return parseFloat(String(x).trim().replace(',', '.')); }
+  function parseCsv(text) {
+    var rows = [];
+    var lines = String(text).split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var sep = line.indexOf(';') >= 0 ? ';' : ',';
+      var cells = line.split(sep).map(function (c) { return c.trim(); });
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(cells[0])) continue; // Kopfzeile oder unlesbar
+      if (cells.length < 3) continue;
+      var ts = new Date(cells[0] + 'T' + (cells[1] || '12:00')).getTime();
+      var durSec = parseCsvNumber(cells[2]);
+      if (!isFinite(ts) || !(durSec > 0)) continue;
+      var rate = parseCsvNumber(cells[4]);
+      if (!isFinite(rate) || rate < 0) rate = settings ? settings.rate : 0;
+      var earned = parseCsvNumber(cells[3]);
+      if (!isFinite(earned) || earned < 0) earned = (durSec / 3600) * rate;
+      rows.push({
+        ts: ts,
+        durationMs: Math.round(durSec * 1000),
+        earned: earned,
+        rate: rate,
+        manual: String(cells[5] || '').toLowerCase() === 'ja'
+      });
+    }
+    return rows;
+  }
+  function sessionKey(ts, durationMs) { return Math.round(ts / 1000) + '_' + Math.round(durationMs / 1000); }
+  $('btn-import-csv').addEventListener('click', function () {
+    $('import-file').value = '';
+    $('import-text').value = '';
+    $('import-error').style.display = 'none';
+    $('import-overlay').classList.remove('hidden');
+  });
+  $('import-cancel').addEventListener('click', function () { $('import-overlay').classList.add('hidden'); });
+  $('import-overlay').addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+  });
+  $('import-file').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { $('import-text').value = String(reader.result || ''); };
+    reader.readAsText(f);
+  });
+  $('import-run').addEventListener('click', function () {
+    var rows = parseCsv($('import-text').value);
+    if (!rows.length) { $('import-error').style.display = 'block'; return; }
+    var sessions = lsGet(LS_SESSIONS) || [];
+    var existing = {};
+    sessions.forEach(function (s) { existing[sessionKey(s.ts, s.durationMs)] = true; });
+    var added = 0, skipped = 0;
+    rows.forEach(function (row) {
+      var key = sessionKey(row.ts, row.durationMs);
+      if (existing[key]) { skipped++; return; }
+      existing[key] = true;
+      sessions.push({
+        id: 'i' + row.ts + '-' + Math.floor(Math.random() * 1e6),
+        ts: row.ts,
+        durationMs: row.durationMs,
+        earned: row.earned,
+        rate: row.rate,
+        manual: row.manual
+      });
+      added++;
+    });
+    lsSet(LS_SESSIONS, sessions);
+    $('import-overlay').classList.add('hidden');
+    renderHistory();
+    infoToast(added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅');
   });
 
   // ---------- Tabs ----------
