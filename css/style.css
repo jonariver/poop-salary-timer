@@ -621,12 +621,25 @@ button.btn:active { transform: scale(0.97); }
 .session-list { list-style: none; margin: 0; padding: 0; }
 .session-list li {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 13px 2px;
+  flex-direction: column;
   border-bottom: 1px solid var(--card-edge);
 }
 .session-list li:last-child { border-bottom: none; }
+.session-row { display: flex; align-items: center; gap: 12px; padding: 13px 2px; }
+.session-detail { display: none; padding: 0 2px 13px 39px; font-size: 0.78rem; color: var(--ink-soft); }
+.session-detail.open { display: block; }
+.session-detail-toggle {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  flex: none;
+}
+.session-detail-toggle:hover { color: var(--gold-strong); background: var(--gold-soft); }
+.session-detail-toggle[aria-expanded="true"] { color: var(--gold-strong); }
 .session-when { flex: 1; min-width: 0; }
 .session-when .d { font-weight: 600; font-size: 0.9rem; }
 .session-when .t { font-size: 0.76rem; color: var(--ink-faint); }

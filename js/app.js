@@ -342,6 +342,8 @@ import * as sharing from './share.js';
 
     sessions.forEach(function (s) {
       var li = document.createElement('li');
+      var row = document.createElement('div');
+      row.className = 'session-row';
       var d = new Date(s.ts);
       var actEl = document.createElement('span');
       actEl.className = 'session-activity';
@@ -359,6 +361,26 @@ import * as sharing from './share.js';
       when.appendChild(dEl); when.appendChild(tEl);
       var dur = document.createElement('span'); dur.className = 'session-dur'; dur.textContent = i18n.fmtElapsed(s.durationMs);
       var earn = document.createElement('span'); earn.className = 'session-earn'; earn.textContent = i18n.fmtMoney(s.earned);
+      row.appendChild(actEl); row.appendChild(when); row.appendChild(dur); row.appendChild(earn);
+
+      var hasTax = typeof s.net === 'number' && typeof s.ded === 'number';
+      if (hasTax) {
+        var detail = document.createElement('div');
+        detail.className = 'session-detail';
+        detail.textContent = t('sessionDetailLine')(i18n.fmtMoney(s.net), i18n.fmtMoney(s.ded), i18n.fmtMoney(s.rate || 0));
+        var toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'session-detail-toggle';
+        toggle.setAttribute('aria-label', t('sessionDetailAria'));
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.textContent = '🧾';
+        toggle.addEventListener('click', function () {
+          var open = detail.classList.toggle('open');
+          toggle.setAttribute('aria-expanded', String(open));
+        });
+        row.appendChild(toggle);
+      }
+
       var del = document.createElement('button');
       del.className = 'session-del';
       del.setAttribute('aria-label', t('delAria'));
@@ -368,7 +390,9 @@ import * as sharing from './share.js';
         storage.saveSessions(all);
         renderHistory();
       });
-      li.appendChild(actEl); li.appendChild(when); li.appendChild(dur); li.appendChild(earn); li.appendChild(del);
+      row.appendChild(del);
+      li.appendChild(row);
+      if (hasTax) li.appendChild(detail);
       list.appendChild(li);
     });
   }
