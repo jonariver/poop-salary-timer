@@ -45,7 +45,33 @@ test('shares the matching image file together with the unchanged session text', 
   assert.equal(calls.shared.files.length, 1);
   assert.equal(calls.shared.files[0].name, 'coffee-salary-result.png');
   assert.equal(calls.shared.files[0].type, 'image/png');
-  assert.deepEqual(calls.canShare, calls.shared);
+  assert.deepEqual(calls.canShare, { files: calls.shared.files });
+});
+
+test('checks file support separately before sharing image and text together', async () => {
+  const { tryShareSessionImage } = await import('../js/share.js');
+  let sharedData = null;
+
+  const result = await tryShareSessionImage('session result', 'smoke', {
+    navigator: {
+      canShare(data) {
+        return Object.keys(data).length === 1 && data.files.length === 1;
+      },
+      async share(data) { sharedData = data; }
+    },
+    fetch: async function () {
+      return {
+        ok: true,
+        blob: async function () { return new Blob(['png'], { type: 'image/png' }); }
+      };
+    },
+    File: File,
+    cache: {}
+  });
+
+  assert.equal(result, true);
+  assert.equal(sharedData.text, 'session result');
+  assert.equal(sharedData.files[0].name, 'smoke-salary-result.png');
 });
 
 test('returns to text fallback when the browser rejects the file payload', async () => {
@@ -163,27 +189,36 @@ test('caches a slowly loaded image and shares it on the next active tap', async 
   assert.equal(cache.coffee.name, 'coffee-salary-result.png');
 });
 
-test('uses text fallback immediately when a slowly loaded file cannot be shared', async () => {
+test('defers text fallback to the next active tap when file loading was slow', async () => {
   const { tryShareSessionImage } = await import('../js/share.js');
+  const cache = {};
+  const userActivation = { isActive: false };
+  let fetchCount = 0;
   let nativeShareCalled = false;
-
-  const result = await tryShareSessionImage('session result', 'smoke', {
+  const dependencies = {
     navigator: {
-      userActivation: { isActive: false },
+      userActivation: userActivation,
       canShare() { return false; },
       async share() { nativeShareCalled = true; }
     },
     fetch: async function () {
+      fetchCount += 1;
       return {
         ok: true,
         blob: async function () { return new Blob(['png'], { type: 'image/png' }); }
       };
     },
     File: File,
-    cache: {}
-  });
+    cache: cache
+  };
 
-  assert.equal(result, false);
+  const firstResult = await tryShareSessionImage('session result', 'smoke', dependencies);
+  userActivation.isActive = true;
+  const secondResult = await tryShareSessionImage('session result', 'smoke', dependencies);
+
+  assert.equal(firstResult, 'ready');
+  assert.equal(secondResult, false);
+  assert.equal(fetchCount, 1);
   assert.equal(nativeShareCalled, false);
 });
 

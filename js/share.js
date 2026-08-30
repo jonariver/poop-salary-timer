@@ -32,12 +32,13 @@ export async function tryShareSessionImage(text, activity, dependencies) {
     }
   }
   var shareData = { text: text, files: [file] };
-  if (!deps.navigator.canShare(shareData)) return false;
   // Slow image loading can consume the transient user activation required by
-  // the native share sheet. The cached file makes the next tap synchronous.
+  // the native share sheet. The cached file makes the next tap synchronous,
+  // including a text-only fallback when this browser cannot share files.
   if (loadedNow && deps.navigator.userActivation && deps.navigator.userActivation.isActive === false) {
     return 'ready';
   }
+  if (!deps.navigator.canShare({ files: [file] })) return false;
   await deps.navigator.share(shareData);
   return true;
 }
