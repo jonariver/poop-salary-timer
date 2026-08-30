@@ -28,6 +28,8 @@ for f in js/*.js; do node --check "$f"; done
   - `pst_achievements` — `{poop:{[achId]:unlockedAtMs}, smoke:{...}, coffee:{...}}` (legacy flat shape auto-migrates on read, see `achievements.js`'s `migrateAchievements`)
   - `pst_ach_category` — last-viewed achievement category tab
   - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen
+  - `pst_last_export` — timestamp (ms) of the last time the user actually opened the CSV export
+  - `pst_export_reminder_dismissed` — timestamp (ms) of the last time the export reminder banner was dismissed
   - Never rename/restructure these without an explicit, deliberate migration.
 - **Every user-facing feature ships with a `whatsnew.js` entry.** When adding a new feature (not a bugfix or internal refactor), add a new entry to `ENTRIES` in `js/whatsnew.js` in the same change — plain-language, DE/EN, tongue-in-cheek tone matching the existing entries — so returning users see it in the 📣 modal.
 

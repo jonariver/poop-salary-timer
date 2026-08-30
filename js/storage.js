@@ -10,6 +10,8 @@ var LS_LANG = 'pst_lang';
 var LS_ACHIEVEMENTS = 'pst_achievements';
 var LS_ACH_CATEGORY = 'pst_ach_category';
 var LS_WHATSNEW_SEEN = 'pst_whatsnew_seen';
+var LS_LAST_EXPORT = 'pst_last_export';
+var LS_EXPORT_REMINDER_DISMISSED = 'pst_export_reminder_dismissed';
 
 function lsGet(key) {
   try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
@@ -46,3 +48,9 @@ export function saveAchCategory(key) { lsSet(LS_ACH_CATEGORY, key); }
 
 export function getWhatsNewSeen() { return lsGet(LS_WHATSNEW_SEEN); }
 export function saveWhatsNewSeen(id) { lsSet(LS_WHATSNEW_SEEN, id); }
+
+export function getLastExport() { return lsGet(LS_LAST_EXPORT); }
+export function saveLastExport(ts) { lsSet(LS_LAST_EXPORT, ts); }
+
+export function getExportReminderDismissed() { return lsGet(LS_EXPORT_REMINDER_DISMISSED); }
+export function saveExportReminderDismissed(ts) { lsSet(LS_EXPORT_REMINDER_DISMISSED, ts); }
