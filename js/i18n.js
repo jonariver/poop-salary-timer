@@ -36,6 +36,7 @@ var STR = {
     statKYearTime: 'Gesamtzeit (Jahr)', statKStreak: 'Aktuelle Serie', statKBestStreak: 'Beste Serie (Jahr)',
     yearProjectionPre: 'Hochgerechnet aufs Jahr: ',
     yearNotEnoughData: 'Noch wenig Daten für eine Hochrechnung — sammle ein paar Sitzungen an verschiedenen Tagen. 🌱',
+    weekdayBreakdownTitle: 'Verdienst nach Wochentag',
     h2Heatmap: 'Sitzungs-Heatmap 🔥',
     heatmapLess: 'Weniger', heatmapMore: 'Mehr',
     heatmapDetailHint: 'Tippe auf einen Tag, um Details zu sehen.',
@@ -207,6 +208,7 @@ var STR = {
     statKYearTime: 'Total time (year)', statKStreak: 'Current streak', statKBestStreak: 'Best streak (year)',
     yearProjectionPre: 'Projected for the year: ',
     yearNotEnoughData: 'Not enough data yet for a projection — log a few sessions on different days. 🌱',
+    weekdayBreakdownTitle: 'Earnings by weekday',
     h2Heatmap: 'Session heatmap 🔥',
     heatmapLess: 'Less', heatmapMore: 'More',
     heatmapDetailHint: 'Tap a day to see details.',
@@ -358,7 +360,7 @@ export function setLang(l) {
 }
 
 // ---------- Formatting (sprachabhaengig) ----------
-var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt, monthShortFmt;
+var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt, weekdayShortFmt, monthShortFmt;
 export function buildFormatters() {
   var loc = lang === 'en' ? 'en-GB' : 'de-DE';
   fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
@@ -367,6 +369,7 @@ export function buildFormatters() {
   timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
   achDateFmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' });
   weekdayFmt = new Intl.DateTimeFormat(loc, { weekday: 'long' });
+  weekdayShortFmt = new Intl.DateTimeFormat(loc, { weekday: 'short' });
   monthShortFmt = new Intl.DateTimeFormat(loc, { month: 'short' });
 }
 buildFormatters();
@@ -375,6 +378,17 @@ export function getTimeFmt() { return timeFmt; }
 export function getAchDateFmt() { return achDateFmt; }
 export function fmtWeekdayLong(ts) { return weekdayFmt.format(new Date(ts)); }
 export function fmtMonthShort(ts) { return monthShortFmt.format(new Date(ts)); }
+// Kurze Wochentagsnamen Montag..Sonntag (lokalisiert), unabhängig vom aktuellen Datum berechnet.
+export function weekdayShortLabelsMonFirst() {
+  var now = new Date();
+  var diffToMonday = now.getDay() === 0 ? -6 : 1 - now.getDay();
+  var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+  var labels = [];
+  for (var i = 0; i < 7; i++) {
+    labels.push(weekdayShortFmt.format(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i)));
+  }
+  return labels;
+}
 
 export function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
 export function fmtMoney(v) { return fmt2.format(v); }
@@ -489,6 +503,7 @@ var BINDINGS = [
   ['#stat-k-best-streak', 'statKBestStreak'],
   ['#year-projection-pre', 'yearProjectionPre'],
   ['#year-not-enough-data', 'yearNotEnoughData'],
+  ['#h2-weekday-breakdown', 'weekdayBreakdownTitle'],
   ['#h2-heatmap', 'h2Heatmap'],
   ['#heatmap-legend-less', 'heatmapLess'],
   ['#heatmap-legend-more', 'heatmapMore'],

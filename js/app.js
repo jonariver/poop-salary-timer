@@ -433,7 +433,37 @@ import * as sharing from './share.js';
     $('year-projection').classList.toggle('hidden', !y.projectionEligible);
     $('year-not-enough-data').classList.toggle('hidden', y.projectionEligible);
     if (y.projectionEligible) $('year-projection-value').textContent = i18n.fmtMoney(y.projection);
+    renderWeekdayBreakdown(y.weekdayEarned);
     renderHeatmap();
+  }
+
+  function renderWeekdayBreakdown(weekdayEarned) {
+    var labels = i18n.weekdayShortLabelsMonFirst();
+    var sundayFirstOrder = [1, 2, 3, 4, 5, 6, 0]; // Mo..So auf das Sonntag-indizierte weekdayEarned gemappt
+    var values = sundayFirstOrder.map(function (i) { return weekdayEarned[i]; });
+    var max = Math.max.apply(null, values.concat([0.01]));
+    var container = $('weekday-breakdown');
+    container.innerHTML = '';
+    values.forEach(function (v, i) {
+      var row = document.createElement('div');
+      row.className = 'weekday-bar';
+      var label = document.createElement('span');
+      label.className = 'weekday-bar-label';
+      label.textContent = labels[i];
+      var track = document.createElement('div');
+      track.className = 'weekday-bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'weekday-bar-fill';
+      fill.style.width = Math.max(0, Math.min(100, (v / max) * 100)) + '%';
+      track.appendChild(fill);
+      var amount = document.createElement('span');
+      amount.className = 'weekday-bar-amount';
+      amount.textContent = i18n.fmtMoney(v);
+      row.appendChild(label);
+      row.appendChild(track);
+      row.appendChild(amount);
+      container.appendChild(row);
+    });
   }
 
   var selectedHeatmapCell = null;

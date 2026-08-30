@@ -105,6 +105,56 @@ export var ACHIEVEMENTS = [
     progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 50)) + '/50 €'; }
   },
   {
+    id: 'streak7',
+    variants: {
+      poop: { badge: '🏅', name: { de: 'Wochenroutine', en: 'Weekly Routine' }, desc: { de: 'An 7 Tagen hintereinander eine Sitzung. Das ist schon Gewohnheit.', en: 'A session on 7 days in a row. That\'s a habit now.' } },
+      smoke: { badge: '🏅', name: { de: 'Raucher-Woche', en: 'Smoker\'s Week' }, desc: { de: 'An 7 Tagen hintereinander eine Rauchpause. Eine ganze Woche durchgequalmt.', en: 'A smoke break on 7 days in a row. A whole week up in smoke.' } },
+      coffee: { badge: '🏅', name: { de: 'Kaffee-Woche', en: 'Coffee Week' }, desc: { de: 'An 7 Tagen hintereinander eine Kaffeepause. Eine ganze Woche wach.', en: 'A coffee break on 7 days in a row. A whole week caffeinated.' } }
+    },
+    test: function (st) { return st.bestStreak >= 7; },
+    progress: function (st) { return Math.min(st.bestStreak, 7) + '/7 ' + t('unitDays'); }
+  },
+  {
+    id: 'streak30',
+    variants: {
+      poop: { badge: '💎', name: { de: 'Eiserne Disziplin', en: 'Iron Discipline' }, desc: { de: 'An 30 Tagen hintereinander eine Sitzung. Respekt vor der Kontinuität.', en: 'A session on 30 days in a row. Respect for the consistency.' } },
+      smoke: { badge: '💎', name: { de: 'Kette ohne Ende', en: 'Endless Chain' }, desc: { de: 'An 30 Tagen hintereinander eine Rauchpause. Ein ganzer Monat in Rauch.', en: 'A smoke break on 30 days in a row. A whole month up in smoke.' } },
+      coffee: { badge: '💎', name: { de: 'Koffein-Monat', en: 'Caffeine Month' }, desc: { de: 'An 30 Tagen hintereinander eine Kaffeepause. Ein ganzer Monat wach.', en: 'A coffee break on 30 days in a row. A whole month caffeinated.' } }
+    },
+    test: function (st) { return st.bestStreak >= 30; },
+    progress: function (st) { return Math.min(st.bestStreak, 30) + '/30 ' + t('unitDays'); }
+  },
+  {
+    id: 'regular50',
+    variants: {
+      poop: { badge: '🌟', name: { de: 'Firmenkunde', en: 'VIP Client' }, desc: { de: '50 gespeicherte Sitzungen. Beinahe Familie.', en: '50 saved sessions. Practically family.' } },
+      smoke: { badge: '🌟', name: { de: 'Vielraucher', en: 'Heavy Smoker' }, desc: { de: '50 gespeicherte Rauchpausen. Der Kiosk kennt deine Marke.', en: '50 saved smoke breaks. The kiosk knows your brand.' } },
+      coffee: { badge: '🌟', name: { de: 'Kaffee-Abonnent', en: 'Coffee Subscriber' }, desc: { de: '50 gespeicherte Kaffeepausen. Quasi ein Abo.', en: '50 saved coffee breaks. Basically a subscription.' } }
+    },
+    test: function (st) { return st.count >= 50; },
+    progress: function (st) { return Math.min(st.count, 50) + '/50'; }
+  },
+  {
+    id: 'regular100',
+    variants: {
+      poop: { badge: '💯', name: { de: 'Hundertschaft', en: 'Century Club' }, desc: { de: '100 gespeicherte Sitzungen. Das Klo kennt dich beim Vornamen.', en: '100 saved sessions. The bathroom knows you by name.' } },
+      smoke: { badge: '💯', name: { de: 'Kettenraucher-Legende', en: 'Chain Smoker Legend' }, desc: { de: '100 gespeicherte Rauchpausen. Eine wandelnde Legende der Raucherecke.', en: '100 saved smoke breaks. A living legend of the smoking corner.' } },
+      coffee: { badge: '💯', name: { de: 'Kaffee-Legende', en: 'Coffee Legend' }, desc: { de: '100 gespeicherte Kaffeepausen. Die Kaffeemaschine widmet dir ein Denkmal.', en: '100 saved coffee breaks. The coffee machine dedicates a monument to you.' } }
+    },
+    test: function (st) { return st.count >= 100; },
+    progress: function (st) { return Math.min(st.count, 100) + '/100'; }
+  },
+  {
+    id: 'earned100',
+    variants: {
+      poop: { badge: '🏦', name: { de: 'Thron-Imperium', en: 'Throne Empire' }, desc: { de: 'Insgesamt 100 € auf dem Thron verdient. Ein wahres Imperium.', en: 'Earned €100 in total on the throne. A true empire.' } },
+      smoke: { badge: '🏦', name: { de: 'Rauch-Imperium', en: 'Smoke Empire' }, desc: { de: 'Insgesamt 100 € beim Rauchen verdient. Geld geht in Rauch auf — und wieder zurück.', en: 'Earned €100 in total while smoking. Money goes up in smoke — and comes back.' } },
+      coffee: { badge: '🏦', name: { de: 'Kaffee-Imperium', en: 'Coffee Empire' }, desc: { de: 'Insgesamt 100 € beim Kaffeetrinken verdient. Ein Imperium aus Bohnen.', en: 'Earned €100 in total while drinking coffee. An empire built on beans.' } }
+    },
+    test: function (st) { return st.totalEarned >= 100; },
+    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 100)) + '/100 €'; }
+  },
+  {
     id: 'tax',
     variants: {
       poop: { badge: '🧾', name: { de: 'Steuerzahler des Monats', en: 'Taxpayer of the Month' }, desc: { de: 'Insgesamt 10 € an Abzügen „gespendet". Der Finanzminister dankt.', en: 'A total of €10 "donated" in deductions. The treasury thanks you.' } },
