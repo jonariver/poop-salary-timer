@@ -15,6 +15,47 @@ test('maps every session activity to its own share image', async () => {
   );
 });
 
+test('preloading fills the cache so a later share needs no fetch and shares on the first tap', async () => {
+  const { tryShareSessionImage, preloadShareImage } = await import('../js/share.js');
+  const cache = {};
+  let fetchCount = 0;
+  let shareCount = 0;
+  const dependencies = {
+    navigator: {
+      userActivation: { isActive: false }, // would defer to a second tap if a fetch happened here
+      canShare() { return true; },
+      async share() { shareCount += 1; }
+    },
+    fetch: async function () {
+      fetchCount += 1;
+      return { ok: true, blob: async function () { return new Blob(['png'], { type: 'image/png' }); } };
+    },
+    File: File,
+    cache: cache
+  };
+
+  await preloadShareImage('coffee', dependencies);
+  assert.equal(fetchCount, 1);
+  assert.equal(cache.coffee.name, 'coffee-salary-result.png');
+
+  const result = await tryShareSessionImage('session result', 'coffee', dependencies);
+
+  assert.equal(result, true); // not 'ready' — no second tap needed, the preload already ran
+  assert.equal(fetchCount, 1); // no extra fetch, reused the preloaded file
+  assert.equal(shareCount, 1);
+});
+
+test('a failed preload is silent and does not throw', async () => {
+  const { preloadShareImage } = await import('../js/share.js');
+
+  await assert.doesNotReject(preloadShareImage('poop', {
+    navigator: { canShare() { return true; }, async share() {} },
+    fetch: async function () { throw new Error('network failure'); },
+    File: File,
+    cache: {}
+  }));
+});
+
 test('shares the matching image file together with the unchanged session text', async () => {
   const { tryShareSessionImage } = await import('../js/share.js');
   const calls = { fetched: null, canShare: null, shared: null };
