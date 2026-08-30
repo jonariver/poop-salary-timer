@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 15,
+    emoji: '🧾',
+    title: { de: 'Netto-Details pro Sitzung', en: 'Net details per session' },
+    body: {
+      de: 'Sitzungen mit Netto-Schätzung zeigen jetzt ein 🧾-Symbol — antippen zeigt Netto, Abzug und Stundenlohn direkt in der Liste.',
+      en: 'Sessions with a net estimate now show a 🧾 icon — tap it to see net, deducted, and hourly wage right in the list.'
+    }
+  },
+  {
     id: 14,
     emoji: '🏆',
     title: { de: '5 neue Erfolge & Wochentag-Verdienst', en: '5 new achievements & weekday earnings' },
