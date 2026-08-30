@@ -16,6 +16,7 @@ export async function tryShareSessionImage(text, activity, dependencies) {
   }
   var cache = deps.cache || shareImageFiles;
   var file = cache[activity];
+  var loadedNow = false;
   if (!file) {
     try {
       var response = await deps.fetch(new URL(getShareImagePath(activity), import.meta.url));
@@ -25,17 +26,18 @@ export async function tryShareSessionImage(text, activity, dependencies) {
         type: blob.type || 'image/png'
       });
       cache[activity] = file;
+      loadedNow = true;
     } catch (err) {
       return false;
-    }
-    // Slow image loading can consume the transient user activation required by
-    // the native share sheet. The cached file makes the next tap synchronous.
-    if (deps.navigator.userActivation && deps.navigator.userActivation.isActive === false) {
-      return 'ready';
     }
   }
   var shareData = { text: text, files: [file] };
   if (!deps.navigator.canShare(shareData)) return false;
+  // Slow image loading can consume the transient user activation required by
+  // the native share sheet. The cached file makes the next tap synchronous.
+  if (loadedNow && deps.navigator.userActivation && deps.navigator.userActivation.isActive === false) {
+    return 'ready';
+  }
   await deps.navigator.share(shareData);
   return true;
 }

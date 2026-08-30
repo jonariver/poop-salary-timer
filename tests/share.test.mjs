@@ -163,6 +163,30 @@ test('caches a slowly loaded image and shares it on the next active tap', async 
   assert.equal(cache.coffee.name, 'coffee-salary-result.png');
 });
 
+test('uses text fallback immediately when a slowly loaded file cannot be shared', async () => {
+  const { tryShareSessionImage } = await import('../js/share.js');
+  let nativeShareCalled = false;
+
+  const result = await tryShareSessionImage('session result', 'smoke', {
+    navigator: {
+      userActivation: { isActive: false },
+      canShare() { return false; },
+      async share() { nativeShareCalled = true; }
+    },
+    fetch: async function () {
+      return {
+        ok: true,
+        blob: async function () { return new Blob(['png'], { type: 'image/png' }); }
+      };
+    },
+    File: File,
+    cache: {}
+  });
+
+  assert.equal(result, false);
+  assert.equal(nativeShareCalled, false);
+});
+
 test('ships all three mapped assets as valid PNG files', async () => {
   const assetNames = ['poop.png', 'smoke.png', 'coffee.png'];
   const validPng = await Promise.all(assetNames.map(async function (name) {
