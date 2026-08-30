@@ -97,7 +97,17 @@ var STR = {
     },
     shareAchNone: 'Noch keine — aber das Sitzungsjahr ist noch lang.',
     shareAchFooter: '\n— gemessen mit dem Poop Salary Timer 💩',
-    toastImported: function (added, skipped) { return added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅'; }
+    toastImported: function (added, skipped) { return added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅'; },
+    milestones: [
+      { emoji: '☕', label: 'Kaffee' },
+      { emoji: '🥙', label: 'Döner' },
+      { emoji: '🎬', label: 'Kinoticket' },
+      { emoji: '🍺', label: 'Bierkasten' },
+      { emoji: '🎧', label: 'AirPods' },
+      { emoji: '🎮', label: 'PS5' }
+    ],
+    milestoneReached: function (emoji, label) { return emoji + ' ' + label + ' finanziert!'; },
+    milestoneNext: function (amount, emoji, label) { return 'Noch ' + amount + ' bis zum nächsten Meilenstein: ' + emoji + ' ' + label; }
   },
   en: {
     tagline: 'Time is money. Even here.',
@@ -190,7 +200,17 @@ var STR = {
     },
     shareAchNone: 'None yet — but the fiscal year on the throne is long.',
     shareAchFooter: '\n— measured with the Poop Salary Timer 💩',
-    toastImported: function (added, skipped) { return added + ' session' + (added === 1 ? '' : 's') + ' imported' + (skipped ? ' · ' + skipped + ' skipped' : '') + ' ✅'; }
+    toastImported: function (added, skipped) { return added + ' session' + (added === 1 ? '' : 's') + ' imported' + (skipped ? ' · ' + skipped + ' skipped' : '') + ' ✅'; },
+    milestones: [
+      { emoji: '☕', label: 'Coffee' },
+      { emoji: '🥙', label: 'Kebab' },
+      { emoji: '🎬', label: 'Movie ticket' },
+      { emoji: '🍺', label: 'Case of beer' },
+      { emoji: '🎧', label: 'AirPods' },
+      { emoji: '🎮', label: 'PS5' }
+    ],
+    milestoneReached: function (emoji, label) { return emoji + ' ' + label + ' funded!'; },
+    milestoneNext: function (amount, emoji, label) { return 'Next milestone in ' + amount + ': ' + emoji + ' ' + label; }
   }
 };
 
@@ -238,6 +258,19 @@ export function fmtFunded(sec) {
   if (sec < 5400) return Math.round(sec / 60) + t('unitMin');
   if (sec < 172800) return num(sec / 3600, 1) + t('unitHourShort');
   return Math.round(sec / 86400) + t('unitDaysShort');
+}
+export function fmtMilestoneMessage(status) {
+  var milestones = t('milestones');
+  var parts = [];
+  if (status.reachedIndex >= 0) {
+    var reached = milestones[status.reachedIndex];
+    parts.push(t('milestoneReached')(reached.emoji, reached.label));
+  }
+  if (status.remaining !== null) {
+    var next = milestones[status.reachedIndex + 1];
+    parts.push(t('milestoneNext')(fmtMoney(status.remaining), next.emoji, next.label));
+  }
+  return parts.join(' · ');
 }
 export function funFact(earned) {
   if (earned < 0.05) return t('factNothing');
