@@ -29,6 +29,13 @@ var STR = {
     btnSaveSession: 'Session speichern', btnShareSession: '📤 Teilen', btnDiscard: 'Verwerfen',
     h2Balance: 'Deine Bilanz 📈',
     statKTotal: 'Gesamt verdient', statKTime: 'Gesamtzeit', statKCount: 'Sitzungen', statKAvg: 'Ø pro Sitzung',
+    h2Year: 'Dein Geschäftsjahr 🧾',
+    statKMonthEarned: 'Verdienst diesen Monat', statKMonthCount: 'Sitzungen diesen Monat',
+    statKYearAvg: 'Ø pro Sitzung (Jahr)', statKBestWeekday: 'Bester Wochentag',
+    statKLongest: 'Längste Sitzung', statKPriciest: 'Teuerste Sitzung',
+    statKYearTime: 'Gesamtzeit (Jahr)', statKStreak: 'Aktuelle Serie', statKBestStreak: 'Beste Serie (Jahr)',
+    yearProjectionPre: 'Hochgerechnet aufs Jahr: ',
+    yearNotEnoughData: 'Noch wenig Daten für eine Hochrechnung — sammle ein paar Sitzungen an verschiedenen Tagen. 🌱',
     h2Sessions: 'Sitzungen', btnBackfill: '+ Nachtragen',
     lblDate: 'Datum', lblTime: 'Uhrzeit', lblDuration: 'Dauer in Minuten', phDuration: 'z. B. 12',
     bfDerivedPre: 'Macht ', bfDerivedPost: ' — nachträglich, aber verdient.',
@@ -48,7 +55,7 @@ var STR = {
     csvExportTitle: 'CSV-Export 📄',
     csvHeader: 'Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen;Netto (EUR);Abzug (EUR);Aktivität',
     csvYes: 'ja', csvNo: 'nein',
-    tabTimer: '⏱️ Timer', tabHistory: '📊 Verlauf', tabAchievements: '🏆 Erfolge', tabSettings: '⚙️ Daten',
+    tabTimer: '⏱️ Timer', tabHistory: '📊 Verlauf', tabYear: '📅 Jahr', tabAchievements: '🏆 Erfolge', tabSettings: '⚙️ Daten',
     tagBackfilled: 'nachgetragen', clockSuffix: ' Uhr', delAria: 'Sitzung löschen',
     unitSec: ' Sek.', unitMin: ' Min.', unitHour: ' Std. ',
     unitDays: 'Tagen', unitMinShort: 'Min.', bestTime: 'Bestzeit ',
@@ -134,6 +141,13 @@ var STR = {
     btnSaveSession: 'Save session', btnShareSession: '📤 Share', btnDiscard: 'Discard',
     h2Balance: 'Your balance 📈',
     statKTotal: 'Total earned', statKTime: 'Total time', statKCount: 'Sessions', statKAvg: 'Avg per session',
+    h2Year: 'Your business year 🧾',
+    statKMonthEarned: 'Earned this month', statKMonthCount: 'Sessions this month',
+    statKYearAvg: 'Avg per session (year)', statKBestWeekday: 'Best weekday',
+    statKLongest: 'Longest session', statKPriciest: 'Priciest session',
+    statKYearTime: 'Total time (year)', statKStreak: 'Current streak', statKBestStreak: 'Best streak (year)',
+    yearProjectionPre: 'Projected for the year: ',
+    yearNotEnoughData: 'Not enough data yet for a projection — log a few sessions on different days. 🌱',
     h2Sessions: 'Sessions', btnBackfill: '+ Add missed one',
     lblDate: 'Date', lblTime: 'Time', lblDuration: 'Duration in minutes', phDuration: 'e.g. 12',
     bfDerivedPre: 'Makes ', bfDerivedPost: ' — belated, but well earned.',
@@ -153,7 +167,7 @@ var STR = {
     csvExportTitle: 'CSV export 📄',
     csvHeader: 'Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled;Net (EUR);Deduction (EUR);Activity',
     csvYes: 'yes', csvNo: 'no',
-    tabTimer: '⏱️ Timer', tabHistory: '📊 History', tabAchievements: '🏆 Awards', tabSettings: '⚙️ Data',
+    tabTimer: '⏱️ Timer', tabHistory: '📊 History', tabYear: '📅 Year', tabAchievements: '🏆 Awards', tabSettings: '⚙️ Data',
     tagBackfilled: 'backfilled', clockSuffix: '', delAria: 'Delete session',
     unitSec: ' sec', unitMin: ' min', unitHour: ' h ',
     unitDays: 'days', unitMinShort: 'min', bestTime: 'Best time ',
@@ -226,7 +240,7 @@ export function setLang(l) {
 }
 
 // ---------- Formatting (sprachabhaengig) ----------
-var fmt2, fmt4, dateFmt, timeFmt, achDateFmt;
+var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt;
 export function buildFormatters() {
   var loc = lang === 'en' ? 'en-GB' : 'de-DE';
   fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
@@ -234,11 +248,13 @@ export function buildFormatters() {
   dateFmt = new Intl.DateTimeFormat(loc, { weekday: 'short', day: 'numeric', month: 'short' });
   timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
   achDateFmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' });
+  weekdayFmt = new Intl.DateTimeFormat(loc, { weekday: 'long' });
 }
 buildFormatters();
 export function getDateFmt() { return dateFmt; }
 export function getTimeFmt() { return timeFmt; }
 export function getAchDateFmt() { return achDateFmt; }
+export function fmtWeekdayLong(ts) { return weekdayFmt.format(new Date(ts)); }
 
 export function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
 export function fmtMoney(v) { return fmt2.format(v); }
@@ -337,6 +353,18 @@ var BINDINGS = [
   ['#stat-k-time', 'statKTime'],
   ['#stat-k-count', 'statKCount'],
   ['#stat-k-avg', 'statKAvg'],
+  ['#h2-year', 'h2Year'],
+  ['#stat-k-month-earned', 'statKMonthEarned'],
+  ['#stat-k-month-count', 'statKMonthCount'],
+  ['#stat-k-year-avg', 'statKYearAvg'],
+  ['#stat-k-best-weekday', 'statKBestWeekday'],
+  ['#stat-k-longest', 'statKLongest'],
+  ['#stat-k-priciest', 'statKPriciest'],
+  ['#stat-k-year-time', 'statKYearTime'],
+  ['#stat-k-streak', 'statKStreak'],
+  ['#stat-k-best-streak', 'statKBestStreak'],
+  ['#year-projection-pre', 'yearProjectionPre'],
+  ['#year-not-enough-data', 'yearNotEnoughData'],
   ['#h2-sessions', 'h2Sessions'],
   ['#btn-show-backfill', 'btnBackfill'],
   ['label[for="bf-date"]', 'lblDate'],
@@ -366,6 +394,7 @@ var BINDINGS = [
   ['#whatsnew-close', 'btnClose'],
   ['#tab-timer', 'tabTimer'],
   ['#tab-history', 'tabHistory'],
+  ['#tab-year', 'tabYear'],
   ['#tab-achievements', 'tabAchievements'],
   ['#tab-settings', 'tabSettings']
 ];

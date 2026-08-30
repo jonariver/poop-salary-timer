@@ -227,6 +227,53 @@
     </div>
   </section>
 
+  <!-- ============ GESCHÄFTSJAHR ============ -->
+  <section id="view-year" class="hidden" aria-label="Geschäftsjahr">
+    <div class="card">
+      <h2 class="section" id="h2-year">Dein Geschäftsjahr 🧾</h2>
+      <div class="stats-grid">
+        <div class="stat-tile">
+          <div class="k" id="stat-k-month-earned">Verdienst diesen Monat</div>
+          <div class="v gold" id="stat-month-earned">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-month-count">Sitzungen diesen Monat</div>
+          <div class="v" id="stat-month-count">0</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-year-avg">Ø pro Sitzung (Jahr)</div>
+          <div class="v" id="stat-year-avg">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-best-weekday">Bester Wochentag</div>
+          <div class="v" id="stat-best-weekday">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-longest">Längste Sitzung</div>
+          <div class="v" id="stat-longest">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-priciest">Teuerste Sitzung</div>
+          <div class="v" id="stat-priciest">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-year-time">Gesamtzeit (Jahr)</div>
+          <div class="v" id="stat-year-time">0 min</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-streak">Aktuelle Serie</div>
+          <div class="v" id="stat-streak">0</div>
+        </div>
+        <div class="stat-tile">
+          <div class="k" id="stat-k-best-streak">Beste Serie (Jahr)</div>
+          <div class="v" id="stat-best-streak">0</div>
+        </div>
+      </div>
+      <div class="derived hidden" id="year-projection"><span id="year-projection-pre">Hochgerechnet aufs Jahr: </span><strong id="year-projection-value">–</strong></div>
+      <p class="privacy-note hidden" id="year-not-enough-data">Noch wenig Daten für eine Hochrechnung — sammle ein paar Sitzungen an verschiedenen Tagen. 🌱</p>
+    </div>
+  </section>
+
   <!-- ============ ACHIEVEMENTS ============ -->
   <section id="view-achievements" class="hidden" aria-label="Erfolge">
     <div class="card">
@@ -296,6 +343,7 @@
 <nav class="tabs" id="tab-bar">
   <button id="tab-timer" aria-current="true">⏱️ Timer</button>
   <button id="tab-history" aria-current="false">📊 Verlauf</button>
+  <button id="tab-year" aria-current="false">📅 Jahr</button>
   <button id="tab-achievements" aria-current="false">🏆 Erfolge</button>
   <button id="tab-settings" aria-current="false">⚙️ Daten</button>
 </nav>

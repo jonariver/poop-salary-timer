@@ -21,7 +21,7 @@ import * as whatsnew from './whatsnew.js';
 
   // ---------- Elements ----------
   function $(id) { return document.getElementById(id); }
-  var views = { setup: $('view-setup'), timer: $('view-timer'), summary: $('view-summary'), history: $('view-history'), achievements: $('view-achievements') };
+  var views = { setup: $('view-setup'), timer: $('view-timer'), summary: $('view-summary'), history: $('view-history'), year: $('view-year'), achievements: $('view-achievements') };
   var tabBar = $('tab-bar');
 
   function show(name) {
@@ -30,6 +30,7 @@ import * as whatsnew from './whatsnew.js';
     tabBar.classList.toggle('hidden', firstRun || name === 'summary');
     $('tab-timer').setAttribute('aria-current', String(name === 'timer'));
     $('tab-history').setAttribute('aria-current', String(name === 'history'));
+    $('tab-year').setAttribute('aria-current', String(name === 'year'));
     $('tab-achievements').setAttribute('aria-current', String(name === 'achievements'));
     $('tab-settings').setAttribute('aria-current', String(name === 'setup'));
     $('btn-save-settings').textContent = settings ? t('btnSaveChanges') : t('btnSaveFirst');
@@ -369,6 +370,23 @@ import * as whatsnew from './whatsnew.js';
     });
   }
 
+  // ---------- Geschäftsjahr ----------
+  function renderYear() {
+    var y = stats.businessYearStats(storage.getSessions() || [], new Date());
+    $('stat-month-earned').textContent = i18n.fmtMoney(y.monthEarned);
+    $('stat-month-count').textContent = String(y.monthCount);
+    $('stat-year-avg').textContent = y.yearCount ? i18n.fmtMoney(y.yearAvg) : '–';
+    $('stat-best-weekday').textContent = y.bestWeekdayIdx >= 0 ? i18n.fmtWeekdayLong(y.bestWeekdayTs) : '–';
+    $('stat-longest').textContent = y.longest ? i18n.fmtDurationWords(y.longest.durationMs) : '–';
+    $('stat-priciest').textContent = y.priciest ? i18n.fmtMoney(y.priciest.earned) : '–';
+    $('stat-year-time').textContent = i18n.fmtDurationWords(y.yearTotalMs);
+    $('stat-streak').textContent = String(y.currentStreak);
+    $('stat-best-streak').textContent = String(y.bestStreak);
+    $('year-projection').classList.toggle('hidden', !y.projectionEligible);
+    $('year-not-enough-data').classList.toggle('hidden', y.projectionEligible);
+    if (y.projectionEligible) $('year-projection-value').textContent = i18n.fmtMoney(y.projection);
+  }
+
   // ---------- Achievements ----------
   var achCategory = stats.actKeyOf(storage.getAchCategory());
 
@@ -663,6 +681,7 @@ import * as whatsnew from './whatsnew.js';
     renderTimer();
     renderActivityPicker();
     renderHistory();
+    renderYear();
     if (!views.summary.classList.contains('hidden')) renderSummary();
     if (!whatsNewOverlay.classList.contains('hidden')) renderWhatsNewList();
   }
@@ -677,6 +696,7 @@ import * as whatsnew from './whatsnew.js';
   // ---------- Tabs ----------
   $('tab-timer').addEventListener('click', function () { show('timer'); renderTimer(); renderActivityPicker(); });
   $('tab-history').addEventListener('click', function () { renderHistory(); show('history'); });
+  $('tab-year').addEventListener('click', function () { renderYear(); show('year'); });
   $('tab-achievements').addEventListener('click', function () {
     checkAndToastAchievements(storage.getSessions() || []);
     show('achievements');
