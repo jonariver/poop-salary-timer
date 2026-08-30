@@ -3,6 +3,21 @@ import { t, getLang, pad } from './i18n.js';
 
 export function actKeyOf(x) { return (x === 'smoke' || x === 'coffee') ? x : 'poop'; }
 
+// Tages-Streaks aus sortierten, eindeutigen Tages-Start-Timestamps: beste Serie insgesamt
+// plus die aktuell laufende Serie (nur "aktuell", wenn der letzte aktive Tag heute oder gestern war).
+function computeStreaks(dayTsSortedAsc, now) {
+  if (!dayTsSortedAsc.length) return { current: 0, best: 0 };
+  var best = 1, run = 1;
+  for (var i = 1; i < dayTsSortedAsc.length; i++) {
+    if (Math.round((dayTsSortedAsc[i] - dayTsSortedAsc[i - 1]) / 86400000) === 1) { run++; if (run > best) best = run; }
+    else run = 1;
+  }
+  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  var lastDay = dayTsSortedAsc[dayTsSortedAsc.length - 1];
+  var gapDays = Math.round((todayStart - lastDay) / 86400000);
+  return { current: gapDays <= 1 ? run : 0, best: best };
+}
+
 export function sessionStats(sessions) {
   var totalEarned = 0, maxDuration = 0, hasEarly = false, hasNight = false, totalDed = 0;
   var minEligibleMs = Infinity; // kürzeste Sitzung ab 30 Sek. (gegen Versehens-Klicks)
@@ -22,15 +37,65 @@ export function sessionStats(sessions) {
     if (perDay[key] > maxSameDay) maxSameDay = perDay[key];
   });
   var dayTs = Object.keys(days).map(function (k) { return days[k]; }).sort(function (a, b) { return a - b; });
-  var bestStreak = dayTs.length ? 1 : 0, cur = 1;
-  for (var i = 1; i < dayTs.length; i++) {
-    if (Math.round((dayTs[i] - dayTs[i - 1]) / 86400000) === 1) { cur++; if (cur > bestStreak) bestStreak = cur; }
-    else cur = 1;
-  }
+  var bestStreak = computeStreaks(dayTs, new Date()).best;
   return {
     count: sessions.length, totalEarned: totalEarned, maxDuration: maxDuration,
     hasEarly: hasEarly, hasNight: hasNight, bestStreak: bestStreak,
     minEligibleMs: minEligibleMs, maxSameDay: maxSameDay, totalDed: totalDed
+  };
+}
+
+// Kennzahlen fürs laufende Kalenderjahr ("Dein Geschäftsjahr"): Monatswerte, Jahres-Rekorde
+// und eine grobe Jahreshochrechnung. `now` ist injizierbar für Tests/manuelle Prüfung.
+export function businessYearStats(sessions, now) {
+  now = now || new Date();
+  var year = now.getFullYear(), month = now.getMonth();
+
+  var monthEarned = 0, monthCount = 0, yearEarned = 0, yearMs = 0, yearCount = 0;
+  var weekdayEarned = [0, 0, 0, 0, 0, 0, 0], weekdayRepTs = [null, null, null, null, null, null, null];
+  var longest = null, priciest = null, days = {};
+
+  sessions.forEach(function (s) {
+    var d = new Date(s.ts);
+    if (d.getFullYear() !== year) return;
+    yearEarned += s.earned;
+    yearMs += s.durationMs;
+    yearCount++;
+    if (d.getMonth() === month) { monthEarned += s.earned; monthCount++; }
+    var wd = d.getDay();
+    weekdayEarned[wd] += s.earned;
+    if (weekdayRepTs[wd] === null) weekdayRepTs[wd] = s.ts;
+    if (!longest || s.durationMs > longest.durationMs) longest = s;
+    if (!priciest || s.earned > priciest.earned) priciest = s;
+    var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    if (!days[key]) days[key] = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  });
+
+  var dayTs = Object.keys(days).map(function (k) { return days[k]; }).sort(function (a, b) { return a - b; });
+  var streaks = computeStreaks(dayTs, now);
+
+  var bestWeekdayIdx = -1, bestWeekdayEarned = 0;
+  for (var i = 0; i < 7; i++) {
+    if (weekdayEarned[i] > bestWeekdayEarned) { bestWeekdayEarned = weekdayEarned[i]; bestWeekdayIdx = i; }
+  }
+
+  var yearAvg = yearCount ? yearEarned / yearCount : 0;
+
+  var startOfYear = new Date(year, 0, 1).getTime();
+  var todayStart = new Date(year, now.getMonth(), now.getDate()).getTime();
+  var daysElapsed = Math.max(1, Math.round((todayStart - startOfYear) / 86400000) + 1);
+  var daysInYear = Math.round((Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / 86400000);
+  var projectionEligible = yearCount >= 3 && dayTs.length >= 3;
+
+  return {
+    monthEarned: monthEarned, monthCount: monthCount,
+    yearCount: yearCount, yearAvg: yearAvg, yearTotalMs: yearMs,
+    longest: longest, priciest: priciest,
+    bestWeekdayIdx: bestWeekdayIdx,
+    bestWeekdayTs: bestWeekdayIdx >= 0 ? weekdayRepTs[bestWeekdayIdx] : null,
+    currentStreak: streaks.current, bestStreak: streaks.best,
+    projectionEligible: projectionEligible,
+    projection: projectionEligible ? (yearEarned / daysElapsed) * daysInYear : null
   };
 }
 

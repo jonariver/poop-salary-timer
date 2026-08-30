@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 7,
+    emoji: '🧾',
+    title: { de: 'Dein Geschäftsjahr', en: 'Your business year' },
+    body: {
+      de: 'Neuer Tab mit Monatsverdienst, Rekorden des Jahres und einer Hochrechnung, wie viel am Jahresende zusammenkommt.',
+      en: 'New tab with your monthly earnings, this year’s records, and a projection of what you’ll rack up by year’s end.'
+    }
+  },
+  {
     id: 6,
     emoji: '💸',
     title: { de: 'Live-Meilensteine im Timer', en: 'Live milestones in the timer' },
