@@ -3,6 +3,7 @@ var SHARE_IMAGES = {
   smoke: '../assets/share/smoke.png',
   coffee: '../assets/share/coffee.png'
 };
+var shareImageFiles = {};
 
 export function getShareImagePath(activity) {
   return SHARE_IMAGES[activity] || SHARE_IMAGES.poop;
@@ -13,16 +14,25 @@ export async function tryShareSessionImage(text, activity, dependencies) {
   if (!deps.navigator || typeof deps.navigator.share !== 'function' || typeof deps.navigator.canShare !== 'function') {
     return false;
   }
-  var file;
-  try {
-    var response = await deps.fetch(new URL(getShareImagePath(activity), import.meta.url));
-    if (!response.ok) return false;
-    var blob = await response.blob();
-    file = new deps.File([blob], activity + '-salary-result.png', {
-      type: blob.type || 'image/png'
-    });
-  } catch (err) {
-    return false;
+  var cache = deps.cache || shareImageFiles;
+  var file = cache[activity];
+  if (!file) {
+    try {
+      var response = await deps.fetch(new URL(getShareImagePath(activity), import.meta.url));
+      if (!response.ok) return false;
+      var blob = await response.blob();
+      file = new deps.File([blob], activity + '-salary-result.png', {
+        type: blob.type || 'image/png'
+      });
+      cache[activity] = file;
+    } catch (err) {
+      return false;
+    }
+    // Slow image loading can consume the transient user activation required by
+    // the native share sheet. The cached file makes the next tap synchronous.
+    if (deps.navigator.userActivation && deps.navigator.userActivation.isActive === false) {
+      return 'ready';
+    }
   }
   var shareData = { text: text, files: [file] };
   if (!deps.navigator.canShare(shareData)) return false;

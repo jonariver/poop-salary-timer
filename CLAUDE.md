@@ -38,7 +38,7 @@ for f in js/*.js; do node --check "$f"; done
 
 ## Architecture
 
-`index.html` holds only markup, one `<link>` to `css/style.css`, and one `<script type="module" src="js/app.js">`. Eight ES modules under `js/`, in dependency order (no cycles):
+`index.html` holds only markup, one `<link>` to `css/style.css`, and one `<script type="module" src="js/app.js">`. Nine ES modules under `js/`, in dependency order (no cycles):
 
 - **`storage.js`** — the only module that touches `localStorage`. Everything else reads/writes through its typed getters/setters (`getSettings`/`saveSettings`, `getSessions`/`saveSessions`, etc.).
 - **`salary.js`** — pure math only, zero DOM/i18n/storage: `computeRate`, `computeTaxRates` (simplified German income-tax approximation), `computeNet(gross, settings)`, `calculateEarnings(durationMs, hourlyRate)`, `FUND_RATES`.
@@ -48,7 +48,7 @@ for f in js/*.js; do node --check "$f"; done
 - **`whatsnew.js`** — curated, user-facing changelog entries (`ENTRIES`, newest first) shown in the header's 📣 modal, plus `hasUnseen(lastSeenId)`. Not derived from git history — hand-written in plain language for end users.
 - **`timer.js`** — the in-memory active-session state machine (`getActive`, `elapsedMs`, `startOrResume`, `pause`, `end`). Depends only on `storage.js`. No DOM.
 - **`share.js`** — activity-specific share-image mapping plus capability-checked Web Share file delivery. No DOM; technical failures return control to `app.js`'s existing text/clipboard fallback.
-- **`app.js`** — the sole orchestrator: caches every DOM element, owns all `render*` functions and event wiring, and runs the boot sequence. Imports from all seven modules above via namespace imports (`import * as X from './x.js'`). Nothing imports from `app.js`.
+- **`app.js`** — the sole orchestrator: caches every DOM element, owns all `render*` functions and event wiring, and runs the boot sequence. Imports from all eight modules above via namespace imports (`import * as X from './x.js'`). Nothing imports from `app.js`.
 
 Key behaviors worth knowing before touching the timer or boot sequence:
 - A running session survives page reload: `timer.js` loads `pst_active` at module-init time, and `app.js`'s boot sequence restarts the 60ms render tick if a session was mid-run.
@@ -56,4 +56,4 @@ Key behaviors worth knowing before touching the timer or boot sequence:
 - Achievements are evaluated (and toasts queued) on every history render — not only right after saving a session — because `renderHistory()` is called from many places (save, delete, backfill, CSV import, language switch).
 - `parseNum` (DOM input parsing, in `app.js`) and `parseCsvNumber` (CSV cell parsing, in `stats.js`) are intentionally *not* merged despite being nearly identical — they diverge on one edge case (literal `"Infinity"` input), so keeping them separate avoids a subtle behavior change.
 
-See `docs/superpowers/plans/2026-08-30-code-structure-refactor.md` for the full rationale behind this module split and the manual QA checklist to run after structural changes (there is no automated test suite).
+See `docs/superpowers/plans/2026-08-30-code-structure-refactor.md` for the full rationale behind this module split and the manual QA checklist to run after structural changes. Run the Node test suite after changes.

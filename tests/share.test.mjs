@@ -35,7 +35,8 @@ test('shares the matching image file together with the unchanged session text', 
       calls.fetched = String(url);
       return { ok: true, blob: async function () { return imageBlob; } };
     },
-    File: File
+    File: File,
+    cache: {}
   });
 
   assert.equal(shared, true);
@@ -62,7 +63,8 @@ test('returns to text fallback when the browser rejects the file payload', async
         blob: async function () { return new Blob(['png'], { type: 'image/png' }); }
       };
     },
-    File: File
+    File: File,
+    cache: {}
   });
 
   assert.equal(shared, false);
@@ -79,7 +81,8 @@ test('skips image loading when Web Share file capability is unavailable', async 
       fetchCalled = true;
       throw new Error('must not fetch');
     },
-    File: File
+    File: File,
+    cache: {}
   });
 
   assert.equal(shared, false);
@@ -95,7 +98,8 @@ test('returns to text fallback when loading the image fails', async () => {
       async share() { throw new Error('native share must not run'); }
     },
     fetch: async function () { throw new Error('network failure'); },
-    File: File
+    File: File,
+    cache: {}
   });
 
   assert.equal(shared, false);
@@ -117,11 +121,46 @@ test('returns to text fallback when the image asset is missing', async () => {
         blob: async function () { return new Blob(['not found'], { type: 'text/html' }); }
       };
     },
-    File: File
+    File: File,
+    cache: {}
   });
 
   assert.equal(shared, false);
   assert.equal(nativeShareCalled, false);
+});
+
+test('caches a slowly loaded image and shares it on the next active tap', async () => {
+  const { tryShareSessionImage } = await import('../js/share.js');
+  const cache = {};
+  let fetchCount = 0;
+  let shareCount = 0;
+  const userActivation = { isActive: false };
+  const dependencies = {
+    navigator: {
+      userActivation: userActivation,
+      canShare() { return true; },
+      async share() { shareCount += 1; }
+    },
+    fetch: async function () {
+      fetchCount += 1;
+      return {
+        ok: true,
+        blob: async function () { return new Blob(['png'], { type: 'image/png' }); }
+      };
+    },
+    File: File,
+    cache: cache
+  };
+
+  const firstResult = await tryShareSessionImage('session result', 'coffee', dependencies);
+  userActivation.isActive = true;
+  const secondResult = await tryShareSessionImage('session result', 'coffee', dependencies);
+
+  assert.equal(firstResult, 'ready');
+  assert.equal(secondResult, true);
+  assert.equal(fetchCount, 1);
+  assert.equal(shareCount, 1);
+  assert.equal(cache.coffee.name, 'coffee-salary-result.png');
 });
 
 test('ships all three mapped assets as valid PNG files', async () => {

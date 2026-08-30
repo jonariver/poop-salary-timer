@@ -625,6 +625,10 @@ import * as sharing from './share.js';
     var text = t('shareSession')(sessionActivity, i18n.fmtDurationWords(lastSummary.durationMs), i18n.fmtMoney(lastSummary.earned), i18n.funFact(lastSummary.earned));
     text += buildTaxShareText(lastSummary.tax);
     sharing.tryShareSessionImage(text, sessionActivity).then(function (sharedWithImage) {
+      if (sharedWithImage === 'ready') {
+        infoToast(t('toastShareImageReady'));
+        return;
+      }
       if (!sharedWithImage) shareContent(text);
     }).catch(function (err) {
       if (err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
