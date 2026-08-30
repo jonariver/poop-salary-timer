@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 14,
+    emoji: '🏆',
+    title: { de: '5 neue Erfolge & Wochentag-Verdienst', en: '5 new achievements & weekday earnings' },
+    body: {
+      de: 'Neue Erfolgs-Stufen für 7-/30-Tage-Serien, 50/100 Sitzungen und 100 € Verdienst. Außerdem zeigt der Jahr-Tab jetzt, wie sich dein Verdienst auf die Wochentage verteilt.',
+      en: 'New achievement tiers for 7-/30-day streaks, 50/100 sessions, and €100 earned. The Year tab also now shows how your earnings break down by weekday.'
+    }
+  },
+  {
     id: 13,
     emoji: '🎭',
     title: { de: 'Mehr Sprüche', en: 'More sayings' },

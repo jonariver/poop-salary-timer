@@ -102,6 +102,7 @@ export function businessYearStats(sessions, now) {
     longest: longest, priciest: priciest,
     bestWeekdayIdx: bestWeekdayIdx,
     bestWeekdayTs: bestWeekdayIdx >= 0 ? weekdayRepTs[bestWeekdayIdx] : null,
+    weekdayEarned: weekdayEarned, // Sonntag-indiziert (JS Date#getDay()), 0=So..6=Sa
     currentStreak: currentStreak, bestStreak: bestStreak,
     projectionEligible: projectionEligible,
     projection: projectionEligible ? (yearEarned / daysElapsed) * daysInYear : null

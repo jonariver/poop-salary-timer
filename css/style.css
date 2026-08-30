@@ -581,6 +581,20 @@ button.btn:active { transform: scale(0.97); }
   margin-top: 10px;
 }
 .heatmap-legend .heatmap-cell { cursor: default; width: 11px; height: 11px; }
+.weekday-breakdown { display: flex; flex-direction: column; gap: 8px; }
+.weekday-bar { display: flex; align-items: center; gap: 10px; }
+.weekday-bar-label { width: 28px; flex: none; font-size: 0.78rem; color: var(--ink-faint); }
+.weekday-bar-track { flex: 1; height: 14px; background: var(--card-edge); border-radius: 4px; overflow: hidden; }
+.weekday-bar-fill { height: 100%; background: var(--gold); border-radius: 0 4px 4px 0; min-width: 2px; }
+.weekday-bar-amount {
+  width: 64px;
+  flex: none;
+  text-align: right;
+  font-family: "Spline Sans Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
 .export-reminder {
   background: var(--gold-soft);
   border-radius: 12px;
