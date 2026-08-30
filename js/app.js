@@ -10,6 +10,29 @@ import * as sharing from './share.js';
 (function () {
   'use strict';
 
+  // TEMPORARY diagnostic for the Brave/Android share bug — visit ?debug=share to see it.
+  // Remove once the Brave Web Share API behavior is understood (tracked in chat, not an issue).
+  if (new URLSearchParams(location.search).has('debug')) {
+    var canShareFiles = 'n/a';
+    try {
+      canShareFiles = String(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.png', { type: 'image/png' })] }));
+    } catch (e) { canShareFiles = 'threw: ' + e.message; }
+    var lines = [
+      'navigator.share: ' + typeof navigator.share,
+      'navigator.canShare: ' + typeof navigator.canShare,
+      'canShare({files}): ' + canShareFiles,
+      'isSecureContext: ' + window.isSecureContext,
+      'protocol: ' + location.protocol,
+      'userAgent: ' + navigator.userAgent
+    ];
+    var box = document.createElement('pre');
+    box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#111;color:#0f0;padding:16px;font-size:13px;white-space:pre-wrap;overflow:auto;margin:0;';
+    box.textContent = lines.join('\n');
+    document.body.innerHTML = '';
+    document.body.appendChild(box);
+    return;
+  }
+
   var t = i18n.t;
 
   // ---------- Aktivität (Kacken / Rauchen / Kaffee) ----------
