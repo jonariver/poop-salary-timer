@@ -49,6 +49,8 @@ export function sessionStats(sessions) {
 // und eine grobe Jahreshochrechnung. `now` ist injizierbar für Tests/manuelle Prüfung.
 export function businessYearStats(sessions, now) {
   now = now || new Date();
+  var nowMs = now.getTime();
+  sessions = sessions.filter(function (s) { return s.ts <= nowMs; }); // manuell nachgetragene Zukunfts-Sessions dürfen Jahreswerte/Streak nicht verfälschen
   var year = now.getFullYear(), month = now.getMonth();
 
   var monthEarned = 0, monthCount = 0, yearEarned = 0, yearMs = 0, yearCount = 0;
@@ -111,6 +113,8 @@ export function businessYearStats(sessions, now) {
 // 0-4 relativ zum verdienststärksten Tag des Jahres (0 nur bei exakt 0 €).
 export function yearHeatmap(sessions, now) {
   now = now || new Date();
+  var nowMs = now.getTime();
+  sessions = sessions.filter(function (s) { return s.ts <= nowMs; }); // keine Zukunfts-Sessions in der Heatmap einfärben
   var year = now.getFullYear();
 
   var byDay = {};

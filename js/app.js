@@ -667,7 +667,16 @@ import * as whatsnew from './whatsnew.js';
     var dateStr = $('bf-date').value, timeStr = $('bf-time').value;
     var mins = parseNum($('bf-duration'));
     var ts = (dateStr && timeStr) ? new Date(dateStr + 'T' + timeStr).getTime() : NaN;
-    if (!isFinite(ts) || !(mins > 0)) { $('bf-error').style.display = 'block'; return; }
+    if (!isFinite(ts) || !(mins > 0)) {
+      $('bf-error').textContent = t('bfError');
+      $('bf-error').style.display = 'block';
+      return;
+    }
+    if (ts > Date.now()) {
+      $('bf-error').textContent = t('bfErrorFuture');
+      $('bf-error').style.display = 'block';
+      return;
+    }
     $('bf-error').style.display = 'none';
     var rate = settings ? settings.rate : 0;
     var durationMs = mins * 60000;
