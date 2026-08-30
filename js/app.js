@@ -313,6 +313,7 @@ import * as whatsnew from './whatsnew.js';
     sessions.sort(function (a, b) { return b.ts - a.ts; });
 
     checkAndToastAchievements(sessions);
+    renderExportReminder(sessions);
 
     var list = $('session-list');
     list.innerHTML = '';
@@ -368,6 +369,31 @@ import * as whatsnew from './whatsnew.js';
       li.appendChild(actEl); li.appendChild(when); li.appendChild(dur); li.appendChild(earn); li.appendChild(del);
       list.appendChild(li);
     });
+  }
+
+  // ---------- Export-Reminder ----------
+  function renderExportReminder(sessions) {
+    var banner = $('export-reminder');
+    if (!sessions.length) { banner.classList.add('hidden'); return; }
+    var now = Date.now();
+    var lastExport = storage.getLastExport();
+    var reference = lastExport || Math.min.apply(null, sessions.map(function (s) { return s.ts; }));
+    var daysSince = (now - reference) / 86400000;
+    var dismissedAt = storage.getExportReminderDismissed();
+    var snoozed = dismissedAt && (now - dismissedAt) / 86400000 < 7;
+    if (daysSince < 14 || snoozed) { banner.classList.add('hidden'); return; }
+    $('export-reminder-text').textContent = lastExport
+      ? t('exportReminderTextDays')(Math.floor(daysSince))
+      : t('exportReminderTextNever');
+    banner.classList.remove('hidden');
+  }
+
+  function runCsvExport() {
+    var sessions = storage.getSessions() || [];
+    if (!sessions.length) { infoToast(t('toastNoExport')); return; }
+    storage.saveLastExport(Date.now());
+    openShareModal(stats.csvFromSessions(sessions), t('csvExportTitle'));
+    renderExportReminder(sessions);
   }
 
   // ---------- Geschäftsjahr ----------
@@ -636,10 +662,11 @@ import * as whatsnew from './whatsnew.js';
   });
 
   // ---------- CSV Export / Import ----------
-  $('btn-export-csv').addEventListener('click', function () {
-    var sessions = storage.getSessions() || [];
-    if (!sessions.length) { infoToast(t('toastNoExport')); return; }
-    openShareModal(stats.csvFromSessions(sessions), t('csvExportTitle'));
+  $('btn-export-csv').addEventListener('click', runCsvExport);
+  $('export-reminder-cta').addEventListener('click', runCsvExport);
+  $('export-reminder-dismiss').addEventListener('click', function () {
+    storage.saveExportReminderDismissed(Date.now());
+    $('export-reminder').classList.add('hidden');
   });
 
   $('btn-import-csv').addEventListener('click', function () {

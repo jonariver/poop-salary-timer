@@ -581,6 +581,29 @@ button.btn:active { transform: scale(0.97); }
   margin-top: 10px;
 }
 .heatmap-legend .heatmap-cell { cursor: default; width: 11px; height: 11px; }
+.export-reminder {
+  background: var(--gold-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.export-reminder p {
+  margin: 0 0 10px;
+  font-size: 0.84rem;
+  color: var(--gold-strong);
+  line-height: 1.5;
+}
+.export-reminder-actions { display: flex; align-items: center; gap: 8px; }
+.export-reminder-actions .btn { flex: 1; padding: 9px 13px; font-size: 0.85rem; }
+.export-reminder-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--gold-strong);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 8px;
+}
 .session-list { list-style: none; margin: 0; padding: 0; }
 .session-list li {
   display: flex;

@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 9,
+    emoji: '💾',
+    title: { de: 'Export-Erinnerung', en: 'Export reminder' },
+    body: {
+      de: 'Da alles nur lokal gespeichert wird, erinnert dich die App jetzt ab und zu daran, deine Daten als CSV zu sichern.',
+      en: 'Since everything is only stored locally, the app now nudges you every so often to back up your data as CSV.'
+    }
+  },
+  {
     id: 8,
     emoji: '🔥',
     title: { de: 'Sitzungs-Heatmap', en: 'Session heatmap' },
