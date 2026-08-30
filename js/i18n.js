@@ -36,6 +36,13 @@ var STR = {
     statKYearTime: 'Gesamtzeit (Jahr)', statKStreak: 'Aktuelle Serie', statKBestStreak: 'Beste Serie (Jahr)',
     yearProjectionPre: 'Hochgerechnet aufs Jahr: ',
     yearNotEnoughData: 'Noch wenig Daten für eine Hochrechnung — sammle ein paar Sitzungen an verschiedenen Tagen. 🌱',
+    h2Heatmap: 'Sitzungs-Heatmap 🔥',
+    heatmapLess: 'Weniger', heatmapMore: 'Mehr',
+    heatmapDetailHint: 'Tippe auf einen Tag, um Details zu sehen.',
+    heatmapDetailNone: function (dateStr) { return dateStr + ' — keine Sitzung.'; },
+    heatmapDetailSome: function (dateStr, count, durWords, earnedStr) {
+      return dateStr + ' — ' + count + ' Sitzung' + (count === 1 ? '' : 'en') + ' · ' + durWords + ' · ' + earnedStr;
+    },
     h2Sessions: 'Sitzungen', btnBackfill: '+ Nachtragen',
     lblDate: 'Datum', lblTime: 'Uhrzeit', lblDuration: 'Dauer in Minuten', phDuration: 'z. B. 12',
     bfDerivedPre: 'Macht ', bfDerivedPost: ' — nachträglich, aber verdient.',
@@ -148,6 +155,13 @@ var STR = {
     statKYearTime: 'Total time (year)', statKStreak: 'Current streak', statKBestStreak: 'Best streak (year)',
     yearProjectionPre: 'Projected for the year: ',
     yearNotEnoughData: 'Not enough data yet for a projection — log a few sessions on different days. 🌱',
+    h2Heatmap: 'Session heatmap 🔥',
+    heatmapLess: 'Less', heatmapMore: 'More',
+    heatmapDetailHint: 'Tap a day to see details.',
+    heatmapDetailNone: function (dateStr) { return dateStr + ' — no session.'; },
+    heatmapDetailSome: function (dateStr, count, durWords, earnedStr) {
+      return dateStr + ' — ' + count + ' session' + (count === 1 ? '' : 's') + ' · ' + durWords + ' · ' + earnedStr;
+    },
     h2Sessions: 'Sessions', btnBackfill: '+ Add missed one',
     lblDate: 'Date', lblTime: 'Time', lblDuration: 'Duration in minutes', phDuration: 'e.g. 12',
     bfDerivedPre: 'Makes ', bfDerivedPost: ' — belated, but well earned.',
@@ -240,7 +254,7 @@ export function setLang(l) {
 }
 
 // ---------- Formatting (sprachabhaengig) ----------
-var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt;
+var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt, monthShortFmt;
 export function buildFormatters() {
   var loc = lang === 'en' ? 'en-GB' : 'de-DE';
   fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
@@ -249,12 +263,14 @@ export function buildFormatters() {
   timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
   achDateFmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short' });
   weekdayFmt = new Intl.DateTimeFormat(loc, { weekday: 'long' });
+  monthShortFmt = new Intl.DateTimeFormat(loc, { month: 'short' });
 }
 buildFormatters();
 export function getDateFmt() { return dateFmt; }
 export function getTimeFmt() { return timeFmt; }
 export function getAchDateFmt() { return achDateFmt; }
 export function fmtWeekdayLong(ts) { return weekdayFmt.format(new Date(ts)); }
+export function fmtMonthShort(ts) { return monthShortFmt.format(new Date(ts)); }
 
 export function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
 export function fmtMoney(v) { return fmt2.format(v); }
@@ -365,6 +381,9 @@ var BINDINGS = [
   ['#stat-k-best-streak', 'statKBestStreak'],
   ['#year-projection-pre', 'yearProjectionPre'],
   ['#year-not-enough-data', 'yearNotEnoughData'],
+  ['#h2-heatmap', 'h2Heatmap'],
+  ['#heatmap-legend-less', 'heatmapLess'],
+  ['#heatmap-legend-more', 'heatmapMore'],
   ['#h2-sessions', 'h2Sessions'],
   ['#btn-show-backfill', 'btnBackfill'],
   ['label[for="bf-date"]', 'lblDate'],
