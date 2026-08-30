@@ -439,12 +439,15 @@ import * as whatsnew from './whatsnew.js';
   }
 
   function renderHeatmap() {
-    var h = stats.yearHeatmap(storage.getSessions() || [], new Date());
+    var now = new Date();
+    var todayTs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var h = stats.yearHeatmap(storage.getSessions() || [], now);
     var monthsEl = $('heatmap-months');
     var gridEl = $('heatmap-grid');
     monthsEl.innerHTML = '';
     gridEl.innerHTML = '';
     selectedHeatmapCell = null;
+    var todayCell = null;
 
     var lastMonth = -1;
     h.weeks.forEach(function (week) {
@@ -469,11 +472,17 @@ import * as whatsnew from './whatsnew.js';
           cell.setAttribute('aria-label', i18n.getDateFmt().format(new Date(day.ts)));
           cell.addEventListener('click', function () { selectHeatmapDay(day, cell); });
           cell.addEventListener('focus', function () { selectHeatmapDay(day, cell); });
+          if (day.ts === todayTs) todayCell = cell;
         }
         gridEl.appendChild(cell);
       });
     });
     $('heatmap-detail').textContent = t('heatmapDetailHint');
+    if (todayCell) {
+      // rAF, da der Tab beim Aufruf hier oft noch "hidden" ist (show() läuft erst danach) —
+      // scrollIntoView auf einem display:none-Vorfahren wäre sonst ein No-op.
+      requestAnimationFrame(function () { todayCell.scrollIntoView({ inline: 'end', block: 'nearest' }); });
+    }
   }
 
   // ---------- Achievements ----------
