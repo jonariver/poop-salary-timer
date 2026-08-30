@@ -10,7 +10,10 @@ export function getShareImagePath(activity) {
 }
 
 export async function tryShareSessionImage(text, activity, dependencies) {
-  var deps = dependencies || { navigator: navigator, fetch: fetch, File: File };
+  // fetch muss an globalThis gebunden bleiben: als bloße Referenz in ein Objekt gepackt und dann
+  // als deps.fetch(...) aufgerufen, wirft Chrome sonst "Failed to execute 'fetch' on 'Window':
+  // Illegal invocation" (native Funktion, Receiver-Check), was hier still im catch verschluckt wurde.
+  var deps = dependencies || { navigator: navigator, fetch: fetch.bind(globalThis), File: File };
   if (!deps.navigator || typeof deps.navigator.share !== 'function' || typeof deps.navigator.canShare !== 'function') {
     return false;
   }
