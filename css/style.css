@@ -383,6 +383,22 @@ button.btn:active { transform: scale(0.97); }
   margin-top: 4px;
 }
 .net-live strong { color: var(--gold); font-weight: 700; }
+.milestone-display {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  line-height: 1.4;
+  border-radius: 8px;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+.milestone-display.flash {
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+  padding: 2px 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .milestone-display { transition: none; }
+}
 .ded-block {
   background: var(--danger-soft);
   border-radius: 12px;
