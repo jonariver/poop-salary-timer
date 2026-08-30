@@ -232,4 +232,11 @@ export function parseCsv(text, fallbackRate) {
   return rows;
 }
 
-export function sessionKey(ts, durationMs) { return Math.round(ts / 1000) + '_' + Math.round(durationMs / 1000); }
+// Aktivität und (auf CSV-Exportgenauigkeit gerundeter) Verdienst fließen mit ein, damit zwei
+// verschiedene Sessions mit zufällig gleichem Zeitpunkt/gleicher Dauer nicht als Duplikat gelten.
+export function sessionKey(ts, durationMs, activity, earned) {
+  var key = Math.round(ts / 1000) + '_' + Math.round(durationMs / 1000);
+  if (activity !== undefined) key += '_' + actKeyOf(activity);
+  if (earned !== undefined) key += '_' + Math.round((earned || 0) * 10000);
+  return key;
+}
