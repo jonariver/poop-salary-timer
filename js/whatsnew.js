@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 12,
+    emoji: '📤',
+    title: { de: 'Session-Bilder beim Teilen', en: 'Session images when sharing' },
+    body: {
+      de: 'Geteilte Sitzungen bringen jetzt passend zu Klo, Rauchen oder Kaffee ihr eigenes Bild mit — sofern dein Gerät Datei-Sharing unterstützt.',
+      en: 'Shared sessions now include a matching image for toilet, smoking, or coffee breaks — when your device supports file sharing.'
+    }
+  },
+  {
     id: 11,
     emoji: '🧾',
     title: { de: 'Netto-Schätzung auf 2026 aktualisiert', en: 'Net estimate updated to 2026' },

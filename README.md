@@ -10,7 +10,7 @@ Eine kleine Web-App, die misst, wie viel du während deiner Toilettenpause **ver
 - **Verlauf mit Statistiken:** Gesamtverdienst, Gesamtzeit, Anzahl und Ø pro Sitzung; Sessions einzeln löschbar
 - **Nachtragen:** Vergessene Sitzungen lassen sich mit Datum, Uhrzeit und Dauer nachtragen (Label „nachgetragen")
 - **10 Achievements:** vom 🎉 „Ersten Geschäft" über den ⚡ „Schnell-Scheißer" und die 🔥 „Pooping Streak" bis zum 👑 „Klo-Krösus" — mit Fortschrittsanzeige und Toast beim Freischalten
-- **Teilen:** Session-Zusammenfassung und Erfolgsliste per Web Share API teilen (Fallback: Zwischenablage bzw. Kopier-Dialog)
+- **Teilen:** Session-Zusammenfassung mit passendem Klo-/Rauch-/Kaffeebild per Web Share API teilen; Erfolgsliste bleibt textbasiert (Fallback: Text-Share, Zwischenablage bzw. Kopier-Dialog)
 - **Hell & Dunkel:** folgt dem System-Theme
 
 ## Datenschutz
