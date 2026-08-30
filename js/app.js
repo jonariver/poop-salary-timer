@@ -10,55 +10,6 @@ import * as sharing from './share.js';
 (function () {
   'use strict';
 
-  // TEMPORARY diagnostic for the Brave/Android share bug — visit ?debug=share to see it.
-  // Remove once the Brave Web Share API behavior is understood (tracked in chat, not an issue).
-  if (new URLSearchParams(location.search).has('debug')) {
-    var canShareFiles = 'n/a';
-    try {
-      canShareFiles = String(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'x.png', { type: 'image/png' })] }));
-    } catch (e) { canShareFiles = 'threw: ' + e.message; }
-    var lines = [
-      'navigator.share: ' + typeof navigator.share,
-      'navigator.canShare: ' + typeof navigator.canShare,
-      'canShare({files}): ' + canShareFiles,
-      'isSecureContext: ' + window.isSecureContext,
-      'protocol: ' + location.protocol,
-      'userAgent: ' + navigator.userAgent
-    ];
-    var box = document.createElement('pre');
-    box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#111;color:#0f0;padding:16px;font-size:13px;white-space:pre-wrap;overflow:auto;margin:0;';
-    box.textContent = lines.join('\n') + '\n';
-    var btn = document.createElement('button');
-    btn.textContent = 'Tap to test real share with the real image';
-    btn.style.cssText = 'margin-top:12px;padding:14px;font-size:14px;';
-    var result = document.createElement('div');
-    result.style.cssText = 'margin-top:12px;color:#ff0;';
-    btn.addEventListener('click', function () {
-      result.textContent = 'loading image...';
-      fetch(new URL('../assets/share/poop.png', import.meta.url))
-        .then(function (r) { return r.blob(); })
-        .then(function (blob) {
-          var file = new File([blob], 'poop-salary-result.png', { type: blob.type || 'image/png' });
-          result.textContent = 'image loaded (' + blob.size + ' bytes), calling canShare...';
-          var can = navigator.canShare({ files: [file] });
-          result.textContent += '\ncanShare(this exact file) = ' + can;
-          if (!can) return;
-          result.textContent += '\ncalling navigator.share now...';
-          return navigator.share({ text: 'debug test', files: [file] }).then(function () {
-            result.textContent += '\nSUCCESS — share() resolved.';
-          });
-        })
-        .catch(function (err) {
-          result.textContent += '\nERROR: ' + (err && err.name) + ' — ' + (err && err.message);
-        });
-    });
-    box.appendChild(btn);
-    box.appendChild(result);
-    document.body.innerHTML = '';
-    document.body.appendChild(box);
-    return;
-  }
-
   var t = i18n.t;
 
   // ---------- Aktivität (Kacken / Rauchen / Kaffee) ----------
@@ -286,6 +237,7 @@ import * as sharing from './share.js';
   function renderSummary() {
     if (!lastSummary) return;
     var sessActivity = stats.actKeyOf(lastSummary.activity);
+    sharing.preloadShareImage(sessActivity); // im Hintergrund laden, bevor auf "Teilen" getippt wird
     $('summary-emoji').textContent = SUMMARY_EMOJI[sessActivity];
     var titleList = t('titles')[sessActivity] || t('titles').poop;
     $('summary-title').textContent = titleList[lastTitleIdx % titleList.length];
