@@ -9,6 +9,7 @@ var LS_ACTIVITY = 'pst_activity';
 var LS_LANG = 'pst_lang';
 var LS_ACHIEVEMENTS = 'pst_achievements';
 var LS_ACH_CATEGORY = 'pst_ach_category';
+var LS_WHATSNEW_SEEN = 'pst_whatsnew_seen';
 
 function lsGet(key) {
   try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }
@@ -42,3 +43,6 @@ export function saveAchievements(data) { lsSet(LS_ACHIEVEMENTS, data); }
 
 export function getAchCategory() { return lsGet(LS_ACH_CATEGORY); }
 export function saveAchCategory(key) { lsSet(LS_ACH_CATEGORY, key); }
+
+export function getWhatsNewSeen() { return lsGet(LS_WHATSNEW_SEEN); }
+export function saveWhatsNewSeen(id) { lsSet(LS_WHATSNEW_SEEN, id); }

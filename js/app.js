@@ -4,6 +4,7 @@ import * as salary from './salary.js';
 import * as stats from './stats.js';
 import * as achievements from './achievements.js';
 import * as timer from './timer.js';
+import * as whatsnew from './whatsnew.js';
 
 (function () {
   'use strict';
@@ -621,6 +622,38 @@ import * as timer from './timer.js';
     infoToast(t('toastImported')(added, skipped));
   });
 
+  // ---------- Was gibt's Neues ----------
+  var whatsNewBtn = $('whatsnew-btn'), whatsNewBadge = $('whatsnew-badge'), whatsNewOverlay = $('whatsnew-overlay');
+  function renderWhatsNewBadge() {
+    whatsNewBadge.classList.toggle('hidden', !whatsnew.hasUnseen(storage.getWhatsNewSeen()));
+  }
+  function renderWhatsNewList() {
+    var lang = i18n.getLang();
+    var list = $('whatsnew-list');
+    list.innerHTML = '';
+    whatsnew.ENTRIES.forEach(function (entry) {
+      var item = document.createElement('div');
+      item.className = 'whatsnew-item';
+      var emoji = document.createElement('div'); emoji.className = 'emoji'; emoji.textContent = entry.emoji;
+      var info = document.createElement('div');
+      var title = document.createElement('div'); title.className = 'title'; title.textContent = entry.title[lang] || entry.title.de;
+      var body = document.createElement('div'); body.className = 'body'; body.textContent = entry.body[lang] || entry.body.de;
+      info.appendChild(title); info.appendChild(body);
+      item.appendChild(emoji); item.appendChild(info);
+      list.appendChild(item);
+    });
+  }
+  whatsNewBtn.addEventListener('click', function () {
+    renderWhatsNewList();
+    whatsNewOverlay.classList.remove('hidden');
+    storage.saveWhatsNewSeen(whatsnew.latestId());
+    renderWhatsNewBadge();
+  });
+  $('whatsnew-close').addEventListener('click', function () { whatsNewOverlay.classList.add('hidden'); });
+  whatsNewOverlay.addEventListener('click', function (e) {
+    if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+  });
+
   // ---------- Sprachumschalter ----------
   function applyLang() {
     i18n.applyBindings();
@@ -631,6 +664,7 @@ import * as timer from './timer.js';
     renderActivityPicker();
     renderHistory();
     if (!views.summary.classList.contains('hidden')) renderSummary();
+    if (!whatsNewOverlay.classList.contains('hidden')) renderWhatsNewList();
   }
   function setLang(l) {
     if (l === i18n.getLang()) return;
@@ -650,6 +684,7 @@ import * as timer from './timer.js';
   $('tab-settings').addEventListener('click', function () { fillSetupForm(); show('setup'); });
 
   // ---------- Boot ----------
+  renderWhatsNewBadge();
   applyLang();
   if (!settings) {
     show('setup');

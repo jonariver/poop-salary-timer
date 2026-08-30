@@ -1,0 +1,66 @@
+// ---------- Was gibt's Neues ----------
+// Curated, user-facing changelog. Newest first. Ids increment; hasUnseen()
+// compares against the last-seen id persisted via storage.js.
+
+export var ENTRIES = [
+  {
+    id: 6,
+    emoji: '💸',
+    title: { de: 'Live-Meilensteine im Timer', en: 'Live milestones in the timer' },
+    body: {
+      de: 'Während du sitzt, siehst du jetzt in Echtzeit, was du dir schon leisten kannst — vom Kaffee bis zur PS5.',
+      en: 'While you sit, you now see in real time what you can already afford — from coffee to a PS5.'
+    }
+  },
+  {
+    id: 5,
+    emoji: '🧾',
+    title: { de: 'Netto-Schätzung', en: 'Net estimate' },
+    body: {
+      de: 'Steuerklasse und Kirchensteuer eintragen und sehen, was nach Abzügen wirklich übrig bleibt.',
+      en: 'Enter your tax class and church tax to see what actually stays in your pocket after deductions.'
+    }
+  },
+  {
+    id: 4,
+    emoji: '📄',
+    title: { de: 'CSV-Export & -Import', en: 'CSV export & import' },
+    body: {
+      de: 'Sitzungen als Tabelle exportieren oder importieren — praktisch für ein eigenes Backup oder eigene Auswertungen.',
+      en: 'Export or import your sessions as a spreadsheet — handy for your own backup or analysis.'
+    }
+  },
+  {
+    id: 3,
+    emoji: '🌍',
+    title: { de: 'Deutsch & Englisch', en: 'German & English' },
+    body: {
+      de: 'Die App spricht jetzt auch Englisch. Einfach oben rechts umschalten.',
+      en: 'The app now speaks English too. Just switch it in the top right.'
+    }
+  },
+  {
+    id: 2,
+    emoji: '🚬☕',
+    title: { de: 'Rauchen & Kaffee', en: 'Smoking & coffee' },
+    body: {
+      de: 'Nicht nur fürs Klo: Jetzt lassen sich auch Rauch- und Kaffeepausen erfassen.',
+      en: 'Not just for the bathroom anymore: now you can also track smoke and coffee breaks.'
+    }
+  },
+  {
+    id: 1,
+    emoji: '🎉',
+    title: { de: 'Los geht\'s!', en: 'Here we go!' },
+    body: {
+      de: 'Poop Salary Timer ist da: Timer, Verlauf, Erfolge und eine Teilen-Funktion.',
+      en: 'Poop Salary Timer is here: timer, history, achievements, and a share feature.'
+    }
+  }
+];
+
+export function latestId() { return ENTRIES.length ? ENTRIES[0].id : null; }
+
+export function hasUnseen(lastSeenId) {
+  return ENTRIES.length > 0 && (lastSeenId == null || ENTRIES[0].id > lastSeenId);
+}

@@ -98,6 +98,8 @@ var STR = {
     shareAchNone: 'Noch keine — aber das Sitzungsjahr ist noch lang.',
     shareAchFooter: '\n— gemessen mit dem Poop Salary Timer 💩',
     toastImported: function (added, skipped) { return added + ' Sitzung' + (added === 1 ? '' : 'en') + ' importiert' + (skipped ? ' · ' + skipped + ' übersprungen' : '') + ' ✅'; },
+    whatsNewAria: 'Neuigkeiten',
+    whatsNewTitle: "Was gibt's Neues 🎉",
     milestones: [
       { emoji: '☕', label: 'Kaffee' },
       { emoji: '🥙', label: 'Döner' },
@@ -201,6 +203,8 @@ var STR = {
     shareAchNone: 'None yet — but the fiscal year on the throne is long.',
     shareAchFooter: '\n— measured with the Poop Salary Timer 💩',
     toastImported: function (added, skipped) { return added + ' session' + (added === 1 ? '' : 's') + ' imported' + (skipped ? ' · ' + skipped + ' skipped' : '') + ' ✅'; },
+    whatsNewAria: "What's new",
+    whatsNewTitle: "What's New 🎉",
     milestones: [
       { emoji: '☕', label: 'Coffee' },
       { emoji: '🥙', label: 'Kebab' },
@@ -357,6 +361,9 @@ var BINDINGS = [
   ['#share-copy', 'btnCopy'],
   ['#share-close', 'btnClose'],
   ['#ach-toast-label', 'toastUnlocked'],
+  ['#whatsnew-btn', 'whatsNewAria', 'title'],
+  ['#whatsnew-title', 'whatsNewTitle'],
+  ['#whatsnew-close', 'btnClose'],
   ['#tab-timer', 'tabTimer'],
   ['#tab-history', 'tabHistory'],
   ['#tab-achievements', 'tabAchievements'],
@@ -377,4 +384,5 @@ export function applyBindings() {
   });
   document.getElementById('activity-picker').setAttribute('aria-label', t('activityPickerLabel'));
   document.getElementById('ach-category-picker').setAttribute('aria-label', t('achCategoryPickerLabel'));
+  document.getElementById('whatsnew-btn').setAttribute('aria-label', t('whatsNewAria'));
 }
