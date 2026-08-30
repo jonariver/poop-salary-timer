@@ -11,29 +11,46 @@ export function computeRate(s) {
 }
 
 // ---------- Netto-Schätzung (vereinfachte Näherung, keine amtliche Tabelle) ----------
+// Tarifparameter nach § 32a EStG für das unten genannte Steuerjahr (Grundfreibetrag,
+// Tarifzonen-Eckwerte und -Koeffizienten) plus Soli-Freigrenze. Bei Wechsel auf ein neues
+// Steuerjahr: TAX_MODEL_YEAR und TAX_PARAMS gemeinsam ersetzen, nicht einzelne Werte anpassen.
+export var TAX_MODEL_YEAR = 2026;
+var TAX_PARAMS = {
+  grundfreibetrag: 12348,
+  zone2End: 17799,
+  zone3End: 69878,
+  zone4End: 277825,
+  zone2: { a: 914.51, b: 1400 },
+  zone3: { a: 173.10, b: 2397, c: 1034.87 },
+  zone4Rate: 0.42, zone4Sub: 11135.63,
+  zone5Rate: 0.45, zone5Sub: 19470.38,
+  soliThreshold: 20350,
+  entlastungAlleinerziehende: 4260
+};
+
 export function computeTaxRates(s) {
   if (!s || !s.taxClass) return null;
   var annualGross = s.mode === 'hourly'
     ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
     : (s.monthly || 0) * 12;
   if (!(annualGross > 0)) return null;
-  var GF = 12096; // Grundfreibetrag (Näherung)
-  function T(z) { // Einkommensteuer-Tarif (Näherung, Formel 2025)
-    if (z <= GF) return 0;
-    if (z <= 17443) { var y = (z - GF) / 10000; return (932.30 * y + 1400) * y; }
-    if (z <= 68480) { var q = (z - 17443) / 10000; return (176.64 * q + 2397) * q + 1015.13; }
-    if (z <= 277825) return 0.42 * z - 10911.92;
-    return 0.45 * z - 19246.67;
+  var p = TAX_PARAMS;
+  function T(z) { // Einkommensteuer-Tarif (Näherung), § 32a EStG, Steuerjahr TAX_MODEL_YEAR
+    if (z <= p.grundfreibetrag) return 0;
+    if (z <= p.zone2End) { var y = (z - p.grundfreibetrag) / 10000; return (p.zone2.a * y + p.zone2.b) * y; }
+    if (z <= p.zone3End) { var q = (z - p.zone2End) / 10000; return (p.zone3.a * q + p.zone3.b) * q + p.zone3.c; }
+    if (z <= p.zone4End) return p.zone4Rate * z - p.zone4Sub;
+    return p.zone5Rate * z - p.zone5Sub;
   }
   var zvE = Math.max(0, annualGross * 0.86 - 1230); // grob: Vorsorge + Werbungskosten
   var cls = String(s.taxClass);
   var lstAnnual;
   if (cls === '3') lstAnnual = 2 * T(zvE / 2);
-  else if (cls === '2') lstAnnual = T(Math.max(0, zvE - 4260));
-  else if (cls === '5' || cls === '6') lstAnnual = T(zvE + GF);
+  else if (cls === '2') lstAnnual = T(Math.max(0, zvE - p.entlastungAlleinerziehende));
+  else if (cls === '5' || cls === '6') lstAnnual = T(zvE + p.grundfreibetrag);
   else lstAnnual = T(zvE);
   var lstRate = Math.max(0, Math.min(0.45, lstAnnual / annualGross));
-  var soliRate = lstAnnual > 19950 ? lstRate * 0.055 : 0;
+  var soliRate = lstAnnual > p.soliThreshold ? lstRate * 0.055 : 0;
   var churchRate = s.church ? lstRate * ((Number(s.churchRate) === 8 ? 8 : 9) / 100) : 0;
   var svRate = 0.205;
   var total = Math.min(0.9, svRate + lstRate + soliRate + churchRate);

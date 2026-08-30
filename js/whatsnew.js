@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 11,
+    emoji: '🧾',
+    title: { de: 'Netto-Schätzung auf 2026 aktualisiert', en: 'Net estimate updated to 2026' },
+    body: {
+      de: 'Die Steuerparameter der Netto-Schätzung basierten noch auf 2025. Jetzt aktualisiert auf 2026 (Grundfreibetrag, Tarifzonen, Soli-Freigrenze) — deine Netto-Zahlen können sich dadurch leicht ändern.',
+      en: 'The net estimate\'s tax parameters were still based on 2025. Updated to 2026 (basic allowance, tax brackets, solidarity surcharge threshold) — your net numbers may shift slightly as a result.'
+    }
+  },
+  {
     id: 10,
     emoji: '📄',
     title: { de: 'Echter CSV-Download', en: 'Real CSV download' },
