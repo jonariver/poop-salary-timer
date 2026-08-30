@@ -87,14 +87,56 @@ var STR = {
     fundedItems: ['Bürgergeld-Regelsatz (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Deutschland gesamt)'],
     summarySub: function (dur) { return 'Du warst ' + dur + ' auf Firmenkosten unterwegs.'; },
     titles: {
-      poop: ['Sauberes Geschäft.', 'Sitzung erfolgreich beendet.', 'Das lief sauber durch.', 'Feierabend auf dem Thron.', 'Erledigt. Im besten Sinne.'],
-      smoke: ['Kurze Pause, gut bezahlt.', 'Rauchpause abgerechnet.', 'Das ging in Rauch auf — profitabel.', 'Feierabend am Aschenbecher.', 'Erledigt. Im besten Sinne.'],
-      coffee: ['Kaffeepause abgerechnet.', 'Kurzer Break, voller Lohn.', 'Tasse leer, Konto voller.', 'Feierabend an der Kaffeemaschine.', 'Erledigt. Im besten Sinne.']
+      poop: [
+        'Sauberes Geschäft.', 'Sitzung erfolgreich beendet.', 'Das lief sauber durch.', 'Feierabend auf dem Thron.', 'Erledigt. Im besten Sinne.',
+        'Geschäftlich unterwegs — im wahrsten Sinne.', 'Stilles Örtchen, laute Kasse.', 'Protokoll geschlossen, Kasse offen.', 'Vom Thron zurück ins Büro.', 'Spülung gedrückt, Gehalt gesichert.'
+      ],
+      smoke: [
+        'Kurze Pause, gut bezahlt.', 'Rauchpause abgerechnet.', 'Das ging in Rauch auf — profitabel.', 'Feierabend am Aschenbecher.', 'Erledigt. Im besten Sinne.',
+        'Rauchzeichen fürs Finanzamt.', 'Nikotin rein, Kohle raus — für dich.', 'Kurz gequalmt, gut kassiert.', 'Asche zu Asche, Cent zu Cent.', 'Zigarette aus, Konto an.'
+      ],
+      coffee: [
+        'Kaffeepause abgerechnet.', 'Kurzer Break, voller Lohn.', 'Tasse leer, Konto voller.', 'Feierabend an der Kaffeemaschine.', 'Erledigt. Im besten Sinne.',
+        'Koffein getankt, Konto gefüllt.', 'Bohne gemahlen, Bares verdient.', 'Kaffeesatz gelesen: Gehalt steigt.', 'Milchschaum weg, Lohn da.', 'Kurz wach, dauerhaft bezahlt.'
+      ]
     },
     factNothing: {
-      poop: 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
-      smoke: 'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Rauchpause erbaut.',
-      coffee: 'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Kaffeepause erbaut.'
+      poop: [
+        'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
+        'Kleinvieh macht auch Mist.',
+        'Noch kein Vermögen, aber immerhin erleichtert.',
+        'Der Betrag ist mickrig, das Gefühl trotzdem golden.',
+        'Reicht noch nicht mal für Klopapier — aber Übung macht den Meister.',
+        'Ein Tropfen auf den heißen Stein — beziehungsweise ins Becken.',
+        'Finanziell ein Klacks, gefühlt ein Erfolg.',
+        'Der Thron zahlt sich noch nicht aus — aber er zahlt.',
+        'Noch zu wenig für irgendwas — außer für ein gutes Gefühl.',
+        'Das war noch keine Goldgrube, eher ein Goldkügelchen.'
+      ],
+      smoke: [
+        'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Rauchpause erbaut.',
+        'Noch kein Vermögen, aber der Rauch hat sich gelohnt.',
+        'Kleine Wolke, kleiner Verdienst.',
+        'Der Betrag verpufft schneller als der Rauch.',
+        'Reicht noch nicht für eine neue Schachtel — aber für ein Grinsen.',
+        'Ein Zug, ein Cent — Kleinvieh macht auch Asche.',
+        'Finanziell verraucht, aber immerhin entspannt.',
+        'Die Pause zahlt sich noch nicht aus — aber sie war trotzdem gut.',
+        'Noch zu wenig für irgendwas — außer die nächste Pause.',
+        'Das war noch kein Goldesel, eher ein Aschenbecher voll Kleingeld.'
+      ],
+      coffee: [
+        'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Kaffeepause erbaut.',
+        'Noch kein Vermögen, aber der Koffein-Kick war\'s wert.',
+        'Kleine Tasse, kleiner Verdienst.',
+        'Der Betrag verdampft schneller als der Milchschaum.',
+        'Reicht noch nicht für den nächsten Kaffee — aber fürs Wachbleiben.',
+        'Ein Schluck, ein Cent — Kleinvieh macht auch Kaffeesatz.',
+        'Finanziell dünn wie der Kaffee, aber immerhin wach.',
+        'Die Pause zahlt sich noch nicht aus — aber sie hat wachgehalten.',
+        'Noch zu wenig für irgendwas — außer den nächsten Schluck.',
+        'Das war noch kein Goldesel, eher ein Kaffeesatz voll Kleingeld.'
+      ]
     },
     factPct: function (pct, item) { return 'Das sind schon ' + pct + ' % von ' + item + '. Dranbleiben!'; },
     factOne: function (item) { return 'Dafür gibt es ' + item + '. Wohl verdient!'; },
@@ -216,14 +258,56 @@ var STR = {
     fundedItems: ["Citizen's benefit rate (1 person)", 'NGO project position', 'Ukraine aid (Germany total)'],
     summarySub: function (dur) { return 'You spent ' + dur + ' on company time.'; },
     titles: {
-      poop: ['Clean business.', 'Session completed successfully.', 'That went smoothly.', 'Clocking out of the throne room.', 'Done. In the best sense.'],
-      smoke: ['Short break, well paid.', 'Smoke break, invoiced.', 'That went up in smoke — profitably.', 'Clocking out at the ashtray.', 'Done. In the best sense.'],
-      coffee: ['Coffee break, invoiced.', 'Short break, full pay.', 'Cup empty, wallet fuller.', 'Clocking out at the coffee machine.', 'Done. In the best sense.']
+      poop: [
+        'Clean business.', 'Session completed successfully.', 'That went smoothly.', 'Clocking out of the throne room.', 'Done. In the best sense.',
+        'Business, literally.', 'Quiet stall, loud payday.', 'Case closed, register open.', 'Off the throne, back to the grind.', 'Flushed and paid.'
+      ],
+      smoke: [
+        'Short break, well paid.', 'Smoke break, invoiced.', 'That went up in smoke — profitably.', 'Clocking out at the ashtray.', 'Done. In the best sense.',
+        'Smoke signals for the taxman.', 'Nicotine in, cash out — for you.', 'Short puff, solid payout.', 'Ashes to ashes, cents to cents.', 'Cigarette out, balance up.'
+      ],
+      coffee: [
+        'Coffee break, invoiced.', 'Short break, full pay.', 'Cup empty, wallet fuller.', 'Clocking out at the coffee machine.', 'Done. In the best sense.',
+        'Caffeine in, balance up.', 'Beans ground, cash earned.', 'Coffee grounds say: raise incoming.', 'Foam gone, wage banked.', 'Briefly awake, permanently paid.'
+      ]
     },
     factNothing: {
-      poop: "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
-      smoke: "That buys you nothing yet — but Rome wasn't built in one smoke break either.",
-      coffee: "That buys you nothing yet — but Rome wasn't built in one coffee break either."
+      poop: [
+        "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
+        "No fortune yet, but you feel lighter.",
+        "The amount is tiny, the feeling is golden.",
+        "Not even enough for toilet paper — but practice makes perfect.",
+        "A drop in the bucket — or the bowl, in this case.",
+        "Financially a nothing-burger, emotionally a win.",
+        "The throne doesn't pay off yet — but it does pay.",
+        "Not enough for anything — except a good feeling.",
+        "Not a gold mine yet, more of a gold nugget.",
+        "Every little bit counts, even this."
+      ],
+      smoke: [
+        "That buys you nothing yet — but Rome wasn't built in one smoke break either.",
+        "No fortune yet, but the smoke break was worth it.",
+        "Small cloud, small earnings.",
+        "The amount vanishes faster than the smoke.",
+        "Not enough for a new pack yet — but enough for a grin.",
+        "One puff, one cent — every bit of ash counts.",
+        "Financially up in smoke, but at least relaxing.",
+        "The break doesn't pay off yet — but it was good anyway.",
+        "Not enough for anything — except the next break.",
+        "Not a jackpot yet, more like an ashtray full of pocket change."
+      ],
+      coffee: [
+        "That buys you nothing yet — but Rome wasn't built in one coffee break either.",
+        "No fortune yet, but the caffeine kick was worth it.",
+        "Small cup, small earnings.",
+        "The amount evaporates faster than the foam.",
+        "Not enough for the next coffee yet — but enough to stay awake.",
+        "One sip, one cent — every bit of grounds counts.",
+        "Financially as thin as the coffee, but at least awake.",
+        "The break doesn't pay off yet — but it kept you awake.",
+        "Not enough for anything — except the next sip.",
+        "Not a jackpot yet, more like a cup full of pocket change."
+      ]
     },
     factPct: function (pct, item) { return "That's already " + pct + '% of ' + item + '. Keep going!'; },
     factOne: function (item) { return 'That buys you ' + item + '. Well earned!'; },
@@ -329,7 +413,11 @@ export function fmtMilestoneMessage(status) {
   return parts.join(' · ');
 }
 export function funFact(earned, activity) {
-  if (earned < 0.05) { var variants = t('factNothing'); return variants[activity] || variants.poop; }
+  if (earned < 0.05) {
+    var variants = t('factNothing');
+    var list = variants[activity] || variants.poop;
+    return list[Math.floor(Math.random() * list.length)];
+  }
   var comparisons = t('comparisons');
   var best = null;
   for (var i = 0; i < comparisons.length; i++) {
