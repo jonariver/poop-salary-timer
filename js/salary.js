@@ -59,3 +59,16 @@ export function calculateEarnings(durationMs, hourlyRate) {
 
 // "Damit finanziert": Euro pro Sekunde der Referenzgrößen (grobe Werte, siehe Disclaimer)
 export var FUND_RATES = [563 / 2592000, 60000 / 31536000, 8000000000 / 31536000];
+
+// Preis-Meilensteine im Live-Timer (aufsteigend sortiert). Labels/Emoji leben in i18n.js.
+export var MILESTONE_PRICES = [4, 8, 15, 20, 130, 500];
+
+export function milestoneStatus(earned, prices) {
+  var reachedIndex = -1;
+  for (var i = 0; i < prices.length; i++) {
+    if (earned >= prices[i]) reachedIndex = i;
+    else break;
+  }
+  var remaining = reachedIndex + 1 < prices.length ? prices[reachedIndex + 1] - earned : null;
+  return { reachedIndex: reachedIndex, remaining: remaining };
+}

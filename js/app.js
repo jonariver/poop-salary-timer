@@ -115,6 +115,9 @@ import * as whatsnew from './whatsnew.js';
   // ---------- Timer rendering ----------
   var stateLabel = $('state-label'), moneyEl = $('money-display'), elapsedEl = $('elapsed-display');
   var btnStart = $('btn-start'), btnStop = $('btn-stop'), holdHint = $('hold-hint');
+  var milestoneEl = $('milestone-display');
+  var lastMilestoneIndex = -1;
+  var milestoneFlashTimer = null;
 
   function renderTimer() {
     var active = timer.getActive();
@@ -126,6 +129,17 @@ import * as whatsnew from './whatsnew.js';
     var netEl = $('net-display');
     netEl.classList.toggle('hidden', !netInfo);
     if (netInfo) netEl.innerHTML = t('netLabel') + ' <strong>' + i18n.fmtMoneyLive(netInfo.net) + '</strong>';
+    milestoneEl.classList.toggle('hidden', !settings);
+    if (settings) {
+      var milestoneStatus = salary.milestoneStatus(earned, salary.MILESTONE_PRICES);
+      milestoneEl.textContent = i18n.fmtMilestoneMessage(milestoneStatus);
+      if (milestoneStatus.reachedIndex > lastMilestoneIndex) {
+        milestoneEl.classList.add('flash');
+        if (milestoneFlashTimer) clearTimeout(milestoneFlashTimer);
+        milestoneFlashTimer = setTimeout(function () { milestoneEl.classList.remove('flash'); }, 700);
+      }
+      lastMilestoneIndex = milestoneStatus.reachedIndex;
+    }
     elapsedEl.textContent = i18n.fmtElapsed(ms);
     var running = !!(active && active.startTs);
     var paused = !!(active && !active.startTs && active.accumulatedMs > 0);
