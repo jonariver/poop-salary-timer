@@ -15,6 +15,10 @@
     <button id="lang-de" aria-pressed="true">DE</button>
     <button id="lang-en" aria-pressed="false">EN</button>
   </div>
+  <button class="whatsnew-btn" id="whatsnew-btn" title="Neuigkeiten" aria-label="Neuigkeiten">
+    📣
+    <span class="whatsnew-badge hidden" id="whatsnew-badge">NEU</span>
+  </button>
   <header class="app">
     <h1>Poop Salary Timer <span class="coin">💩</span></h1>
     <p class="tagline">Zeit ist Geld. Auch hier.</p>
@@ -274,6 +278,16 @@
     <div class="actions">
       <button class="btn btn-start" id="share-copy">Kopieren</button>
       <button class="btn btn-secondary" id="share-close">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<div class="share-overlay hidden" id="whatsnew-overlay">
+  <div class="share-modal" role="dialog" aria-label="Was gibt's Neues">
+    <h3 id="whatsnew-title">Was gibt's Neues 🎉</h3>
+    <div class="whatsnew-list" id="whatsnew-list"></div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="whatsnew-close" style="width:100%">Schließen</button>
     </div>
   </div>
 </div>

@@ -118,6 +118,54 @@ body {
   color: var(--gold-strong);
 }
 
+/* ---------- Was gibt's Neues ---------- */
+.whatsnew-btn {
+  position: absolute;
+  top: 10px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  z-index: 10;
+}
+.whatsnew-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  padding: 2px 6px;
+}
+.whatsnew-list {
+  text-align: left;
+  max-height: 50vh;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+.whatsnew-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--card-edge);
+}
+.whatsnew-item:last-child { border-bottom: none; }
+.whatsnew-item .emoji { font-size: 1.3rem; line-height: 1; flex: none; }
+.whatsnew-item .title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: var(--ink); }
+.whatsnew-item .body { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; }
+
 /* ---------- Header ---------- */
 header.app { text-align: center; margin: 22px 0 20px; }
 h1 {

@@ -27,6 +27,7 @@ for f in js/*.js; do node --check "$f"; done
   - `pst_lang` — `'de'|'en'`
   - `pst_achievements` — `{poop:{[achId]:unlockedAtMs}, smoke:{...}, coffee:{...}}` (legacy flat shape auto-migrates on read, see `achievements.js`'s `migrateAchievements`)
   - `pst_ach_category` — last-viewed achievement category tab
+  - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen
   - Never rename/restructure these without an explicit, deliberate migration.
 
 ## Architecture
@@ -38,6 +39,7 @@ for f in js/*.js; do node --check "$f"; done
 - **`i18n.js`** — everything locale-dependent: the `STR` translation dictionary, `t()`, `Intl` formatters, and all `fmt*`/`funFact`/`pad` helpers (money/duration formatting is bundled here because it's locale-sensitive, not because it's DOM work). Also owns the `BINDINGS` table + `applyBindings()`, which patches static translated text into the DOM by CSS selector.
 - **`stats.js`** — `actKeyOf` (normalizes an activity string to `poop`/`smoke`/`coffee`), `sessionStats` (aggregation for achievements/history), CSV export/import (`csvFromSessions`, `parseCsv`, `sessionKey`). Depends only on `i18n.js`.
 - **`achievements.js`** — the `ACHIEVEMENTS` definitions (11 total; each has per-activity-category `variants` with translated name/desc/badge, a `test(stats)` predicate, and a `progress(stats)` formatter), plus `checkAchievements` and `migrateAchievements`. Depends on `i18n.js` and `stats.js`.
+- **`whatsnew.js`** — curated, user-facing changelog entries (`ENTRIES`, newest first) shown in the header's 📣 modal, plus `hasUnseen(lastSeenId)`. Not derived from git history — hand-written in plain language for end users.
 - **`timer.js`** — the in-memory active-session state machine (`getActive`, `elapsedMs`, `startOrResume`, `pause`, `end`). Depends only on `storage.js`. No DOM.
 - **`app.js`** — the sole orchestrator: caches every DOM element, owns all `render*` functions and event wiring, and runs the boot sequence. Imports from all six modules above via namespace imports (`import * as X from './x.js'`). Nothing imports from `app.js`.
 
