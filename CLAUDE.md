@@ -29,6 +29,7 @@ for f in js/*.js; do node --check "$f"; done
   - `pst_ach_category` — last-viewed achievement category tab
   - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen
   - Never rename/restructure these without an explicit, deliberate migration.
+- **Every user-facing feature ships with a `whatsnew.js` entry.** When adding a new feature (not a bugfix or internal refactor), add a new entry to `ENTRIES` in `js/whatsnew.js` in the same change — plain-language, DE/EN, tongue-in-cheek tone matching the existing entries — so returning users see it in the 📣 modal.
 
 ## Architecture
 
