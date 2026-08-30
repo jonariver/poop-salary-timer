@@ -5,6 +5,7 @@ import * as stats from './stats.js';
 import * as achievements from './achievements.js';
 import * as timer from './timer.js';
 import * as whatsnew from './whatsnew.js';
+import * as sharing from './share.js';
 
 (function () {
   'use strict';
@@ -620,9 +621,15 @@ import * as whatsnew from './whatsnew.js';
   }
   $('btn-share-session').addEventListener('click', function () {
     if (!lastSummary) return;
-    var text = t('shareSession')(stats.actKeyOf(lastSummary.activity), i18n.fmtDurationWords(lastSummary.durationMs), i18n.fmtMoney(lastSummary.earned), i18n.funFact(lastSummary.earned));
+    var sessionActivity = stats.actKeyOf(lastSummary.activity);
+    var text = t('shareSession')(sessionActivity, i18n.fmtDurationWords(lastSummary.durationMs), i18n.fmtMoney(lastSummary.earned), i18n.funFact(lastSummary.earned));
     text += buildTaxShareText(lastSummary.tax);
-    shareContent(text);
+    sharing.tryShareSessionImage(text, sessionActivity).then(function (sharedWithImage) {
+      if (!sharedWithImage) shareContent(text);
+    }).catch(function (err) {
+      if (err && err.name === 'AbortError') return; // Nutzer hat abgebrochen
+      copyFallback(text);
+    });
   });
   $('btn-share-achievements').addEventListener('click', function () {
     var unlockedAll = achievements.migrateAchievements(storage.getRawAchievements());
