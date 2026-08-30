@@ -222,6 +222,47 @@ test('defers text fallback to the next active tap when file loading was slow', a
   assert.equal(nativeShareCalled, false);
 });
 
+test('binds the default fetch to the global so a receiver-checked native fetch does not throw "Illegal invocation"', async () => {
+  const { tryShareSessionImage } = await import('../js/share.js');
+
+  // Mimics the real browser: window.fetch is a native function that throws
+  // "Illegal invocation" unless called with `this === globalThis` — exactly what
+  // happens if it's extracted as a bare reference into a plain object and then
+  // invoked as obj.fetch(...). This bug shipped silently because every other
+  // test here passes its own mock fetch, which has no such receiver check.
+  function receiverCheckedFetch(url) {
+    if (this !== globalThis) {
+      throw new TypeError("Failed to execute 'fetch' on 'Window': Illegal invocation");
+    }
+    return Promise.resolve({
+      ok: true,
+      blob: async () => new Blob(['png-data'], { type: 'image/png' })
+    });
+  }
+
+  const originalFetch = globalThis.fetch;
+  const originalNavigator = globalThis.navigator;
+  let shareCalled = null;
+  globalThis.fetch = receiverCheckedFetch;
+  // navigator is a read-only global in Node; redefine it for the duration of this test.
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      canShare(data) { return true; },
+      async share(data) { shareCalled = data; }
+    }
+  });
+
+  try {
+    const shared = await tryShareSessionImage('session result', 'poop');
+    assert.equal(shared, true);
+    assert.equal(shareCalled.files[0].name, 'poop-salary-result.png');
+  } finally {
+    globalThis.fetch = originalFetch;
+    Object.defineProperty(globalThis, 'navigator', { configurable: true, value: originalNavigator });
+  }
+});
+
 test('ships all three mapped assets as valid PNG files', async () => {
   const assetNames = ['poop.png', 'smoke.png', 'coffee.png'];
   const validPng = await Promise.all(assetNames.map(async function (name) {
