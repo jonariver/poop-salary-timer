@@ -729,10 +729,10 @@ import * as whatsnew from './whatsnew.js';
     if (!rows.length) { $('import-error').style.display = 'block'; return; }
     var sessions = storage.getSessions() || [];
     var existing = {};
-    sessions.forEach(function (s) { existing[stats.sessionKey(s.ts, s.durationMs)] = true; });
+    sessions.forEach(function (s) { existing[stats.sessionKey(s.ts, s.durationMs, s.activity, s.earned)] = true; });
     var added = 0, skipped = 0;
     rows.forEach(function (row) {
-      var key = stats.sessionKey(row.ts, row.durationMs);
+      var key = stats.sessionKey(row.ts, row.durationMs, row.activity, row.earned);
       if (existing[key]) { skipped++; return; }
       existing[key] = true;
       var imp = {

@@ -23,14 +23,18 @@ function lsSet(key, val) {
 function lsDel(key) {
   try { localStorage.removeItem(key); } catch (e) {}
 }
+function isPlainObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
 
-export function getSettings() { return lsGet(LS_SETTINGS); }
+// Getter geben bei kaputten/falsch geformten Daten (z.B. `pst_sessions` versehentlich als `{}`
+// statt Array) einen sicheren leeren Zustand zurück, statt den Wert unverändert durchzureichen —
+// Aufrufer wie renderHistory() erwarten sonst z.B. ein Array und würden beim ersten .sort()/.map() crashen.
+export function getSettings() { var v = lsGet(LS_SETTINGS); return isPlainObject(v) ? v : null; }
 export function saveSettings(settings) { lsSet(LS_SETTINGS, settings); }
 
-export function getSessions() { return lsGet(LS_SESSIONS); }
+export function getSessions() { var v = lsGet(LS_SESSIONS); return Array.isArray(v) ? v : []; }
 export function saveSessions(sessions) { lsSet(LS_SESSIONS, sessions); }
 
-export function getActive() { return lsGet(LS_ACTIVE); }
+export function getActive() { var v = lsGet(LS_ACTIVE); return isPlainObject(v) ? v : null; }
 export function saveActive(active) { lsSet(LS_ACTIVE, active); }
 export function clearActive() { lsDel(LS_ACTIVE); }
 
@@ -40,7 +44,7 @@ export function saveActivity(key) { lsSet(LS_ACTIVITY, key); }
 export function getLang() { return lsGet(LS_LANG); }
 export function saveLang(lang) { lsSet(LS_LANG, lang); }
 
-export function getRawAchievements() { return lsGet(LS_ACHIEVEMENTS); }
+export function getRawAchievements() { var v = lsGet(LS_ACHIEVEMENTS); return isPlainObject(v) ? v : null; }
 export function saveAchievements(data) { lsSet(LS_ACHIEVEMENTS, data); }
 
 export function getAchCategory() { return lsGet(LS_ACH_CATEGORY); }
