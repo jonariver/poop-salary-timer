@@ -82,7 +82,7 @@ body {
 .shell {
   max-width: 430px;
   margin: 0 auto;
-  padding: 20px 18px 96px;
+  padding: 20px 18px 140px;
   min-height: 100vh;
   position: relative;
 }
@@ -765,6 +765,7 @@ nav.tabs {
   left: 0;
   right: 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
