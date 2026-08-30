@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 13,
+    emoji: '🎭',
+    title: { de: 'Mehr Sprüche', en: 'More sayings' },
+    body: {
+      de: 'Die Titel und Sprüche nach einer Sitzung gibt es jetzt in 10 statt 5 Varianten pro Aktivität — mehr Abwechslung beim Klo, Rauchen und Kaffee.',
+      en: 'The titles and sayings after a session now come in 10 variants per activity instead of 5 — more variety for toilet, smoking, and coffee breaks.'
+    }
+  },
+  {
     id: 12,
     emoji: '📤',
     title: { de: 'Session-Bilder beim Teilen', en: 'Session images when sharing' },
