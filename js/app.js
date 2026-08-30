@@ -389,11 +389,13 @@ import * as whatsnew from './whatsnew.js';
   }
 
   function downloadCsv(csvText) {
+    var d = new Date();
+    var localDate = d.getFullYear() + '-' + i18n.pad(d.getMonth() + 1) + '-' + i18n.pad(d.getDate());
     var blob = new Blob(['﻿' + csvText], { type: 'text/csv;charset=utf-8;' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'poop-salary-timer-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.download = 'poop-salary-timer-' + localDate + '.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -403,8 +405,13 @@ import * as whatsnew from './whatsnew.js';
   function runCsvExport() {
     var sessions = storage.getSessions() || [];
     if (!sessions.length) { infoToast(t('toastNoExport')); return; }
+    try {
+      downloadCsv(stats.csvFromSessions(sessions));
+    } catch (e) {
+      infoToast(t('toastExportFailed'));
+      return;
+    }
     storage.saveLastExport(Date.now());
-    downloadCsv(stats.csvFromSessions(sessions));
     infoToast(t('toastExported'));
     renderExportReminder(sessions);
   }

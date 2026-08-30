@@ -53,10 +53,14 @@ export function businessYearStats(sessions, now) {
 
   var monthEarned = 0, monthCount = 0, yearEarned = 0, yearMs = 0, yearCount = 0;
   var weekdayEarned = [0, 0, 0, 0, 0, 0, 0], weekdayRepTs = [null, null, null, null, null, null, null];
-  var longest = null, priciest = null, days = {};
+  var longest = null, priciest = null, days = {}, allDays = {};
 
   sessions.forEach(function (s) {
     var d = new Date(s.ts);
+    // Alle Sessions fließen in allDays ein (für currentStreak, die jahresübergreifend laufen soll);
+    // der Rest bleibt jahresgefiltert.
+    var allKey = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    if (!allDays[allKey]) allDays[allKey] = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
     if (d.getFullYear() !== year) return;
     yearEarned += s.earned;
     yearMs += s.durationMs;
@@ -67,12 +71,15 @@ export function businessYearStats(sessions, now) {
     if (weekdayRepTs[wd] === null) weekdayRepTs[wd] = s.ts;
     if (!longest || s.durationMs > longest.durationMs) longest = s;
     if (!priciest || s.earned > priciest.earned) priciest = s;
-    var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
-    if (!days[key]) days[key] = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    days[allKey] = allDays[allKey];
   });
 
   var dayTs = Object.keys(days).map(function (k) { return days[k]; }).sort(function (a, b) { return a - b; });
-  var streaks = computeStreaks(dayTs, now);
+  var allDayTs = Object.keys(allDays).map(function (k) { return allDays[k]; }).sort(function (a, b) { return a - b; });
+  // bestStreak bleibt auf das laufende Jahr begrenzt, currentStreak läuft jahresübergreifend
+  // (eine Serie 30.12. → 01.01. darf am Jahreswechsel nicht künstlich abreißen).
+  var bestStreak = computeStreaks(dayTs, now).best;
+  var currentStreak = computeStreaks(allDayTs, now).current;
 
   var bestWeekdayIdx = -1, bestWeekdayEarned = 0;
   for (var i = 0; i < 7; i++) {
@@ -93,7 +100,7 @@ export function businessYearStats(sessions, now) {
     longest: longest, priciest: priciest,
     bestWeekdayIdx: bestWeekdayIdx,
     bestWeekdayTs: bestWeekdayIdx >= 0 ? weekdayRepTs[bestWeekdayIdx] : null,
-    currentStreak: streaks.current, bestStreak: streaks.best,
+    currentStreak: currentStreak, bestStreak: bestStreak,
     projectionEligible: projectionEligible,
     projection: projectionEligible ? (yearEarned / daysElapsed) * daysInYear : null
   };
