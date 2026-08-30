@@ -388,11 +388,24 @@ import * as whatsnew from './whatsnew.js';
     banner.classList.remove('hidden');
   }
 
+  function downloadCsv(csvText) {
+    var blob = new Blob(['﻿' + csvText], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'poop-salary-timer-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function runCsvExport() {
     var sessions = storage.getSessions() || [];
     if (!sessions.length) { infoToast(t('toastNoExport')); return; }
     storage.saveLastExport(Date.now());
-    openShareModal(stats.csvFromSessions(sessions), t('csvExportTitle'));
+    downloadCsv(stats.csvFromSessions(sessions));
+    infoToast(t('toastExported'));
     renderExportReminder(sessions);
   }
 

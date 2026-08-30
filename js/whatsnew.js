@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 10,
+    emoji: '📄',
+    title: { de: 'Echter CSV-Download', en: 'Real CSV download' },
+    body: {
+      de: 'Der CSV-Export lädt jetzt eine richtige Datei herunter, statt nur den Text in die Zwischenablage zu kopieren.',
+      en: 'CSV export now downloads an actual file instead of just copying the text to your clipboard.'
+    }
+  },
+  {
     id: 9,
     emoji: '💾',
     title: { de: 'Export-Erinnerung', en: 'Export reminder' },
