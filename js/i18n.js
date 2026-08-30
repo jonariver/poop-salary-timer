@@ -91,7 +91,11 @@ var STR = {
       smoke: ['Kurze Pause, gut bezahlt.', 'Rauchpause abgerechnet.', 'Das ging in Rauch auf — profitabel.', 'Feierabend am Aschenbecher.', 'Erledigt. Im besten Sinne.'],
       coffee: ['Kaffeepause abgerechnet.', 'Kurzer Break, voller Lohn.', 'Tasse leer, Konto voller.', 'Feierabend an der Kaffeemaschine.', 'Erledigt. Im besten Sinne.']
     },
-    factNothing: 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
+    factNothing: {
+      poop: 'Das reicht noch für nichts — aber Rom wurde auch nicht an einem Klogang erbaut.',
+      smoke: 'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Rauchpause erbaut.',
+      coffee: 'Das reicht noch für nichts — aber Rom wurde auch nicht in einer Kaffeepause erbaut.'
+    },
     factPct: function (pct, item) { return 'Das sind schon ' + pct + ' % von ' + item + '. Dranbleiben!'; },
     factOne: function (item) { return 'Dafür gibt es ' + item + '. Wohl verdient!'; },
     factMany: function (n, items) { return 'Dafür gibt es ' + n + ' ' + items + '. Wohl verdient!'; },
@@ -216,7 +220,11 @@ var STR = {
       smoke: ['Short break, well paid.', 'Smoke break, invoiced.', 'That went up in smoke — profitably.', 'Clocking out at the ashtray.', 'Done. In the best sense.'],
       coffee: ['Coffee break, invoiced.', 'Short break, full pay.', 'Cup empty, wallet fuller.', 'Clocking out at the coffee machine.', 'Done. In the best sense.']
     },
-    factNothing: "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
+    factNothing: {
+      poop: "That buys you nothing yet — but Rome wasn't built in one bathroom break either.",
+      smoke: "That buys you nothing yet — but Rome wasn't built in one smoke break either.",
+      coffee: "That buys you nothing yet — but Rome wasn't built in one coffee break either."
+    },
     factPct: function (pct, item) { return "That's already " + pct + '% of ' + item + '. Keep going!'; },
     factOne: function (item) { return 'That buys you ' + item + '. Well earned!'; },
     factMany: function (n, items) { return 'That buys you ' + n + ' ' + items + '. Well earned!'; },
@@ -320,8 +328,8 @@ export function fmtMilestoneMessage(status) {
   }
   return parts.join(' · ');
 }
-export function funFact(earned) {
-  if (earned < 0.05) return t('factNothing');
+export function funFact(earned, activity) {
+  if (earned < 0.05) { var variants = t('factNothing'); return variants[activity] || variants.poop; }
   var comparisons = t('comparisons');
   var best = null;
   for (var i = 0; i < comparisons.length; i++) {

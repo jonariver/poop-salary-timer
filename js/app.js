@@ -244,7 +244,7 @@ import * as sharing from './share.js';
     $('summary-sub').textContent = t('summarySub')(i18n.fmtDurationWords(lastSummary.durationMs));
     $('summary-duration').textContent = i18n.fmtElapsed(lastSummary.durationMs);
     $('summary-earned').textContent = i18n.fmtMoney(lastSummary.earned);
-    $('summary-fact').textContent = i18n.funFact(lastSummary.earned);
+    $('summary-fact').textContent = i18n.funFact(lastSummary.earned, sessActivity);
     var tax = lastSummary.tax;
     $('sum-k-earned').textContent = tax ? t('sumKGross') : t('sumKEarned');
     $('sum-tile-net').classList.toggle('hidden', !tax);
@@ -623,7 +623,7 @@ import * as sharing from './share.js';
   $('btn-share-session').addEventListener('click', function () {
     if (!lastSummary) return;
     var sessionActivity = stats.actKeyOf(lastSummary.activity);
-    var text = t('shareSession')(sessionActivity, i18n.fmtDurationWords(lastSummary.durationMs), i18n.fmtMoney(lastSummary.earned), i18n.funFact(lastSummary.earned));
+    var text = t('shareSession')(sessionActivity, i18n.fmtDurationWords(lastSummary.durationMs), i18n.fmtMoney(lastSummary.earned), i18n.funFact(lastSummary.earned, sessionActivity));
     text += buildTaxShareText(lastSummary.tax);
     sharing.tryShareSessionImage(text, sessionActivity).then(function (sharedWithImage) {
       if (sharedWithImage === 'ready') {
