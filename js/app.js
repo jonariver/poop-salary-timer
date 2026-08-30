@@ -385,6 +385,56 @@ import * as whatsnew from './whatsnew.js';
     $('year-projection').classList.toggle('hidden', !y.projectionEligible);
     $('year-not-enough-data').classList.toggle('hidden', y.projectionEligible);
     if (y.projectionEligible) $('year-projection-value').textContent = i18n.fmtMoney(y.projection);
+    renderHeatmap();
+  }
+
+  var selectedHeatmapCell = null;
+  function selectHeatmapDay(day, cell) {
+    if (selectedHeatmapCell) selectedHeatmapCell.classList.remove('selected');
+    cell.classList.add('selected');
+    selectedHeatmapCell = cell;
+    var dateStr = i18n.getDateFmt().format(new Date(day.ts));
+    $('heatmap-detail').textContent = day.count
+      ? t('heatmapDetailSome')(dateStr, day.count, i18n.fmtDurationWords(day.durationMs), i18n.fmtMoney(day.earned))
+      : t('heatmapDetailNone')(dateStr);
+  }
+
+  function renderHeatmap() {
+    var h = stats.yearHeatmap(storage.getSessions() || [], new Date());
+    var monthsEl = $('heatmap-months');
+    var gridEl = $('heatmap-grid');
+    monthsEl.innerHTML = '';
+    gridEl.innerHTML = '';
+    selectedHeatmapCell = null;
+
+    var lastMonth = -1;
+    h.weeks.forEach(function (week) {
+      var monthLabel = document.createElement('div');
+      var firstDay = week.filter(function (c) { return c; })[0];
+      if (firstDay) {
+        var m = new Date(firstDay.ts).getMonth();
+        if (m !== lastMonth) { monthLabel.textContent = i18n.fmtMonthShort(firstDay.ts); lastMonth = m; }
+      }
+      monthsEl.appendChild(monthLabel);
+
+      week.forEach(function (day) {
+        var cell = document.createElement('button');
+        cell.className = 'heatmap-cell';
+        cell.type = 'button';
+        if (!day) {
+          cell.classList.add('empty');
+          cell.disabled = true;
+          cell.tabIndex = -1;
+        } else {
+          cell.setAttribute('data-level', String(day.level));
+          cell.setAttribute('aria-label', i18n.getDateFmt().format(new Date(day.ts)));
+          cell.addEventListener('click', function () { selectHeatmapDay(day, cell); });
+          cell.addEventListener('focus', function () { selectHeatmapDay(day, cell); });
+        }
+        gridEl.appendChild(cell);
+      });
+    });
+    $('heatmap-detail').textContent = t('heatmapDetailHint');
   }
 
   // ---------- Achievements ----------

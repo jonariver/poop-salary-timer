@@ -99,6 +99,58 @@ export function businessYearStats(sessions, now) {
   };
 }
 
+// Tages-Heatmap fürs laufende Kalenderjahr (Montag-Start): ein Eintrag pro Kalendertag von
+// 1. Jan bis 31. Dez, außerdem in Wochen-Spalten gruppiert fürs Grid-Rendering. Intensitätsstufe
+// 0-4 relativ zum verdienststärksten Tag des Jahres (0 nur bei exakt 0 €).
+export function yearHeatmap(sessions, now) {
+  now = now || new Date();
+  var year = now.getFullYear();
+
+  var byDay = {};
+  sessions.forEach(function (s) {
+    var d = new Date(s.ts);
+    if (d.getFullYear() !== year) return;
+    var key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    var entry = byDay[key] || (byDay[key] = { earned: 0, count: 0, durationMs: 0 });
+    entry.earned += s.earned;
+    entry.count += 1;
+    entry.durationMs += s.durationMs;
+  });
+
+  var days = [], maxEarned = 0;
+  var cursor = new Date(year, 0, 1);
+  var end = new Date(year, 11, 31).getTime();
+  while (cursor.getTime() <= end) {
+    var key2 = cursor.getFullYear() + '-' + cursor.getMonth() + '-' + cursor.getDate();
+    var e = byDay[key2];
+    var earned = e ? e.earned : 0;
+    if (earned > maxEarned) maxEarned = earned;
+    days.push({
+      ts: new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()).getTime(),
+      earned: earned, count: e ? e.count : 0, durationMs: e ? e.durationMs : 0
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  days.forEach(function (day) {
+    day.level = day.earned <= 0 ? 0 : Math.min(4, Math.ceil((day.earned / maxEarned) * 4));
+  });
+
+  // Montag = erste Zeile. Führende/folgende Lücken (vor dem 1. Jan / nach dem 31. Dez) werden mit null aufgefüllt.
+  var firstWeekday = (new Date(year, 0, 1).getDay() + 6) % 7; // 0=Mo ... 6=So
+  var weeks = [], col = [];
+  for (var i = 0; i < firstWeekday; i++) col.push(null);
+  days.forEach(function (day) {
+    col.push(day);
+    if (col.length === 7) { weeks.push(col); col = []; }
+  });
+  if (col.length) {
+    while (col.length < 7) col.push(null);
+    weeks.push(col);
+  }
+
+  return { days: days, weeks: weeks, maxEarned: maxEarned };
+}
+
 // ---------- CSV Export / Import ----------
 function csvNum(v, dec) {
   var out = v.toFixed(dec);

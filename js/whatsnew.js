@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 8,
+    emoji: '🔥',
+    title: { de: 'Sitzungs-Heatmap', en: 'Session heatmap' },
+    body: {
+      de: 'Im Jahr-Tab siehst du jetzt eine GitHub-artige Heatmap deines Jahres. Tippe auf einen Tag für die Details.',
+      en: 'The Year tab now shows a GitHub-style heatmap of your year. Tap a day for the details.'
+    }
+  },
+  {
     id: 7,
     emoji: '🧾',
     title: { de: 'Dein Geschäftsjahr', en: 'Your business year' },
