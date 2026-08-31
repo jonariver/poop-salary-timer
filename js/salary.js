@@ -28,6 +28,44 @@ var TAX_PARAMS = {
   entlastungAlleinerziehende: 4260
 };
 
+// ---------- Schweiz: Bundessteuer (vereinfachte Näherung) ----------
+// Stufentarif "Tarif für Alleinstehende (Grundtarif)", gültig ab 2026, verifiziert gegen
+// die offizielle Tariftabelle des Kantons Basel-Landschaft (reproduziert den Bundestarif
+// nach Bundesgesetz über die direkte Bundessteuer, DBG). Bei Wechsel auf ein neues
+// Steuerjahr: CH_TAX_MODEL_YEAR und CH_FEDERAL_BRACKETS gemeinsam ersetzen.
+export var CH_TAX_MODEL_YEAR = 2026;
+var CH_FEDERAL_BRACKETS = [
+  { upTo: 15200, rate: 0 },
+  { upTo: 33200, rate: 0.0077 },
+  { upTo: 43500, rate: 0.0088 },
+  { upTo: 58000, rate: 0.0264 },
+  { upTo: 76200, rate: 0.0297 },
+  { upTo: 82100, rate: 0.0594 },
+  { upTo: 108900, rate: 0.0660 },
+  { upTo: 141500, rate: 0.0880 },
+  { upTo: 185100, rate: 0.1100 },
+  { upTo: 793900, rate: 0.1320 }
+];
+var CH_FEDERAL_TOP_RATE = 0.115; // ab CHF 793'900: pauschal 11,5 % vom gesamten zvE (vereinfacht,
+                                  // ignoriert die ~200-CHF-Übergangszone der offiziellen Tabelle)
+
+// Stufenweise (bracket) Steuerberechnung: Basis für Bundes- UND (sobald befüllt) Kantonssteuer.
+function computeBracketTax(zvE, brackets) {
+  var tax = 0, lower = 0;
+  for (var i = 0; i < brackets.length; i++) {
+    var b = brackets[i];
+    if (zvE <= b.upTo) { tax += (zvE - lower) * b.rate; return tax; }
+    tax += (b.upTo - lower) * b.rate;
+    lower = b.upTo;
+  }
+  return tax;
+}
+
+export function computeChFederalTax(zvE) {
+  if (zvE >= 793900) return zvE * CH_FEDERAL_TOP_RATE;
+  return computeBracketTax(zvE, CH_FEDERAL_BRACKETS);
+}
+
 export function computeTaxRates(s) {
   if (!s || !s.taxClass) return null;
   var annualGross = s.mode === 'hourly'
