@@ -58,6 +58,9 @@ function computeBracketTax(zvE, brackets) {
     tax += (b.upTo - lower) * b.rate;
     lower = b.upTo;
   }
+  // zvE exceeds every listed bracket: continue taxing the remainder at the top bracket's rate,
+  // so a future cantonal table's finite top `upTo` doesn't silently under-tax high incomes.
+  tax += (zvE - lower) * brackets[brackets.length - 1].rate;
   return tax;
 }
 
@@ -98,6 +101,12 @@ export function computeChSocialSecurity(annualGross) {
 
 export var CH_CANTON_TAX = {}; // wird in einem Folge-Schritt mit Kantonsdaten befüllt (siehe Spec Abschnitt 5)
 
+// NOTE: `s.region` here is a field on the settings object passed in by the caller — it is a
+// SEPARATE, unreconciled source of truth from the `pst_region` localStorage key that i18n.js
+// reads/writes via `getRegion()`/`setRegion()`. Nothing currently keeps them in sync, since no
+// UI writes `region` onto `pst_settings` yet. The next plan's region-toggle UI must either write
+// `region` into `pst_settings` (mirroring i18n.js's `pst_region`) or otherwise unify the two, or
+// a user could see CHF-formatted display numbers computed with German tax brackets (or vice versa).
 export function computeTaxRates(s) {
   if (!s) return null;
   if (s.region === 'CH') return computeChTaxRates(s);

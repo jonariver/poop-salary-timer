@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as i18n from '../js/i18n.js';
-import { ACHIEVEMENTS, achVariant } from '../js/achievements.js';
+import { ACHIEVEMENTS, achVariant, achDesc } from '../js/achievements.js';
 
 function descText(achievementId, cat, lang) {
   var a = ACHIEVEMENTS.find(function (x) { return x.id === achievementId; });
   var v = achVariant(a, cat);
-  var raw = v.desc[lang] || v.desc.de;
-  return typeof raw === 'function' ? raw() : raw;
+  return achDesc(v, lang);
 }
 
 test('gold/kroesus/earned100/tax descriptions reflect CHF when region is CH', () => {
@@ -45,4 +44,18 @@ test('all 16 achievements still have exactly poop/smoke/coffee variants with bad
       assert.ok(v.desc.de && v.desc.en, a.id + '/' + cat + ' missing desc');
     });
   });
+});
+
+test('gold/kroesus/earned100/tax progress strings reflect CHF when region is CH', () => {
+  i18n.setRegion('CH');
+  i18n.buildFormatters();
+  var st = { totalEarned: 5, totalDed: 5 };
+  ['gold', 'kroesus', 'earned100', 'tax'].forEach(function (id) {
+    var a = ACHIEVEMENTS.find(function (x) { return x.id === id; });
+    var text = a.progress(st);
+    assert.ok(text.indexOf('CHF') >= 0, id + ': expected CHF in progress "' + text + '"');
+    assert.ok(text.indexOf('€') === -1, id + ': must not still contain € in progress "' + text + '"');
+  });
+  i18n.setRegion('DE');
+  i18n.buildFormatters();
 });

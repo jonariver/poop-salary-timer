@@ -1,5 +1,5 @@
 // ---------- Achievements ----------
-import { t, fmtMoney, fmtElapsed } from './i18n.js';
+import { t, fmtMoney, fmtElapsed, currencyCode } from './i18n.js';
 import { sessionStats, actKeyOf } from './stats.js';
 import { getRawAchievements, saveAchievements } from './storage.js';
 
@@ -42,7 +42,7 @@ export var ACHIEVEMENTS = [
       coffee: { badge: '🪙', name: { de: 'Goldene Kaffeetasse', en: 'Golden Coffee Cup' }, desc: { de: function () { return 'Insgesamt ' + fmtMoney(10) + ' beim Kaffeetrinken verdient.'; }, en: function () { return 'Earned ' + fmtMoney(10) + ' in total while drinking coffee.'; } } }
     },
     test: function (st) { return st.totalEarned >= 10; },
-    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 10)) + '/10 €'; }
+    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 10)) + '/10 ' + currencyCode(); }
   },
   {
     id: 'early',
@@ -102,7 +102,7 @@ export var ACHIEVEMENTS = [
       coffee: { badge: '👑', name: { de: 'Kaffee-Krösus', en: 'Coffee Tycoon' }, desc: { de: function () { return 'Insgesamt ' + fmtMoney(50) + ' beim Kaffeetrinken verdient. Teuerste Tasse aller Zeiten — im positiven Sinne.'; }, en: function () { return 'Earned ' + fmtMoney(50) + ' in total while drinking coffee. Most valuable cup ever — in a good way.'; } } }
     },
     test: function (st) { return st.totalEarned >= 50; },
-    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 50)) + '/50 €'; }
+    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 50)) + '/50 ' + currencyCode(); }
   },
   {
     id: 'streak7',
@@ -152,7 +152,7 @@ export var ACHIEVEMENTS = [
       coffee: { badge: '🏦', name: { de: 'Kaffee-Imperium', en: 'Coffee Empire' }, desc: { de: function () { return 'Insgesamt ' + fmtMoney(100) + ' beim Kaffeetrinken verdient. Ein Imperium aus Bohnen.'; }, en: function () { return 'Earned ' + fmtMoney(100) + ' in total while drinking coffee. An empire built on beans.'; } } }
     },
     test: function (st) { return st.totalEarned >= 100; },
-    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 100)) + '/100 €'; }
+    progress: function (st) { return fmtMoney(Math.min(st.totalEarned, 100)) + '/100 ' + currencyCode(); }
   },
   {
     id: 'tax',
@@ -162,11 +162,16 @@ export var ACHIEVEMENTS = [
       coffee: { badge: '🧾', name: { de: 'Kaffee-Steuerzahler', en: 'Coffee Taxpayer' }, desc: { de: function () { return 'Insgesamt ' + fmtMoney(10) + ' an Abzügen beim Kaffeetrinken „gespendet". Der Finanzminister freut sich.'; }, en: function () { return 'A total of ' + fmtMoney(10) + ' "donated" in deductions while drinking coffee. The treasury is pleased.'; } } }
     },
     test: function (st) { return st.totalDed >= 10; },
-    progress: function (st) { return fmtMoney(Math.min(st.totalDed, 10)) + '/10 €'; }
+    progress: function (st) { return fmtMoney(Math.min(st.totalDed, 10)) + '/10 ' + currencyCode(); }
   }
 ];
 
 export function achVariant(a, cat) { return a.variants[cat] || a.variants.poop; }
+
+export function achDesc(v, lang) {
+  var raw = v.desc[lang] || v.desc.de;
+  return typeof raw === 'function' ? raw() : raw;
+}
 
 export function migrateAchievements(raw) {
   if (raw && (raw.poop || raw.smoke || raw.coffee)) {

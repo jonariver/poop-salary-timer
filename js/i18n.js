@@ -4,6 +4,9 @@
 import { getLang as storedLang, saveLang, getRegion as storedRegion, saveRegion } from './storage.js';
 
 var lang = storedLang() === 'en' ? 'en' : 'de';
+// NOTE: this in-memory `region` (backed by the separate `pst_region` localStorage key) is NOT
+// currently read by js/salary.js's `computeTaxRates`, which expects `region` on its own
+// settings-object argument instead — see the comment in salary.js above `computeTaxRates`.
 var region = storedRegion() === 'CH' ? 'CH' : 'DE';
 
 var STR = {
@@ -411,6 +414,7 @@ export function weekdayShortLabelsMonFirst() {
 
 export function fmtMoneyLive(v) { return fmt4.format(v) + (region === 'CH' ? ' CHF' : ' €'); }
 export function fmtMoney(v) { return fmt2.format(v); }
+export function currencyCode() { return region === 'CH' ? 'CHF' : 'EUR'; }
 export function pad(n) { return (n < 10 ? '0' : '') + n; }
 export function fmtElapsed(ms) {
   var s = Math.floor(ms / 1000);
