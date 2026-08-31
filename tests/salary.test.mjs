@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeChFederalTax } from '../js/salary.js';
+import { computeChFederalTax, computeChSocialSecurity } from '../js/salary.js';
 
 test('computeChFederalTax matches the official 2026 Grundtarif (Basel-Landschaft PDF) within rounding tolerance', () => {
   // [zvE, official tax] pairs, verified against the official cantonal
@@ -45,4 +45,38 @@ test('computeChFederalTax is monotonically non-decreasing across the full range'
     assert.ok(tax >= prev - 0.001, 'tax decreased at zvE=' + zvE + ' (' + tax + ' < ' + prev + ')');
     prev = tax;
   }
+});
+
+test('computeChSocialSecurity: AHV/IV/EO has no ceiling', () => {
+  var s = computeChSocialSecurity(500000);
+  assert.ok(Math.abs(s.ahvIvEo - 500000 * 0.053) < 0.01);
+});
+
+test('computeChSocialSecurity: ALV is capped at the CHF 148200 ceiling', () => {
+  var below = computeChSocialSecurity(100000);
+  assert.ok(Math.abs(below.alv - 100000 * 0.011) < 0.01);
+  var above = computeChSocialSecurity(200000);
+  assert.ok(Math.abs(above.alv - 148200 * 0.011) < 0.01, 'ALV must not exceed the ceiling-based amount');
+});
+
+test('computeChSocialSecurity: BVG is zero below the entry threshold', () => {
+  var s = computeChSocialSecurity(20000); // below CHF 22680
+  assert.equal(s.bvg, 0);
+});
+
+test('computeChSocialSecurity: BVG applies the coordination deduction', () => {
+  var s = computeChSocialSecurity(80000);
+  var expectedCoordinated = 80000 - 26460; // below the max insured salary, no cap needed
+  assert.ok(Math.abs(s.bvg - expectedCoordinated * 0.0625) < 0.01);
+});
+
+test('computeChSocialSecurity: BVG coordinated salary is capped at the max insured salary', () => {
+  var s = computeChSocialSecurity(200000);
+  var expectedCoordinated = 90720 - 26460; // capped at bvgMaxInsuredSalary before the deduction
+  assert.ok(Math.abs(s.bvg - expectedCoordinated * 0.0625) < 0.01);
+});
+
+test('computeChSocialSecurity: total is the sum of all three parts', () => {
+  var s = computeChSocialSecurity(80000);
+  assert.ok(Math.abs(s.total - (s.ahvIvEo + s.alv + s.bvg)) < 0.001);
 });

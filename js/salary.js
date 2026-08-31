@@ -66,6 +66,36 @@ export function computeChFederalTax(zvE) {
   return computeBracketTax(zvE, CH_FEDERAL_BRACKETS);
 }
 
+// ---------- Schweiz: Sozialabgaben (vereinfachte Näherung) ----------
+// AHV/IV/EO und ALV: Arbeitnehmeranteile, öffentlich bekannte, stabile Sätze.
+// BVG: die gesetzlichen Mindest-Altersgutschriften sind altersgestaffelt (7/10/15/18 %
+// Gesamtsatz je Altersgruppe, hälftig Arbeitnehmer/Arbeitgeber). Da die App kein Alter
+// erfasst, wird der ungewichtete Mittelwert der vier Arbeitnehmeranteile verwendet:
+// (3.5+5.0+7.5+9.0)/4 = 6.25 % — eine bewusste, im Disclaimer offengelegte Näherung.
+// Explizit NICHT enthalten: Krankenversicherung (in der Schweiz keine Lohnabzugsposition).
+export var CH_SOCIAL_SECURITY_PARAMS = {
+  ahvIvEoRate: 0.053,
+  alvRate: 0.011,
+  alvCeiling: 148200,
+  bvgRate: 0.0625,
+  bvgEntryThreshold: 22680,
+  bvgCoordinationDeduction: 26460,
+  bvgMaxInsuredSalary: 90720
+};
+
+export function computeChSocialSecurity(annualGross) {
+  var p = CH_SOCIAL_SECURITY_PARAMS;
+  var ahvIvEo = annualGross * p.ahvIvEoRate;
+  var alv = Math.min(annualGross, p.alvCeiling) * p.alvRate;
+  var bvg = 0;
+  if (annualGross >= p.bvgEntryThreshold) {
+    var insuredSalary = Math.min(annualGross, p.bvgMaxInsuredSalary);
+    var coordinatedSalary = Math.max(0, insuredSalary - p.bvgCoordinationDeduction);
+    bvg = coordinatedSalary * p.bvgRate;
+  }
+  return { ahvIvEo: ahvIvEo, alv: alv, bvg: bvg, total: ahvIvEo + alv + bvg };
+}
+
 export function computeTaxRates(s) {
   if (!s || !s.taxClass) return null;
   var annualGross = s.mode === 'hourly'
