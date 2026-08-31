@@ -96,8 +96,16 @@ export function computeChSocialSecurity(annualGross) {
   return { ahvIvEo: ahvIvEo, alv: alv, bvg: bvg, total: ahvIvEo + alv + bvg };
 }
 
+export var CH_CANTON_TAX = {}; // wird in einem Folge-Schritt mit Kantonsdaten befüllt (siehe Spec Abschnitt 5)
+
 export function computeTaxRates(s) {
-  if (!s || !s.taxClass) return null;
+  if (!s) return null;
+  if (s.region === 'CH') return computeChTaxRates(s);
+  return computeDeTaxRates(s);
+}
+
+function computeDeTaxRates(s) {
+  if (!s.taxClass) return null;
   var annualGross = s.mode === 'hourly'
     ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
     : (s.monthly || 0) * 12;
@@ -123,6 +131,28 @@ export function computeTaxRates(s) {
   var svRate = 0.205;
   var total = Math.min(0.9, svRate + lstRate + soliRate + churchRate);
   return { sv: svRate, lst: lstRate, soli: soliRate, church: churchRate, total: total };
+}
+
+function computeChTaxRates(s) {
+  var annualGross = s.mode === 'hourly'
+    ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
+    : (s.monthly || 0) * 12;
+  if (!(annualGross > 0)) return null;
+
+  var social = computeChSocialSecurity(annualGross);
+  var svRate = social.total / annualGross;
+
+  // zvE_CH: Sozialabgaben sind in der Schweiz vor der Einkommenssteuer abzugsfähig — anders
+  // als die deutsche Näherung (0.86-Faktor), die hier NICHT wiederverwendet werden darf.
+  var zvE = Math.max(0, annualGross - social.total);
+  var federalTax = computeChFederalTax(zvE);
+  var canton = CH_CANTON_TAX[s.canton];
+  var cantonalTax = canton ? computeBracketTax(zvE, canton.brackets) * canton.gemeindeMultiplier : 0;
+  var lstAnnual = federalTax + cantonalTax;
+  var lstRate = Math.max(0, Math.min(0.45, lstAnnual / annualGross));
+
+  var total = Math.min(0.9, svRate + lstRate);
+  return { sv: svRate, lst: lstRate, soli: 0, church: 0, total: total };
 }
 
 export function computeNet(gross, settings) {

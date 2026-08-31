@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeChFederalTax, computeChSocialSecurity } from '../js/salary.js';
+import { computeChFederalTax, computeChSocialSecurity, computeTaxRates } from '../js/salary.js';
 
 test('computeChFederalTax matches the official 2026 Grundtarif (Basel-Landschaft PDF) within rounding tolerance', () => {
   // [zvE, official tax] pairs, verified against the official cantonal
@@ -79,4 +79,50 @@ test('computeChSocialSecurity: BVG coordinated salary is capped at the max insur
 test('computeChSocialSecurity: total is the sum of all three parts', () => {
   var s = computeChSocialSecurity(80000);
   assert.ok(Math.abs(s.total - (s.ahvIvEo + s.alv + s.bvg)) < 0.001);
+});
+
+test('computeTaxRates: existing DE behavior is unchanged (regression, taxClass 1)', () => {
+  var r = computeTaxRates({ mode: 'monthly', monthly: 3200, taxClass: '1', church: false });
+  // Golden value captured from this exact settings shape before this plan's changes.
+  assert.ok(Math.abs(r.lst - 0.12313815633528646) < 0.0000001);
+  assert.equal(r.soli, 0);
+  assert.equal(r.church, 0);
+  assert.equal(r.sv, 0.205);
+});
+
+test('computeTaxRates: missing region defaults to DE behavior', () => {
+  var withRegion = computeTaxRates({ mode: 'monthly', monthly: 3200, taxClass: '1', region: 'DE' });
+  var withoutRegion = computeTaxRates({ mode: 'monthly', monthly: 3200, taxClass: '1' });
+  assert.deepEqual(withRegion, withoutRegion);
+});
+
+test('computeTaxRates: DE without taxClass still returns null', () => {
+  assert.equal(computeTaxRates({ mode: 'monthly', monthly: 3200 }), null);
+});
+
+test('computeTaxRates: CH branch returns a rate object without needing taxClass', () => {
+  var r = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000 });
+  assert.ok(r !== null);
+  assert.ok(r.lst > 0);
+  assert.ok(r.sv > 0);
+  assert.equal(r.soli, 0);
+  assert.equal(r.church, 0);
+});
+
+test('computeTaxRates: CH branch with zero/missing gross returns null', () => {
+  assert.equal(computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 0 }), null);
+});
+
+test('computeTaxRates: CH branch works with no canton selected (cantonal tax contributes 0)', () => {
+  var r = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000 });
+  var rWithUnknownCanton = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000, canton: 'ZH' });
+  // ZH isn't in CH_CANTON_TAX yet (next plan adds it) — both must be identical for now.
+  assert.deepEqual(r, rWithUnknownCanton);
+});
+
+test('computeTaxRates: total never exceeds the 0.9 safety cap for either region', () => {
+  var de = computeTaxRates({ mode: 'monthly', monthly: 3200, taxClass: '1', church: true, churchRate: 9 });
+  var ch = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 3200 });
+  assert.ok(de.total <= 0.9);
+  assert.ok(ch.total <= 0.9);
 });
