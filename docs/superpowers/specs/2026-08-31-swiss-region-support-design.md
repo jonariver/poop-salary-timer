@@ -201,6 +201,26 @@ Diese Funktion und die Bracket-Tabelle leben — analog zu `TAX_PARAMS` für
 Deutschland — in einem eigenen, klar mit Steuerjahr versehenen Block in
 `salary.js` (z.B. `CH_TAX_MODEL_YEAR = 2026`).
 
+**Herleitung von zvE (steuerbares Einkommen) für die Schweiz — wichtig, nicht
+mit der deutschen Formel verwechseln:** Die deutsche Näherung
+(`annualGross * 0.86 - 1230`) ist strukturell deutsch (pauschale
+Vorsorge-/Werbungskosten) und darf für die Schweiz nicht wiederverwendet
+werden. In der Schweiz sind die Sozialabgaben (AHV/IV/EO, ALV, BVG, siehe
+Abschnitt 6) direkt vom Bruttolohn abzugsfähig, *bevor* die Einkommenssteuer
+greift — das ist strukturell korrekt und in beliebigen Schweizer
+Steuerrechnern nachvollziehbar. Formel:
+
+```
+zvE_CH = max(0, annualGross - sozialabgabenGesamt)
+```
+
+wobei `sozialabgabenGesamt` die Summe aus AHV/IV/EO + ALV + BVG-Näherung
+(Abschnitt 6) ist. Eine zusätzliche Berufskosten-Pauschale (in der Realität
+kantonal unterschiedlich, meist ~3 % mit Ober-/Untergrenze) wird bewusst
+**nicht** angesetzt — das ergibt ein leicht zu hohes zvE und damit eine
+leicht zu hohe Steuerschätzung, eine offengelegte, konservative
+Vereinfachung statt einer stillschweigend falschen Mechanik.
+
 ## 5. Schweizer Kantons-/Gemeindesteuer (Architektur, Daten folgen)
 
 Struktur, in die die drei Pilot-Kantone eingehängt werden:
