@@ -298,6 +298,13 @@
     </div>
     <div class="card">
       <h2 class="section" id="h2-heatmap">Sitzungs-Heatmap 🔥</h2>
+      <div class="heatmap-controls">
+        <div class="heatmap-metric-toggle" role="group">
+          <button type="button" class="heatmap-metric-btn" id="heatmap-metric-earned" aria-pressed="true">💶 Verdienst</button>
+          <button type="button" class="heatmap-metric-btn" id="heatmap-metric-count" aria-pressed="false">🔢 Sitzungen</button>
+        </div>
+        <select id="heatmap-month-filter" title="Monat filtern"></select>
+      </div>
       <div class="heatmap-scroll">
         <div class="heatmap-months" id="heatmap-months"></div>
         <div class="heatmap-grid" id="heatmap-grid"></div>

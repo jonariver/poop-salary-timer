@@ -538,6 +538,36 @@ button.btn:active { transform: scale(0.97); }
 }
 
 /* ---------- Heatmap ---------- */
+.heatmap-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.heatmap-metric-toggle { display: flex; gap: 6px; }
+.heatmap-metric-btn {
+  font-family: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border: 1px solid var(--card-edge);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.heatmap-metric-btn[aria-pressed="true"] { background: var(--gold-soft); color: var(--gold-strong); border-color: transparent; }
+#heatmap-month-filter {
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 6px 9px;
+  border: 1px solid var(--card-edge);
+  border-radius: 8px;
+  background: var(--field-bg);
+  color: var(--ink);
+}
 .heatmap-scroll { overflow-x: auto; padding-bottom: 4px; }
 .heatmap-months {
   display: grid;

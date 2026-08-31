@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 17,
+    emoji: '🔥',
+    title: { de: 'Heatmap: Umschalter & Monatsfilter', en: 'Heatmap: metric toggle & month filter' },
+    body: {
+      de: 'Die Sitzungs-Heatmap lässt sich jetzt zwischen Verdienst und Sitzungsanzahl umschalten und auf einen einzelnen Monat filtern.',
+      en: 'The session heatmap can now switch between earnings and session count, and be filtered down to a single month.'
+    }
+  },
+  {
     id: 16,
     emoji: '📊',
     title: { de: 'Monatsvergleich & persönliche Rekorde', en: 'Month comparison & personal records' },
