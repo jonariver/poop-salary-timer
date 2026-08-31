@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeChFederalTax, computeChSocialSecurity, computeTaxRates } from '../js/salary.js';
+import { computeChFederalTax, computeChSocialSecurity, computeTaxRates, computeNet } from '../js/salary.js';
 
 test('computeChFederalTax matches the official 2026 Grundtarif (Basel-Landschaft PDF) within rounding tolerance', () => {
   // [zvE, official tax] pairs, verified against the official cantonal
@@ -125,4 +125,22 @@ test('computeTaxRates: total never exceeds the 0.9 safety cap for either region'
   var ch = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 3200 });
   assert.ok(de.total <= 0.9);
   assert.ok(ch.total <= 0.9);
+});
+
+test('computeNet: DE net+ded reconstructs gross exactly (regression)', () => {
+  var settings = { mode: 'monthly', monthly: 3200, taxClass: '1', church: false };
+  var r = computeNet(3200, settings);
+  assert.ok(Math.abs(r.net + r.ded - 3200) < 0.001);
+});
+
+test('computeNet: CH net+ded reconstructs gross exactly', () => {
+  var settings = { region: 'CH', mode: 'monthly', monthly: 6000 };
+  var r = computeNet(6000, settings);
+  assert.ok(Math.abs(r.net + r.ded - 6000) < 0.001);
+  assert.equal(r.soli, 0);
+  assert.equal(r.church, 0);
+});
+
+test('computeNet: no taxClass and DE region returns null (unchanged behavior)', () => {
+  assert.equal(computeNet(3200, { mode: 'monthly', monthly: 3200 }), null);
 });
