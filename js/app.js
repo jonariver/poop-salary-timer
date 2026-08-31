@@ -444,7 +444,9 @@ import * as sharing from './share.js';
 
   // ---------- Geschäftsjahr ----------
   function renderYear() {
-    var y = stats.businessYearStats(storage.getSessions() || [], new Date());
+    var sessions = storage.getSessions() || [];
+    var now = new Date();
+    var y = stats.businessYearStats(sessions, now);
     $('stat-month-earned').textContent = i18n.fmtMoney(y.monthEarned);
     $('stat-month-count').textContent = String(y.monthCount);
     $('stat-year-avg').textContent = y.yearCount ? i18n.fmtMoney(y.yearAvg) : '–';
@@ -454,9 +456,21 @@ import * as sharing from './share.js';
     $('stat-year-time').textContent = i18n.fmtDurationWords(y.yearTotalMs);
     $('stat-streak').textContent = String(y.currentStreak);
     $('stat-best-streak').textContent = String(y.bestStreak);
+    $('stat-best-month').textContent = y.bestMonthIdx >= 0 ? i18n.fmtMonthShort(y.bestMonthTs) + ' · ' + i18n.fmtMoney(y.bestMonthEarned) : '–';
+    $('stat-max-day-count').textContent = String(y.maxDayCount);
+    $('stat-max-day-earned').textContent = y.maxDayCount ? i18n.fmtMoney(y.maxDayEarned) : '–';
     $('year-projection').classList.toggle('hidden', !y.projectionEligible);
     $('year-not-enough-data').classList.toggle('hidden', y.projectionEligible);
     if (y.projectionEligible) $('year-projection-value').textContent = i18n.fmtMoney(y.projection);
+
+    var mc = stats.monthComparison(sessions, now);
+    $('year-month-comparison').classList.toggle('hidden', !mc.available);
+    if (mc.available) {
+      var arrow = mc.diff > 0 ? '▲' : mc.diff < 0 ? '▼' : '＝';
+      var value = mc.pct !== null ? Math.abs(Math.round(mc.pct)) + ' %' : i18n.fmtMoney(Math.abs(mc.diff));
+      $('year-month-comparison-value').textContent = t('monthComparisonLine')(arrow, value, i18n.fmtMonthShort(mc.prevMonthTs));
+    }
+
     renderWeekdayBreakdown(y.weekdayEarned);
     renderHeatmap();
   }
