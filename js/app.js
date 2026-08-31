@@ -515,10 +515,31 @@ import * as sharing from './share.js';
       : t('heatmapDetailNone')(dateStr);
   }
 
+  var heatmapMetric = 'earned'; // 'earned' | 'count' — nur im Speicher, kein localStorage nötig
+  var heatmapMonthFilter = null; // null = ganzes Jahr, sonst 0-11
+
+  function renderHeatmapMonthFilterOptions() {
+    var select = $('heatmap-month-filter');
+    select.innerHTML = '';
+    var allOpt = document.createElement('option');
+    allOpt.value = '';
+    allOpt.textContent = t('heatmapMonthFilterAll');
+    select.appendChild(allOpt);
+    var yearForLabels = new Date().getFullYear();
+    for (var m = 0; m < 12; m++) {
+      var opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = i18n.fmtMonthShort(new Date(yearForLabels, m, 1).getTime());
+      select.appendChild(opt);
+    }
+    select.value = heatmapMonthFilter === null ? '' : String(heatmapMonthFilter);
+  }
+
   function renderHeatmap() {
     var now = new Date();
     var todayTs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     var h = stats.yearHeatmap(storage.getSessions() || [], now);
+    renderHeatmapMonthFilterOptions();
     var monthsEl = $('heatmap-months');
     var gridEl = $('heatmap-grid');
     monthsEl.innerHTML = '';
@@ -526,8 +547,23 @@ import * as sharing from './share.js';
     selectedHeatmapCell = null;
     var todayCell = null;
 
+    var max = heatmapMetric === 'count' ? h.maxCount : h.maxEarned;
+    function levelFor(day) {
+      var v = heatmapMetric === 'count' ? day.count : day.earned;
+      return v <= 0 ? 0 : Math.min(4, Math.ceil((v / max) * 4));
+    }
+
+    var weeks = h.weeks;
+    if (heatmapMonthFilter !== null) {
+      weeks = weeks
+        .map(function (week) {
+          return week.map(function (day) { return day && new Date(day.ts).getMonth() === heatmapMonthFilter ? day : null; });
+        })
+        .filter(function (week) { return week.some(function (d) { return d; }); });
+    }
+
     var lastMonth = -1;
-    h.weeks.forEach(function (week) {
+    weeks.forEach(function (week) {
       var monthLabel = document.createElement('div');
       var firstDay = week.filter(function (c) { return c; })[0];
       if (firstDay) {
@@ -545,7 +581,7 @@ import * as sharing from './share.js';
           cell.disabled = true;
           cell.tabIndex = -1;
         } else {
-          cell.setAttribute('data-level', String(day.level));
+          cell.setAttribute('data-level', String(levelFor(day)));
           cell.setAttribute('aria-label', i18n.getDateFmt().format(new Date(day.ts)));
           cell.addEventListener('click', function () { selectHeatmapDay(day, cell); });
           cell.addEventListener('focus', function () { selectHeatmapDay(day, cell); });
@@ -561,6 +597,26 @@ import * as sharing from './share.js';
       requestAnimationFrame(function () { todayCell.scrollIntoView({ inline: 'end', block: 'nearest' }); });
     }
   }
+
+  $('heatmap-metric-earned').addEventListener('click', function () {
+    if (heatmapMetric === 'earned') return;
+    heatmapMetric = 'earned';
+    $('heatmap-metric-earned').setAttribute('aria-pressed', 'true');
+    $('heatmap-metric-count').setAttribute('aria-pressed', 'false');
+    renderHeatmap();
+  });
+  $('heatmap-metric-count').addEventListener('click', function () {
+    if (heatmapMetric === 'count') return;
+    heatmapMetric = 'count';
+    $('heatmap-metric-count').setAttribute('aria-pressed', 'true');
+    $('heatmap-metric-earned').setAttribute('aria-pressed', 'false');
+    renderHeatmap();
+  });
+  $('heatmap-month-filter').addEventListener('change', function () {
+    var v = $('heatmap-month-filter').value;
+    heatmapMonthFilter = v === '' ? null : parseInt(v, 10);
+    renderHeatmap();
+  });
 
   // ---------- Achievements ----------
   var achCategory = stats.actKeyOf(storage.getAchCategory());

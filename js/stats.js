@@ -176,23 +176,24 @@ export function yearHeatmap(sessions, now) {
     entry.durationMs += s.durationMs;
   });
 
-  var days = [], maxEarned = 0;
+  var days = [], maxEarned = 0, maxCount = 0;
   var cursor = new Date(year, 0, 1);
   var end = new Date(year, 11, 31).getTime();
   while (cursor.getTime() <= end) {
     var key2 = cursor.getFullYear() + '-' + cursor.getMonth() + '-' + cursor.getDate();
     var e = byDay[key2];
     var earned = e ? e.earned : 0;
+    var count = e ? e.count : 0;
     if (earned > maxEarned) maxEarned = earned;
+    if (count > maxCount) maxCount = count;
     days.push({
       ts: new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate()).getTime(),
-      earned: earned, count: e ? e.count : 0, durationMs: e ? e.durationMs : 0
+      earned: earned, count: count, durationMs: e ? e.durationMs : 0
     });
     cursor.setDate(cursor.getDate() + 1);
   }
-  days.forEach(function (day) {
-    day.level = day.earned <= 0 ? 0 : Math.min(4, Math.ceil((day.earned / maxEarned) * 4));
-  });
+  // Intensitätsstufe (level) wird bewusst nicht hier berechnet: sie hängt vom in der UI
+  // gewählten Anzeige-Modus (Verdienst/Sitzungen) ab und ist damit Darstellung, nicht Aggregation.
 
   // Montag = erste Zeile. Führende/folgende Lücken (vor dem 1. Jan / nach dem 31. Dez) werden mit null aufgefüllt.
   var firstWeekday = (new Date(year, 0, 1).getDay() + 6) % 7; // 0=Mo ... 6=So
@@ -207,7 +208,7 @@ export function yearHeatmap(sessions, now) {
     weeks.push(col);
   }
 
-  return { days: days, weeks: weeks, maxEarned: maxEarned };
+  return { days: days, weeks: weeks, maxEarned: maxEarned, maxCount: maxCount };
 }
 
 // ---------- CSV Export / Import ----------

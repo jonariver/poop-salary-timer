@@ -41,6 +41,8 @@ var STR = {
     weekdayBreakdownTitle: 'Verdienst nach Wochentag',
     h2Heatmap: 'Sitzungs-Heatmap 🔥',
     heatmapLess: 'Weniger', heatmapMore: 'Mehr',
+    heatmapMetricEarned: '💶 Verdienst', heatmapMetricCount: '🔢 Sitzungen',
+    heatmapMonthFilterAll: 'Ganzes Jahr', heatmapMonthFilterAria: 'Monat filtern',
     heatmapDetailHint: 'Tippe auf einen Tag, um Details zu sehen.',
     heatmapDetailNone: function (dateStr) { return dateStr + ' — keine Sitzung.'; },
     heatmapDetailSome: function (dateStr, count, durWords, earnedStr) {
@@ -216,6 +218,8 @@ var STR = {
     weekdayBreakdownTitle: 'Earnings by weekday',
     h2Heatmap: 'Session heatmap 🔥',
     heatmapLess: 'Less', heatmapMore: 'More',
+    heatmapMetricEarned: '💶 Earnings', heatmapMetricCount: '🔢 Sessions',
+    heatmapMonthFilterAll: 'Whole year', heatmapMonthFilterAria: 'Filter month',
     heatmapDetailHint: 'Tap a day to see details.',
     heatmapDetailNone: function (dateStr) { return dateStr + ' — no session.'; },
     heatmapDetailSome: function (dateStr, count, durWords, earnedStr) {
@@ -516,6 +520,9 @@ var BINDINGS = [
   ['#h2-heatmap', 'h2Heatmap'],
   ['#heatmap-legend-less', 'heatmapLess'],
   ['#heatmap-legend-more', 'heatmapMore'],
+  ['#heatmap-metric-earned', 'heatmapMetricEarned'],
+  ['#heatmap-metric-count', 'heatmapMetricCount'],
+  ['#heatmap-month-filter', 'heatmapMonthFilterAria', 'title'],
   ['#h2-sessions', 'h2Sessions'],
   ['#btn-show-backfill', 'btnBackfill'],
   ['label[for="bf-date"]', 'lblDate'],
