@@ -7,6 +7,7 @@ var LS_SESSIONS = 'pst_sessions';
 var LS_ACTIVE = 'pst_active';
 var LS_ACTIVITY = 'pst_activity';
 var LS_LANG = 'pst_lang';
+var LS_REGION = 'pst_region';
 var LS_ACHIEVEMENTS = 'pst_achievements';
 var LS_ACH_CATEGORY = 'pst_ach_category';
 var LS_WHATSNEW_SEEN = 'pst_whatsnew_seen';
@@ -43,6 +44,9 @@ export function saveActivity(key) { lsSet(LS_ACTIVITY, key); }
 
 export function getLang() { return lsGet(LS_LANG); }
 export function saveLang(lang) { lsSet(LS_LANG, lang); }
+
+export function getRegion() { return lsGet(LS_REGION); }
+export function saveRegion(region) { lsSet(LS_REGION, region); }
 
 export function getRawAchievements() { var v = lsGet(LS_ACHIEVEMENTS); return isPlainObject(v) ? v : null; }
 export function saveAchievements(data) { lsSet(LS_ACHIEVEMENTS, data); }

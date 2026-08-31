@@ -1,9 +1,10 @@
 // ---------- Sprache / i18n ----------
 // Everything that depends on the current language or locale: the translation
 // dictionary, the Intl formatter instances, and locale-aware text formatting.
-import { getLang as storedLang, saveLang } from './storage.js';
+import { getLang as storedLang, saveLang, getRegion as storedRegion, saveRegion } from './storage.js';
 
 var lang = storedLang() === 'en' ? 'en' : 'de';
+var region = storedRegion() === 'CH' ? 'CH' : 'DE';
 
 var STR = {
   de: {
@@ -368,12 +369,20 @@ export function setLang(l) {
   lang = l;
   saveLang(l);
 }
+export function getRegion() { return region; }
+export function setRegion(r) {
+  region = r === 'CH' ? 'CH' : 'DE';
+  saveRegion(region);
+}
 
 // ---------- Formatting (sprachabhaengig) ----------
 var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt, weekdayShortFmt, monthShortFmt;
 export function buildFormatters() {
-  var loc = lang === 'en' ? 'en-GB' : 'de-DE';
-  fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
+  var loc = region === 'CH'
+    ? (lang === 'en' ? 'en-CH' : 'de-CH')
+    : (lang === 'en' ? 'en-GB' : 'de-DE');
+  var currency = region === 'CH' ? 'CHF' : 'EUR';
+  fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: currency });
   fmt4 = new Intl.NumberFormat(loc, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
   dateFmt = new Intl.DateTimeFormat(loc, { weekday: 'short', day: 'numeric', month: 'short' });
   timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
@@ -400,7 +409,7 @@ export function weekdayShortLabelsMonFirst() {
   return labels;
 }
 
-export function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
+export function fmtMoneyLive(v) { return fmt4.format(v) + (region === 'CH' ? ' CHF' : ' €'); }
 export function fmtMoney(v) { return fmt2.format(v); }
 export function pad(n) { return (n < 10 ? '0' : '') + n; }
 export function fmtElapsed(ms) {

@@ -28,6 +28,7 @@ for f in js/*.js; do node --check "$f"; done
   - `pst_active` — `{accumulatedMs, startTs, activity}` (present only while a session is running/paused)
   - `pst_activity` — last-selected idle activity (`'poop'|'smoke'|'coffee'`)
   - `pst_lang` — `'de'|'en'`
+  - `pst_region` — `'DE'|'CH'`, drives currency + tax model in `salary.js`/`i18n.js` (default `'DE'` if absent)
   - `pst_achievements` — `{poop:{[achId]:unlockedAtMs}, smoke:{...}, coffee:{...}}` (legacy flat shape auto-migrates on read, see `achievements.js`'s `migrateAchievements`)
   - `pst_ach_category` — last-viewed achievement category tab
   - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen
