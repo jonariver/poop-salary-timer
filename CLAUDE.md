@@ -23,11 +23,12 @@ for f in js/*.js; do node --check "$f"; done
 - **No build step, no framework, no npm/bundler.** Vanilla HTML/CSS/JS with native ES modules (`<script type="module">`) only. Do not introduce React/Vue/TypeScript/Vite/Webpack/etc.
 - **No backend.** All persistence is `localStorage`. No server, no accounts, no network calls except the Google Fonts stylesheet in `index.html`'s `<head>`.
 - **localStorage keys and shapes are a compatibility contract.** Existing users' data must keep working across changes. The keys, all accessed exclusively through `js/storage.js`:
-  - `pst_settings` — `{mode, monthly?, hoursPerWeek?, hourly?, rate, taxClass, church, churchRate, dedLabel}`
+  - `pst_settings` — `{mode, monthly?, hoursPerWeek?, hourly?, rate, taxClass, church, churchRate, dedLabel, region?, canton?}` (`region`/`canton` are read by `salary.js`'s `computeTaxRates` but nothing currently writes them — see the comment above `computeTaxRates` in `js/salary.js`)
   - `pst_sessions` — array of `{id, ts, durationMs, earned, rate, activity, net?, ded?, manual?}`
   - `pst_active` — `{accumulatedMs, startTs, activity}` (present only while a session is running/paused)
   - `pst_activity` — last-selected idle activity (`'poop'|'smoke'|'coffee'`)
   - `pst_lang` — `'de'|'en'`
+  - `pst_region` — `'DE'|'CH'`, drives currency + tax model in `salary.js`/`i18n.js` (default `'DE'` if absent)
   - `pst_achievements` — `{poop:{[achId]:unlockedAtMs}, smoke:{...}, coffee:{...}}` (legacy flat shape auto-migrates on read, see `achievements.js`'s `migrateAchievements`)
   - `pst_ach_category` — last-viewed achievement category tab
   - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen
@@ -44,7 +45,7 @@ for f in js/*.js; do node --check "$f"; done
 - **`salary.js`** — pure math only, zero DOM/i18n/storage: `computeRate`, `computeTaxRates` (simplified German income-tax approximation), `computeNet(gross, settings)`, `calculateEarnings(durationMs, hourlyRate)`, `FUND_RATES`.
 - **`i18n.js`** — everything locale-dependent: the `STR` translation dictionary, `t()`, `Intl` formatters, and all `fmt*`/`funFact`/`pad` helpers (money/duration formatting is bundled here because it's locale-sensitive, not because it's DOM work). Also owns the `BINDINGS` table + `applyBindings()`, which patches static translated text into the DOM by CSS selector.
 - **`stats.js`** — `actKeyOf` (normalizes an activity string to `poop`/`smoke`/`coffee`), `sessionStats` (aggregation for achievements/history), CSV export/import (`csvFromSessions`, `parseCsv`, `sessionKey`). Depends only on `i18n.js`.
-- **`achievements.js`** — the `ACHIEVEMENTS` definitions (11 total; each has per-activity-category `variants` with translated name/desc/badge, a `test(stats)` predicate, and a `progress(stats)` formatter), plus `checkAchievements` and `migrateAchievements`. Depends on `i18n.js` and `stats.js`.
+- **`achievements.js`** — the `ACHIEVEMENTS` definitions (16 total; each has per-activity-category `variants` with translated name/desc/badge, a `test(stats)` predicate, and a `progress(stats)` formatter), plus `checkAchievements`, `migrateAchievements`, and `achDesc(variant, lang)` (a `desc` entry is a plain string OR a zero-arg function returning a string — used for the 4 achievements whose description embeds a currency amount via `fmtMoney`, so it reflects the active region). Depends on `i18n.js` and `stats.js`.
 - **`whatsnew.js`** — curated, user-facing changelog entries (`ENTRIES`, newest first) shown in the header's 📣 modal, plus `hasUnseen(lastSeenId)`. Not derived from git history — hand-written in plain language for end users.
 - **`timer.js`** — the in-memory active-session state machine (`getActive`, `elapsedMs`, `startOrResume`, `pause`, `end`). Depends only on `storage.js`. No DOM.
 - **`share.js`** — activity-specific share-image mapping plus capability-checked Web Share file delivery. No DOM; technical failures return control to `app.js`'s existing text/clipboard fallback.

@@ -1,9 +1,13 @@
 // ---------- Sprache / i18n ----------
 // Everything that depends on the current language or locale: the translation
 // dictionary, the Intl formatter instances, and locale-aware text formatting.
-import { getLang as storedLang, saveLang } from './storage.js';
+import { getLang as storedLang, saveLang, getRegion as storedRegion, saveRegion } from './storage.js';
 
 var lang = storedLang() === 'en' ? 'en' : 'de';
+// NOTE: this in-memory `region` (backed by the separate `pst_region` localStorage key) is NOT
+// currently read by js/salary.js's `computeTaxRates`, which expects `region` on its own
+// settings-object argument instead — see the comment in salary.js above `computeTaxRates`.
+var region = storedRegion() === 'CH' ? 'CH' : 'DE';
 
 var STR = {
   de: {
@@ -61,7 +65,7 @@ var STR = {
     btnExportNow: 'Jetzt exportieren', exportReminderDismissAria: 'Erinnerung schließen',
     h2Achievements: 'Erfolge 🏆', btnShareAch: '📤 Erfolge teilen',
     importTitle: 'CSV importieren ⬆️',
-    importHint: 'Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen',
+    importHint: 'Datei auswählen oder CSV-Inhalt unten einfügen. Erwartetes Format wie beim Export: Datum;Uhrzeit;Dauer (Sekunden);Verdient;Stundenlohn;Nachgetragen',
     importError: 'Keine gültigen Zeilen gefunden.',
     btnImportRun: 'Importieren',
     shareTitleDefault: 'Zum Teilen kopieren 📤', btnCopy: 'Kopieren', btnClose: 'Schließen',
@@ -71,7 +75,7 @@ var STR = {
     toastNoExport: 'Keine Sitzungen zum Exportieren 🤷',
     toastExported: 'CSV heruntergeladen ✅',
     toastExportFailed: 'Export fehlgeschlagen ❌',
-    csvHeader: 'Datum;Uhrzeit;Dauer (Sekunden);Verdient (EUR);Stundenlohn (EUR);Nachgetragen;Netto (EUR);Abzug (EUR);Aktivität',
+    csvHeader: function (cur) { return 'Datum;Uhrzeit;Dauer (Sekunden);Verdient (' + cur + ');Stundenlohn (' + cur + ');Nachgetragen;Netto (' + cur + ');Abzug (' + cur + ');Aktivität'; },
     csvYes: 'ja', csvNo: 'nein',
     tabTimer: '⏱️ Timer', tabHistory: '📊 Verlauf', tabYear: '📅 Jahr', tabAchievements: '🏆 Erfolge', tabSettings: '⚙️ Daten',
     tagBackfilled: 'nachgetragen', clockSuffix: ' Uhr', delAria: 'Sitzung löschen',
@@ -238,7 +242,7 @@ var STR = {
     btnExportNow: 'Export now', exportReminderDismissAria: 'Dismiss reminder',
     h2Achievements: 'Achievements 🏆', btnShareAch: '📤 Share achievements',
     importTitle: 'Import CSV ⬆️',
-    importHint: 'Pick a file or paste CSV content below. Expected format matches the export: Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled',
+    importHint: 'Pick a file or paste CSV content below. Expected format matches the export: Date;Time;Duration (seconds);Earned;Hourly wage;Backfilled',
     importError: 'No valid rows found.',
     btnImportRun: 'Import',
     shareTitleDefault: 'Copy to share 📤', btnCopy: 'Copy', btnClose: 'Close',
@@ -248,7 +252,7 @@ var STR = {
     toastNoExport: 'No sessions to export 🤷',
     toastExported: 'CSV downloaded ✅',
     toastExportFailed: 'Export failed ❌',
-    csvHeader: 'Date;Time;Duration (seconds);Earned (EUR);Hourly wage (EUR);Backfilled;Net (EUR);Deduction (EUR);Activity',
+    csvHeader: function (cur) { return 'Date;Time;Duration (seconds);Earned (' + cur + ');Hourly wage (' + cur + ');Backfilled;Net (' + cur + ');Deduction (' + cur + ');Activity'; },
     csvYes: 'yes', csvNo: 'no',
     tabTimer: '⏱️ Timer', tabHistory: '📊 History', tabYear: '📅 Year', tabAchievements: '🏆 Awards', tabSettings: '⚙️ Data',
     tagBackfilled: 'backfilled', clockSuffix: '', delAria: 'Delete session',
@@ -368,12 +372,20 @@ export function setLang(l) {
   lang = l;
   saveLang(l);
 }
+export function getRegion() { return region; }
+export function setRegion(r) {
+  region = r === 'CH' ? 'CH' : 'DE';
+  saveRegion(region);
+}
 
 // ---------- Formatting (sprachabhaengig) ----------
 var fmt2, fmt4, dateFmt, timeFmt, achDateFmt, weekdayFmt, weekdayShortFmt, monthShortFmt;
 export function buildFormatters() {
-  var loc = lang === 'en' ? 'en-GB' : 'de-DE';
-  fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR' });
+  var loc = region === 'CH'
+    ? (lang === 'en' ? 'en-CH' : 'de-CH')
+    : (lang === 'en' ? 'en-GB' : 'de-DE');
+  var currency = region === 'CH' ? 'CHF' : 'EUR';
+  fmt2 = new Intl.NumberFormat(loc, { style: 'currency', currency: currency });
   fmt4 = new Intl.NumberFormat(loc, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
   dateFmt = new Intl.DateTimeFormat(loc, { weekday: 'short', day: 'numeric', month: 'short' });
   timeFmt = new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' });
@@ -400,8 +412,9 @@ export function weekdayShortLabelsMonFirst() {
   return labels;
 }
 
-export function fmtMoneyLive(v) { return fmt4.format(v) + ' €'; }
+export function fmtMoneyLive(v) { return fmt4.format(v) + (region === 'CH' ? ' CHF' : ' €'); }
 export function fmtMoney(v) { return fmt2.format(v); }
+export function currencyCode() { return region === 'CH' ? 'CHF' : 'EUR'; }
 export function pad(n) { return (n < 10 ? '0' : '') + n; }
 export function fmtElapsed(ms) {
   var s = Math.floor(ms / 1000);

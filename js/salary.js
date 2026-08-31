@@ -28,8 +28,93 @@ var TAX_PARAMS = {
   entlastungAlleinerziehende: 4260
 };
 
+// ---------- Schweiz: Bundessteuer (vereinfachte Näherung) ----------
+// Stufentarif "Tarif für Alleinstehende (Grundtarif)", gültig ab 2026, verifiziert gegen
+// die offizielle Tariftabelle des Kantons Basel-Landschaft (reproduziert den Bundestarif
+// nach Bundesgesetz über die direkte Bundessteuer, DBG). Bei Wechsel auf ein neues
+// Steuerjahr: CH_TAX_MODEL_YEAR und CH_FEDERAL_BRACKETS gemeinsam ersetzen.
+export var CH_TAX_MODEL_YEAR = 2026;
+var CH_FEDERAL_BRACKETS = [
+  { upTo: 15200, rate: 0 },
+  { upTo: 33200, rate: 0.0077 },
+  { upTo: 43500, rate: 0.0088 },
+  { upTo: 58000, rate: 0.0264 },
+  { upTo: 76200, rate: 0.0297 },
+  { upTo: 82100, rate: 0.0594 },
+  { upTo: 108900, rate: 0.0660 },
+  { upTo: 141500, rate: 0.0880 },
+  { upTo: 185100, rate: 0.1100 },
+  { upTo: 793900, rate: 0.1320 }
+];
+var CH_FEDERAL_TOP_RATE = 0.115; // ab CHF 793'900: pauschal 11,5 % vom gesamten zvE (vereinfacht,
+                                  // ignoriert die ~200-CHF-Übergangszone der offiziellen Tabelle)
+
+// Stufenweise (bracket) Steuerberechnung: Basis für Bundes- UND (sobald befüllt) Kantonssteuer.
+function computeBracketTax(zvE, brackets) {
+  var tax = 0, lower = 0;
+  for (var i = 0; i < brackets.length; i++) {
+    var b = brackets[i];
+    if (zvE <= b.upTo) { tax += (zvE - lower) * b.rate; return tax; }
+    tax += (b.upTo - lower) * b.rate;
+    lower = b.upTo;
+  }
+  // zvE exceeds every listed bracket: continue taxing the remainder at the top bracket's rate,
+  // so a future cantonal table's finite top `upTo` doesn't silently under-tax high incomes.
+  tax += (zvE - lower) * brackets[brackets.length - 1].rate;
+  return tax;
+}
+
+export function computeChFederalTax(zvE) {
+  if (zvE >= 793900) return zvE * CH_FEDERAL_TOP_RATE;
+  return computeBracketTax(zvE, CH_FEDERAL_BRACKETS);
+}
+
+// ---------- Schweiz: Sozialabgaben (vereinfachte Näherung) ----------
+// AHV/IV/EO und ALV: Arbeitnehmeranteile, öffentlich bekannte, stabile Sätze.
+// BVG: die gesetzlichen Mindest-Altersgutschriften sind altersgestaffelt (7/10/15/18 %
+// Gesamtsatz je Altersgruppe, hälftig Arbeitnehmer/Arbeitgeber). Da die App kein Alter
+// erfasst, wird der ungewichtete Mittelwert der vier Arbeitnehmeranteile verwendet:
+// (3.5+5.0+7.5+9.0)/4 = 6.25 % — eine bewusste, im Disclaimer offengelegte Näherung.
+// Explizit NICHT enthalten: Krankenversicherung (in der Schweiz keine Lohnabzugsposition).
+export var CH_SOCIAL_SECURITY_PARAMS = {
+  ahvIvEoRate: 0.053,
+  alvRate: 0.011,
+  alvCeiling: 148200,
+  bvgRate: 0.0625,
+  bvgEntryThreshold: 22680,
+  bvgCoordinationDeduction: 26460,
+  bvgMaxInsuredSalary: 90720
+};
+
+export function computeChSocialSecurity(annualGross) {
+  var p = CH_SOCIAL_SECURITY_PARAMS;
+  var ahvIvEo = annualGross * p.ahvIvEoRate;
+  var alv = Math.min(annualGross, p.alvCeiling) * p.alvRate;
+  var bvg = 0;
+  if (annualGross >= p.bvgEntryThreshold) {
+    var insuredSalary = Math.min(annualGross, p.bvgMaxInsuredSalary);
+    var coordinatedSalary = Math.max(0, insuredSalary - p.bvgCoordinationDeduction);
+    bvg = coordinatedSalary * p.bvgRate;
+  }
+  return { ahvIvEo: ahvIvEo, alv: alv, bvg: bvg, total: ahvIvEo + alv + bvg };
+}
+
+export var CH_CANTON_TAX = {}; // wird in einem Folge-Schritt mit Kantonsdaten befüllt (siehe Spec Abschnitt 5)
+
+// NOTE: `s.region` here is a field on the settings object passed in by the caller — it is a
+// SEPARATE, unreconciled source of truth from the `pst_region` localStorage key that i18n.js
+// reads/writes via `getRegion()`/`setRegion()`. Nothing currently keeps them in sync, since no
+// UI writes `region` onto `pst_settings` yet. The next plan's region-toggle UI must either write
+// `region` into `pst_settings` (mirroring i18n.js's `pst_region`) or otherwise unify the two, or
+// a user could see CHF-formatted display numbers computed with German tax brackets (or vice versa).
 export function computeTaxRates(s) {
-  if (!s || !s.taxClass) return null;
+  if (!s) return null;
+  if (s.region === 'CH') return computeChTaxRates(s);
+  return computeDeTaxRates(s);
+}
+
+function computeDeTaxRates(s) {
+  if (!s.taxClass) return null;
   var annualGross = s.mode === 'hourly'
     ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
     : (s.monthly || 0) * 12;
@@ -55,6 +140,28 @@ export function computeTaxRates(s) {
   var svRate = 0.205;
   var total = Math.min(0.9, svRate + lstRate + soliRate + churchRate);
   return { sv: svRate, lst: lstRate, soli: soliRate, church: churchRate, total: total };
+}
+
+function computeChTaxRates(s) {
+  var annualGross = s.mode === 'hourly'
+    ? (s.hourly || 0) * ((s.hoursPerWeek || 40) * 52)
+    : (s.monthly || 0) * 12;
+  if (!(annualGross > 0)) return null;
+
+  var social = computeChSocialSecurity(annualGross);
+  var svRate = social.total / annualGross;
+
+  // zvE_CH: Sozialabgaben sind in der Schweiz vor der Einkommenssteuer abzugsfähig — anders
+  // als die deutsche Näherung (0.86-Faktor), die hier NICHT wiederverwendet werden darf.
+  var zvE = Math.max(0, annualGross - social.total);
+  var federalTax = computeChFederalTax(zvE);
+  var canton = CH_CANTON_TAX[s.canton];
+  var cantonalTax = canton ? computeBracketTax(zvE, canton.brackets) * canton.gemeindeMultiplier : 0;
+  var lstAnnual = federalTax + cantonalTax;
+  var lstRate = Math.max(0, Math.min(0.45, lstAnnual / annualGross));
+
+  var total = Math.min(0.9, svRate + lstRate);
+  return { sv: svRate, lst: lstRate, soli: 0, church: 0, total: total };
 }
 
 export function computeNet(gross, settings) {
