@@ -1,5 +1,5 @@
 // ---------- Session statistics & CSV export/import ----------
-import { t, getLang, pad } from './i18n.js';
+import { t, getLang, getRegion, pad } from './i18n.js';
 
 export function actKeyOf(x) { return (x === 'smoke' || x === 'coffee') ? x : 'poop'; }
 
@@ -227,7 +227,8 @@ function actFromLabel(x) {
 }
 
 export function csvFromSessions(sessions) {
-  var lines = [t('csvHeader')];
+  var currencyLabel = getRegion() === 'CH' ? 'CHF' : 'EUR';
+  var lines = [t('csvHeader')(currencyLabel)];
   sessions.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (s) {
     var d = new Date(s.ts);
     lines.push(
