@@ -45,6 +45,35 @@ export function sessionStats(sessions) {
   };
 }
 
+// Vergleich des laufenden Kalendermonats mit dem direkt vorherigen — jahresübergreifend korrekt
+// (z.B. Januar vs. Dezember des Vorjahres), unabhängig von der Jahresfilterung in businessYearStats().
+export function monthComparison(sessions, now) {
+  now = now || new Date();
+  var nowMs = now.getTime();
+  var curYear = now.getFullYear(), curMonth = now.getMonth();
+  var prevMonth = curMonth === 0 ? 11 : curMonth - 1;
+  var prevYear = curMonth === 0 ? curYear - 1 : curYear;
+
+  var curEarned = 0, prevEarned = 0, hasPrevData = false;
+  sessions.forEach(function (s) {
+    if (s.ts > nowMs) return; // keine Zukunfts-Sessions berücksichtigen
+    var d = new Date(s.ts);
+    if (d.getFullYear() === curYear && d.getMonth() === curMonth) curEarned += s.earned;
+    if (d.getFullYear() === prevYear && d.getMonth() === prevMonth) { prevEarned += s.earned; hasPrevData = true; }
+  });
+
+  if (!hasPrevData) return { available: false };
+  var diff = curEarned - prevEarned;
+  return {
+    available: true,
+    curEarned: curEarned,
+    prevEarned: prevEarned,
+    diff: diff,
+    pct: prevEarned > 0 ? (diff / prevEarned) * 100 : null,
+    prevMonthTs: new Date(prevYear, prevMonth, 1).getTime()
+  };
+}
+
 // Kennzahlen fürs laufende Kalenderjahr ("Dein Geschäftsjahr"): Monatswerte, Jahres-Rekorde
 // und eine grobe Jahreshochrechnung. `now` ist injizierbar für Tests/manuelle Prüfung.
 export function businessYearStats(sessions, now) {
@@ -55,6 +84,8 @@ export function businessYearStats(sessions, now) {
 
   var monthEarned = 0, monthCount = 0, yearEarned = 0, yearMs = 0, yearCount = 0;
   var weekdayEarned = [0, 0, 0, 0, 0, 0, 0], weekdayRepTs = [null, null, null, null, null, null, null];
+  var monthTotals = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var dayEarned = {}, dayCount = {};
   var longest = null, priciest = null, days = {}, allDays = {};
 
   sessions.forEach(function (s) {
@@ -73,6 +104,9 @@ export function businessYearStats(sessions, now) {
     if (weekdayRepTs[wd] === null) weekdayRepTs[wd] = s.ts;
     if (!longest || s.durationMs > longest.durationMs) longest = s;
     if (!priciest || s.earned > priciest.earned) priciest = s;
+    monthTotals[d.getMonth()] += s.earned;
+    dayEarned[allKey] = (dayEarned[allKey] || 0) + s.earned;
+    dayCount[allKey] = (dayCount[allKey] || 0) + 1;
     days[allKey] = allDays[allKey];
   });
 
@@ -87,6 +121,14 @@ export function businessYearStats(sessions, now) {
   for (var i = 0; i < 7; i++) {
     if (weekdayEarned[i] > bestWeekdayEarned) { bestWeekdayEarned = weekdayEarned[i]; bestWeekdayIdx = i; }
   }
+
+  var bestMonthIdx = -1, bestMonthEarned = 0;
+  for (var m = 0; m < 12; m++) {
+    if (monthTotals[m] > bestMonthEarned) { bestMonthEarned = monthTotals[m]; bestMonthIdx = m; }
+  }
+  var maxDayEarned = 0, maxDayCount = 0;
+  Object.keys(dayEarned).forEach(function (k) { if (dayEarned[k] > maxDayEarned) maxDayEarned = dayEarned[k]; });
+  Object.keys(dayCount).forEach(function (k) { if (dayCount[k] > maxDayCount) maxDayCount = dayCount[k]; });
 
   var yearAvg = yearCount ? yearEarned / yearCount : 0;
 
@@ -105,7 +147,12 @@ export function businessYearStats(sessions, now) {
     weekdayEarned: weekdayEarned, // Sonntag-indiziert (JS Date#getDay()), 0=So..6=Sa
     currentStreak: currentStreak, bestStreak: bestStreak,
     projectionEligible: projectionEligible,
-    projection: projectionEligible ? (yearEarned / daysElapsed) * daysInYear : null
+    projection: projectionEligible ? (yearEarned / daysElapsed) * daysInYear : null,
+    bestMonthIdx: bestMonthIdx,
+    bestMonthTs: bestMonthIdx >= 0 ? new Date(year, bestMonthIdx, 1).getTime() : null,
+    bestMonthEarned: bestMonthEarned,
+    maxDayEarned: maxDayEarned,
+    maxDayCount: maxDayCount
   };
 }
 

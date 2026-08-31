@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 16,
+    emoji: '📊',
+    title: { de: 'Monatsvergleich & persönliche Rekorde', en: 'Month comparison & personal records' },
+    body: {
+      de: 'Der Jahr-Tab zeigt jetzt, wie der aktuelle Monat im Vergleich zum letzten abschneidet, plus deinen besten Monat, die meisten Sitzungen an einem Tag und den höchsten Tagesverdienst.',
+      en: 'The Year tab now shows how the current month compares to the last one, plus your best month, most sessions in a day, and highest daily earnings.'
+    }
+  },
+  {
     id: 15,
     emoji: '🧾',
     title: { de: 'Netto-Details pro Sitzung', en: 'Net details per session' },
