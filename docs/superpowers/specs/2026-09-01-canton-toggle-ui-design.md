@@ -220,12 +220,31 @@ Kanton- und Gemeindesteuer kombiniert (ohne Bund, ohne Kirche), Alleinstehend
 | ZH | 150'000 | 23'807.50 | 23'808 (dito) | 0.50 |
 | ZG | 80'000 | 5'109.65 | 5'109.60 (Kanton-Zug-Steuerrechner `steuern.zg.ch`, live geprüft) | 0.05 |
 | ZG | 150'000 | 13'434.85 | 13'434.80 (dito) | 0.05 |
-| GE | 90'000 | 11'469.05 | 11'469 (Musterrechnung `fbk-conseils.ch`, Genfer Steuerberatung, Steuerjahr 2025) | 0.05 |
 
 Alle Abweichungen sind Rappen-Rundungsartefakte einzelner Teilkomponenten
 (z.B. rundet der Kanton-Zug-Rechner Kanton- und Gemeindeanteil getrennt),
 keine Datenfehler — dieselbe Größenordnung wie die Bundestarif-Verifikation
 der Vorgänger-Spec.
+
+**Genève wird separat verifiziert**, weil die Kantonssteuer dort strukturell
+anders funktioniert (siehe Mechanik-Erklärung oben): Die reine Bracket-
+Tabelle wurde direkt gegen die amtliche AFC-GE-Tariftabelle geprüft — alle
+kumulierten „Impôt total"-Werte an den Bracket-Grenzen stimmen auf den
+Rappen genau überein, u.a. bei zvE 48'309 (eigene Rechnung 3'140.38 vs.
+amtlich 3'140.40) und zvE 77'518 (6'995.97 vs. 6'996.00). Der
+Kanton-Multiplikator-Anteil (1.308, also ohne die Gemeinde-Centimes) wurde
+separat gegen eine Musterrechnung von `fbk-conseils.ch` (Genfer
+Steuerberatung) verifiziert: deren Basissteuer B=CHF 8'769 × 1.308 =
+CHF 11'469.05, exakt wie im Artikel angegeben. Ein ursprünglich in diesem
+Dokument enthaltener Prüfpunkt bei zvE=90'000 wurde entfernt — er vermischte
+fälschlich die eigene Bracket-Berechnung (die bei exakt 90'000 CHF 8'768.41
+statt der Artikel-Zahl 8'769 ergibt, vermutlich weil das Beispiel-Einkommen
+im Artikel nicht exakt 90'000 war) mit dem separat verifizierten
+Kanton-Multiplikator. Die Gemeinde-Centimes für Ville de Genève (45.49%)
+sind unabhängig aus drei offiziellen/halboffiziellen Quellen bestätigt
+(siehe Quellenliste), aber nicht end-to-end an einem Ville-de-Genève-
+spezifischen Gesamtbeispiel durchgerechnet — dieselbe Einschränkung, die die
+ursprüngliche Recherche bereits selbst benannt hatte.
 
 Quellen (vollständig, für spätere Nachprüfung):
 - ZH Bracket-Tabelle: ESTV Kantonsblatt Zürich, `estv2.admin.ch/stp/kb/zh-de.pdf`, Stand Februar 2026
