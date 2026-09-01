@@ -23,12 +23,11 @@ for f in js/*.js; do node --check "$f"; done
 - **No build step, no framework, no npm/bundler.** Vanilla HTML/CSS/JS with native ES modules (`<script type="module">`) only. Do not introduce React/Vue/TypeScript/Vite/Webpack/etc.
 - **No backend.** All persistence is `localStorage`. No server, no accounts, no network calls except the Google Fonts stylesheet in `index.html`'s `<head>`.
 - **localStorage keys and shapes are a compatibility contract.** Existing users' data must keep working across changes. The keys, all accessed exclusively through `js/storage.js`:
-  - `pst_settings` — `{mode, monthly?, hoursPerWeek?, hourly?, rate, taxClass, church, churchRate, dedLabel, region?, canton?}` (`region`/`canton` are read by `salary.js`'s `computeTaxRates` but nothing currently writes them — see the comment above `computeTaxRates` in `js/salary.js`)
+  - `pst_settings` — `{mode, monthly?, hoursPerWeek?, hourly?, rate, taxClass?, church?, churchRate?, dedLabel, region?, canton?}` (`taxClass`/`church`/`churchRate` only meaningful when `region!=='CH'`; `canton` only meaningful when `region==='CH'`; `region` defaults to `'DE'` if absent)
   - `pst_sessions` — array of `{id, ts, durationMs, earned, rate, activity, net?, ded?, manual?}`
   - `pst_active` — `{accumulatedMs, startTs, activity}` (present only while a session is running/paused)
   - `pst_activity` — last-selected idle activity (`'poop'|'smoke'|'coffee'`)
   - `pst_lang` — `'de'|'en'`
-  - `pst_region` — `'DE'|'CH'`, drives currency + tax model in `salary.js`/`i18n.js` (default `'DE'` if absent)
   - `pst_achievements` — `{poop:{[achId]:unlockedAtMs}, smoke:{...}, coffee:{...}}` (legacy flat shape auto-migrates on read, see `achievements.js`'s `migrateAchievements`)
   - `pst_ach_category` — last-viewed achievement category tab
   - `pst_whatsnew_seen` — id (number) of the last "What's New" entry the user has seen

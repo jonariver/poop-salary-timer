@@ -19,6 +19,7 @@ import * as sharing from './share.js';
 
   // ---------- Settings ----------
   var settings = storage.getSettings(); // {mode:'monthly'|'hourly', monthly, hoursPerWeek, hourly, rate}
+  i18n.setRegion(settings ? settings.region : 'DE'); // hält i18n.js's In-Memory-region synchron, bevor irgendwo formatiert wird
 
   // ---------- Elements ----------
   function $(id) { return document.getElementById(id); }
@@ -49,6 +50,49 @@ import * as sharing from './share.js';
   $('mode-monthly').addEventListener('click', function () { mode = 'monthly'; renderModeSwitch(); });
   $('mode-hourly').addEventListener('click', function () { mode = 'hourly'; renderModeSwitch(); });
 
+  var land = (settings && settings.region) || 'DE';
+  function renderKantonOptions() {
+    var sel = $('inp-kanton');
+    var prevValue = sel.value;
+    while (sel.options.length > 1) sel.remove(1); // Option 0 ("– (nur Brutto)") bleibt erhalten
+    var available = Object.keys(salary.CH_CANTON_TAX).filter(function (code) { return !!i18n.CANTON_NAMES[code]; });
+    available.forEach(function (code) {
+      var opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = i18n.CANTON_NAMES[code][i18n.getLang()] + ' (' + code + ')';
+      sel.appendChild(opt);
+    });
+    var divider = document.createElement('option');
+    divider.disabled = true;
+    divider.textContent = '──────────';
+    sel.appendChild(divider);
+    Object.keys(i18n.CANTON_NAMES)
+      .filter(function (code) { return available.indexOf(code) === -1; })
+      .sort(function (a, b) { return i18n.CANTON_NAMES[a][i18n.getLang()].localeCompare(i18n.CANTON_NAMES[b][i18n.getLang()]); })
+      .forEach(function (code) {
+        var opt = document.createElement('option');
+        opt.value = code;
+        opt.disabled = true;
+        opt.textContent = i18n.CANTON_NAMES[code][i18n.getLang()] + ' — ' + t('kantonComingSoon');
+        sel.appendChild(opt);
+      });
+    sel.value = prevValue;
+  }
+  function renderLandSwitch() {
+    $('land-de').setAttribute('aria-pressed', String(land === 'DE'));
+    $('land-ch').setAttribute('aria-pressed', String(land === 'CH'));
+    $('field-taxclass').classList.toggle('hidden', land !== 'DE');
+    $('row-church').classList.toggle('hidden', land !== 'DE');
+    $('field-kanton').classList.toggle('hidden', land !== 'CH');
+    $('lbl-monthly').textContent = land === 'CH' ? t('lblMonthlyCh') : t('lblMonthly');
+    $('lbl-rate').textContent = land === 'CH' ? t('lblRateCh') : t('lblRate');
+    $('tax-hint').textContent = land === 'CH' ? t('taxHintCh') : t('taxHint');
+    renderKantonOptions();
+    updateDerived();
+  }
+  $('land-de').addEventListener('click', function () { land = 'DE'; renderLandSwitch(); });
+  $('land-ch').addEventListener('click', function () { land = 'CH'; renderLandSwitch(); });
+
   function parseNum(el) {
     var v = parseFloat(String(el.value).replace(',', '.'));
     return isFinite(v) ? v : NaN;
@@ -59,7 +103,7 @@ import * as sharing from './share.js';
     var m = parseNum($('inp-monthly')), h = parseNum($('inp-hours'));
     if (m > 0 && h > 0) {
       var r = m / (h * 52 / 12);
-      $('derived-value').textContent = i18n.fmtMoney(r);
+      $('derived-value').textContent = i18n.fmtMoneyForRegion(r, land);
       box.classList.remove('hidden');
     } else {
       box.classList.add('hidden');
@@ -71,6 +115,7 @@ import * as sharing from './share.js';
   function fillSetupForm() {
     if (!settings) return;
     mode = settings.mode || mode;
+    land = settings.region || 'DE';
     if (settings.monthly) $('inp-monthly').value = settings.monthly;
     if (settings.hoursPerWeek) $('inp-hours').value = settings.hoursPerWeek;
     if (settings.hourly) $('inp-rate').value = settings.hourly;
@@ -79,6 +124,8 @@ import * as sharing from './share.js';
     $('inp-church-rate').value = String(Number(settings.churchRate) === 8 ? 8 : 9);
     $('inp-dedlabel').value = settings.dedLabel || '';
     renderModeSwitch();
+    renderLandSwitch();
+    $('inp-kanton').value = settings.canton || '';
   }
 
   $('btn-save-settings').addEventListener('click', function () {
@@ -94,12 +141,16 @@ import * as sharing from './share.js';
     }
     err.style.display = 'none';
     s.rate = salary.computeRate(s);
-    s.taxClass = $('inp-taxclass').value || null;
-    s.church = $('inp-church').checked;
+    s.region = land;
+    s.taxClass = land === 'DE' ? ($('inp-taxclass').value || null) : null;
+    s.church = land === 'DE' ? $('inp-church').checked : false;
     s.churchRate = Number($('inp-church-rate').value) === 8 ? 8 : 9;
+    s.canton = land === 'CH' ? ($('inp-kanton').value || null) : null;
     s.dedLabel = $('inp-dedlabel').value.trim();
     settings = s;
     storage.saveSettings(s);
+    i18n.setRegion(land);
+    i18n.buildFormatters();
     renderRateChip();
     show('timer');
     renderTimer();
@@ -265,9 +316,11 @@ import * as sharing from './share.js';
     $('funded-disclaimer').textContent = t('fundedDisclaimer');
     var list = $('funded-list');
     list.innerHTML = '';
-    t('fundedItems').forEach(function (name, i) {
+    var fundRates = (settings && settings.region === 'CH') ? salary.FUND_RATES_CH : salary.FUND_RATES;
+    var fundedItemsKey = (settings && settings.region === 'CH') ? 'fundedItemsCh' : 'fundedItems';
+    t(fundedItemsKey).forEach(function (name, i) {
       var li = document.createElement('li');
-      li.textContent = i18n.fmtFunded(tax.ded / salary.FUND_RATES[i]) + ' ' + name;
+      li.textContent = i18n.fmtFunded(tax.ded / fundRates[i]) + ' ' + name;
       list.appendChild(li);
     });
   }
@@ -737,8 +790,10 @@ import * as sharing from './share.js';
       .filter(function (p) { return p[1] > 0.00005; })
       .map(function (p) { return p[0] + ' ' + i18n.fmtMoney(p[1]); })
       .join(' · ');
-    var funded = t('fundedItems').map(function (name, i) {
-      return i18n.fmtFunded(tax.ded / salary.FUND_RATES[i]) + ' ' + name;
+    var fundRates = (settings && settings.region === 'CH') ? salary.FUND_RATES_CH : salary.FUND_RATES;
+    var fundedItemsKey = (settings && settings.region === 'CH') ? 'fundedItemsCh' : 'fundedItems';
+    var funded = t(fundedItemsKey).map(function (name, i) {
+      return i18n.fmtFunded(tax.ded / fundRates[i]) + ' ' + name;
     }).join('\n');
     return '\n\n' + label + ' ' + i18n.fmtMoney(tax.ded) + '\n' + parts +
       '\n' + t('fundedTitle') + '\n' + funded +
@@ -933,6 +988,7 @@ import * as sharing from './share.js';
     renderActivityPicker();
     renderHistory();
     renderYear();
+    renderLandSwitch();
     if (!views.summary.classList.contains('hidden')) renderSummary();
     if (!whatsNewOverlay.classList.contains('hidden')) renderWhatsNewList();
   }

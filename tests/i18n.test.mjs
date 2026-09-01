@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as i18n from '../js/i18n.js';
+import { CH_CANTON_TAX } from '../js/salary.js';
 
 test('default region is DE', () => {
   assert.equal(i18n.getRegion(), 'DE');
@@ -50,4 +51,44 @@ test('lang and region are independent (Swiss region, English language)', () => {
   i18n.setRegion('DE');
   i18n.setLang('de');
   i18n.buildFormatters();
+});
+
+test('CANTON_NAMES has all 26 cantons with non-empty de/en names, including the 3 available ones', () => {
+  var codes = Object.keys(i18n.CANTON_NAMES);
+  assert.equal(codes.length, 26);
+  codes.forEach(function (code) {
+    var n = i18n.CANTON_NAMES[code];
+    assert.ok(n.de && n.de.length > 0, code + ' missing de name');
+    assert.ok(n.en && n.en.length > 0, code + ' missing en name');
+  });
+  assert.equal(i18n.CANTON_NAMES.ZH.de, 'Zürich');
+  assert.equal(i18n.CANTON_NAMES.ZG.de, 'Zug');
+  assert.equal(i18n.CANTON_NAMES.GE.de, 'Genève');
+});
+
+test('taxHintCh and fundedItemsCh are distinct CH-specific content, not the DE strings', () => {
+  i18n.setLang('de');
+  assert.notEqual(i18n.t('taxHintCh'), i18n.t('taxHint'));
+  assert.ok(i18n.t('taxHintCh').indexOf('€') === -1, 'CH tax hint must not mention €');
+  var itemsCh = i18n.t('fundedItemsCh');
+  var itemsDe = i18n.t('fundedItems');
+  assert.equal(itemsCh.length, 3);
+  assert.notDeepEqual(itemsCh, itemsDe);
+});
+
+test('lblMonthlyCh and lblRateCh mention CHF, not €', () => {
+  i18n.setLang('de');
+  assert.ok(i18n.t('lblMonthlyCh').indexOf('CHF') >= 0);
+  assert.ok(i18n.t('lblMonthlyCh').indexOf('€') === -1);
+  assert.ok(i18n.t('lblRateCh').indexOf('CHF') >= 0);
+  assert.ok(i18n.t('lblRateCh').indexOf('€') === -1);
+});
+
+test('every canton in CH_CANTON_TAX has a matching CANTON_NAMES entry (guards renderKantonOptions against a boot-time crash)', () => {
+  Object.keys(CH_CANTON_TAX).forEach(function (code) {
+    var name = i18n.CANTON_NAMES[code];
+    assert.ok(name, code + ' is in CH_CANTON_TAX but missing from CANTON_NAMES — this would crash renderKantonOptions() at boot for every user');
+    assert.ok(name.de && name.de.length > 0, code + ' missing a German name in CANTON_NAMES');
+    assert.ok(name.en && name.en.length > 0, code + ' missing an English name in CANTON_NAMES');
+  });
 });

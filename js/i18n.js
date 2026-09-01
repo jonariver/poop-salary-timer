@@ -1,13 +1,14 @@
 // ---------- Sprache / i18n ----------
 // Everything that depends on the current language or locale: the translation
 // dictionary, the Intl formatter instances, and locale-aware text formatting.
-import { getLang as storedLang, saveLang, getRegion as storedRegion, saveRegion } from './storage.js';
+import { getLang as storedLang, saveLang } from './storage.js';
 
 var lang = storedLang() === 'en' ? 'en' : 'de';
-// NOTE: this in-memory `region` (backed by the separate `pst_region` localStorage key) is NOT
-// currently read by js/salary.js's `computeTaxRates`, which expects `region` on its own
-// settings-object argument instead — see the comment in salary.js above `computeTaxRates`.
-var region = storedRegion() === 'CH' ? 'CH' : 'DE';
+// `region` lives only in memory here — the persisted copy is `pst_settings.region` (read by
+// salary.js's computeTaxRates via its settings-object argument). app.js keeps this in-memory
+// value synced to pst_settings.region at boot and on every settings save via setRegion(); this
+// module does not read or write localStorage for region itself.
+var region = 'DE';
 
 var STR = {
   de: {
@@ -95,6 +96,14 @@ var STR = {
     fundedTitle: 'Damit hast du finanziert:',
     fundedDisclaimer: 'Augenzwinkernde Schätzung, kein echter Haushaltsbezug.',
     fundedItems: ['Bürgergeld-Regelsatz (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Deutschland gesamt)'],
+    taxHintCh: 'Vereinfachte Näherung (Bundes- und Kantonssteuer-Schätzung + AHV/IV/EO, ALV und BVG), keine amtliche Steuerrechnung. Krankenkassenprämien sind in der Schweiz kein Lohnabzug und daher nicht enthalten. Gemeindesteuerfuss der Kantonshauptstadt — deine tatsächliche Gemeinde kann abweichen. Beim Stundenlohn-Modus wird eine 40-Stunden-Woche angenommen, falls keine Wochenstunden bekannt sind.',
+    fundedItemsCh: ['Sozialhilfe-Grundbedarf (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Schweiz gesamt)'],
+    lblMonthlyCh: 'Monatslohn (brutto oder netto — deine Wahl) in CHF',
+    lblRateCh: 'Stundenlohn in CHF',
+    lblKanton: 'Kanton',
+    landDe: 'Deutschland',
+    landCh: 'Schweiz',
+    kantonComingSoon: 'bald verfügbar',
     summarySub: function (dur) { return 'Du warst ' + dur + ' auf Firmenkosten unterwegs.'; },
     titles: {
       poop: [
@@ -272,6 +281,14 @@ var STR = {
     fundedTitle: 'With that you funded:',
     fundedDisclaimer: 'Tongue-in-cheek estimate, no actual budget reference.',
     fundedItems: ["Citizen's benefit rate (1 person)", 'NGO project position', 'Ukraine aid (Germany total)'],
+    taxHintCh: 'Simplified approximation (federal and cantonal tax estimate + AHV/IV/EO, ALV, and BVG), not an official tax calculation. Health insurance premiums are not a payroll deduction in Switzerland, so they are not included. Communal tax rate of the canton\'s capital — your actual municipality may differ. In hourly mode a 40-hour week is assumed if no weekly hours are known.',
+    fundedItemsCh: ['Social assistance basic rate (1 person)', 'NGO project position', 'Ukraine aid (Switzerland total)'],
+    lblMonthlyCh: 'Monthly salary (gross or net — your call) in CHF',
+    lblRateCh: 'Hourly wage in CHF',
+    lblKanton: 'Canton',
+    landDe: 'Germany',
+    landCh: 'Switzerland',
+    kantonComingSoon: 'coming soon',
     summarySub: function (dur) { return 'You spent ' + dur + ' on company time.'; },
     titles: {
       poop: [
@@ -366,6 +383,35 @@ var STR = {
   }
 };
 
+export var CANTON_NAMES = {
+  ZH: { de: 'Zürich', en: 'Zurich' },
+  ZG: { de: 'Zug', en: 'Zug' },
+  GE: { de: 'Genève', en: 'Geneva' },
+  AG: { de: 'Aargau', en: 'Aargau' },
+  AI: { de: 'Appenzell Innerrhoden', en: 'Appenzell Innerrhoden' },
+  AR: { de: 'Appenzell Ausserrhoden', en: 'Appenzell Ausserrhoden' },
+  BE: { de: 'Bern', en: 'Bern' },
+  BL: { de: 'Basel-Landschaft', en: 'Basel-Landschaft' },
+  BS: { de: 'Basel-Stadt', en: 'Basel-Stadt' },
+  FR: { de: 'Freiburg', en: 'Fribourg' },
+  GL: { de: 'Glarus', en: 'Glarus' },
+  GR: { de: 'Graubünden', en: 'Grisons' },
+  JU: { de: 'Jura', en: 'Jura' },
+  LU: { de: 'Luzern', en: 'Lucerne' },
+  NE: { de: 'Neuenburg', en: 'Neuchâtel' },
+  NW: { de: 'Nidwalden', en: 'Nidwalden' },
+  OW: { de: 'Obwalden', en: 'Obwalden' },
+  SG: { de: 'St. Gallen', en: 'St. Gallen' },
+  SH: { de: 'Schaffhausen', en: 'Schaffhausen' },
+  SO: { de: 'Solothurn', en: 'Solothurn' },
+  SZ: { de: 'Schwyz', en: 'Schwyz' },
+  TG: { de: 'Thurgau', en: 'Thurgau' },
+  TI: { de: 'Tessin', en: 'Ticino' },
+  UR: { de: 'Uri', en: 'Uri' },
+  VD: { de: 'Waadt', en: 'Vaud' },
+  VS: { de: 'Wallis', en: 'Valais' }
+};
+
 export function t(key) { return (STR[lang] && STR[lang][key] !== undefined ? STR[lang] : STR.de)[key]; }
 export function getLang() { return lang; }
 export function setLang(l) {
@@ -375,7 +421,6 @@ export function setLang(l) {
 export function getRegion() { return region; }
 export function setRegion(r) {
   region = r === 'CH' ? 'CH' : 'DE';
-  saveRegion(region);
 }
 
 // ---------- Formatting (sprachabhaengig) ----------
@@ -415,6 +460,17 @@ export function weekdayShortLabelsMonFirst() {
 export function fmtMoneyLive(v) { return fmt4.format(v) + (region === 'CH' ? ' CHF' : ' €'); }
 export function fmtMoney(v) { return fmt2.format(v); }
 export function currencyCode() { return region === 'CH' ? 'CHF' : 'EUR'; }
+// Formats a money value for an explicitly given region, without touching the module's shared
+// in-memory `region`/formatter state — used where a caller needs to preview a not-yet-saved
+// region choice (e.g. the setup form's derived-rate line) without leaking it into every other
+// view that calls fmtMoney().
+export function fmtMoneyForRegion(v, r) {
+  var loc = r === 'CH'
+    ? (lang === 'en' ? 'en-CH' : 'de-CH')
+    : (lang === 'en' ? 'en-GB' : 'de-DE');
+  var currency = r === 'CH' ? 'CHF' : 'EUR';
+  return new Intl.NumberFormat(loc, { style: 'currency', currency: currency }).format(v);
+}
 export function pad(n) { return (n < 10 ? '0' : '') + n; }
 export function fmtElapsed(ms) {
   var s = Math.floor(ms / 1000);
@@ -476,9 +532,7 @@ var BINDINGS = [
   ['#view-setup h2', 'setupTitle'],
   ['#mode-monthly', 'modeMonthly'],
   ['#mode-hourly', 'modeHourly'],
-  ['label[for="inp-monthly"]', 'lblMonthly'],
   ['label[for="inp-hours"]', 'lblHours'],
-  ['label[for="inp-rate"]', 'lblRate'],
   ['#inp-monthly', 'phMonthly', 'placeholder'],
   ['#inp-hours', 'phHours', 'placeholder'],
   ['#inp-rate', 'phRate', 'placeholder'],
@@ -494,10 +548,13 @@ var BINDINGS = [
   ['#tax-title', 'taxTitle'],
   ['#lbl-taxclass', 'lblTaxClass'],
   ['#inp-taxclass option[value=""]', 'taxNone'],
+  ['#inp-kanton option[value=""]', 'taxNone'],
+  ['#lbl-kanton', 'lblKanton'],
+  ['#land-de', 'landDe'],
+  ['#land-ch', 'landCh'],
   ['#lbl-church', 'lblChurch'],
   ['#lbl-dedlabel', 'lblDedLabel'],
   ['#inp-dedlabel', 'dedLabelDefault', 'placeholder'],
-  ['#tax-hint', 'taxHint'],
   ['#stat-k-net', 'statKNet'],
   ['#stat-k-ded', 'statKDed'],
   ['#sum-k-net', 'sumKNet'],
