@@ -99,14 +99,10 @@ export function computeChSocialSecurity(annualGross) {
   return { ahvIvEo: ahvIvEo, alv: alv, bvg: bvg, total: ahvIvEo + alv + bvg };
 }
 
-export var CH_CANTON_TAX = {}; // wird in einem Folge-Schritt mit Kantonsdaten befüllt (siehe Spec Abschnitt 5)
+export var CH_CANTON_TAX = {}; // wird in Task 2 dieses Plans mit Kantonsdaten befüllt
 
-// NOTE: `s.region` here is a field on the settings object passed in by the caller — it is a
-// SEPARATE, unreconciled source of truth from the `pst_region` localStorage key that i18n.js
-// reads/writes via `getRegion()`/`setRegion()`. Nothing currently keeps them in sync, since no
-// UI writes `region` onto `pst_settings` yet. The next plan's region-toggle UI must either write
-// `region` into `pst_settings` (mirroring i18n.js's `pst_region`) or otherwise unify the two, or
-// a user could see CHF-formatted display numbers computed with German tax brackets (or vice versa).
+// `s.region`/`s.canton` come from pst_settings, the single source of truth for region (see
+// storage.js / i18n.js — app.js keeps i18n.js's in-memory region synced to this same field).
 export function computeTaxRates(s) {
   if (!s) return null;
   if (s.region === 'CH') return computeChTaxRates(s);

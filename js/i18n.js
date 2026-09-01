@@ -1,13 +1,14 @@
 // ---------- Sprache / i18n ----------
 // Everything that depends on the current language or locale: the translation
 // dictionary, the Intl formatter instances, and locale-aware text formatting.
-import { getLang as storedLang, saveLang, getRegion as storedRegion, saveRegion } from './storage.js';
+import { getLang as storedLang, saveLang } from './storage.js';
 
 var lang = storedLang() === 'en' ? 'en' : 'de';
-// NOTE: this in-memory `region` (backed by the separate `pst_region` localStorage key) is NOT
-// currently read by js/salary.js's `computeTaxRates`, which expects `region` on its own
-// settings-object argument instead — see the comment in salary.js above `computeTaxRates`.
-var region = storedRegion() === 'CH' ? 'CH' : 'DE';
+// `region` lives only in memory here — the persisted copy is `pst_settings.region` (read by
+// salary.js's computeTaxRates via its settings-object argument). app.js keeps this in-memory
+// value synced to pst_settings.region at boot and on every settings save via setRegion(); this
+// module does not read or write localStorage for region itself.
+var region = 'DE';
 
 var STR = {
   de: {
@@ -375,7 +376,6 @@ export function setLang(l) {
 export function getRegion() { return region; }
 export function setRegion(r) {
   region = r === 'CH' ? 'CH' : 'DE';
-  saveRegion(region);
 }
 
 // ---------- Formatting (sprachabhaengig) ----------
