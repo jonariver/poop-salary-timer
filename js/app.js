@@ -114,7 +114,7 @@ import * as sharing from './share.js';
   function fillSetupForm() {
     if (!settings) return;
     mode = settings.mode || mode;
-    land = settings.region || land;
+    land = settings.region || 'DE';
     if (settings.monthly) $('inp-monthly').value = settings.monthly;
     if (settings.hoursPerWeek) $('inp-hours').value = settings.hoursPerWeek;
     if (settings.hourly) $('inp-rate').value = settings.hourly;
