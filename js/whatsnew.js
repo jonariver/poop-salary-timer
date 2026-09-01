@@ -4,6 +4,15 @@
 
 export var ENTRIES = [
   {
+    id: 18,
+    emoji: '🇨🇭',
+    title: { de: 'Jetzt auch für die Schweiz', en: 'Now available for Switzerland' },
+    body: {
+      de: 'Land umschaltbar auf Schweiz, mit Kanton-Auswahl für Zürich, Zug und Genève — inklusive Bundes-, Kantons- und Gemeindesteuer sowie AHV/IV/EO, ALV und BVG. Weitere Kantone folgen.',
+      en: 'You can now switch to Switzerland, with canton selection for Zürich, Zug, and Genève — including federal, cantonal, and communal tax plus AHV/IV/EO, ALV, and BVG. More cantons to come.'
+    }
+  },
+  {
     id: 17,
     emoji: '🔥',
     title: { de: 'Heatmap: Umschalter & Monatsfilter', en: 'Heatmap: metric toggle & month filter' },
