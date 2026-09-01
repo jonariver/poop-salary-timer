@@ -96,6 +96,14 @@ var STR = {
     fundedTitle: 'Damit hast du finanziert:',
     fundedDisclaimer: 'Augenzwinkernde Schätzung, kein echter Haushaltsbezug.',
     fundedItems: ['Bürgergeld-Regelsatz (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Deutschland gesamt)'],
+    taxHintCh: 'Vereinfachte Näherung (Bundes- und Kantonssteuer-Schätzung + AHV/IV/EO, ALV und BVG), keine amtliche Steuerrechnung. Krankenkassenprämien sind in der Schweiz kein Lohnabzug und daher nicht enthalten. Gemeindesteuerfuss der Kantonshauptstadt — deine tatsächliche Gemeinde kann abweichen. Beim Stundenlohn-Modus wird eine 40-Stunden-Woche angenommen, falls keine Wochenstunden bekannt sind.',
+    fundedItemsCh: ['Sozialhilfe-Grundbedarf (1 Person)', 'NGO-Projektstelle', 'Ukraine-Hilfe (Schweiz gesamt)'],
+    lblMonthlyCh: 'Monatslohn (brutto oder netto — deine Wahl) in CHF',
+    lblRateCh: 'Stundenlohn in CHF',
+    lblKanton: 'Kanton',
+    landDe: 'Deutschland',
+    landCh: 'Schweiz',
+    kantonComingSoon: 'bald verfügbar',
     summarySub: function (dur) { return 'Du warst ' + dur + ' auf Firmenkosten unterwegs.'; },
     titles: {
       poop: [
@@ -273,6 +281,14 @@ var STR = {
     fundedTitle: 'With that you funded:',
     fundedDisclaimer: 'Tongue-in-cheek estimate, no actual budget reference.',
     fundedItems: ["Citizen's benefit rate (1 person)", 'NGO project position', 'Ukraine aid (Germany total)'],
+    taxHintCh: 'Simplified approximation (federal and cantonal tax estimate + AHV/IV/EO, ALV, and BVG), not an official tax calculation. Health insurance premiums are not a payroll deduction in Switzerland, so they are not included. Communal tax rate of the canton\'s capital — your actual municipality may differ. In hourly mode a 40-hour week is assumed if no weekly hours are known.',
+    fundedItemsCh: ['Social assistance basic rate (1 person)', 'NGO project position', 'Ukraine aid (Switzerland total)'],
+    lblMonthlyCh: 'Monthly salary (gross or net — your call) in CHF',
+    lblRateCh: 'Hourly wage in CHF',
+    lblKanton: 'Canton',
+    landDe: 'Germany',
+    landCh: 'Switzerland',
+    kantonComingSoon: 'coming soon',
     summarySub: function (dur) { return 'You spent ' + dur + ' on company time.'; },
     titles: {
       poop: [
@@ -365,6 +381,35 @@ var STR = {
     milestoneReached: function (emoji, label) { return emoji + ' ' + label + ' funded!'; },
     milestoneNext: function (amount, emoji, label) { return 'Next milestone in ' + amount + ': ' + emoji + ' ' + label; }
   }
+};
+
+export var CANTON_NAMES = {
+  ZH: { de: 'Zürich', en: 'Zurich' },
+  ZG: { de: 'Zug', en: 'Zug' },
+  GE: { de: 'Genève', en: 'Geneva' },
+  AG: { de: 'Aargau', en: 'Aargau' },
+  AI: { de: 'Appenzell Innerrhoden', en: 'Appenzell Innerrhoden' },
+  AR: { de: 'Appenzell Ausserrhoden', en: 'Appenzell Ausserrhoden' },
+  BE: { de: 'Bern', en: 'Bern' },
+  BL: { de: 'Basel-Landschaft', en: 'Basel-Landschaft' },
+  BS: { de: 'Basel-Stadt', en: 'Basel-Stadt' },
+  FR: { de: 'Freiburg', en: 'Fribourg' },
+  GL: { de: 'Glarus', en: 'Glarus' },
+  GR: { de: 'Graubünden', en: 'Grisons' },
+  JU: { de: 'Jura', en: 'Jura' },
+  LU: { de: 'Luzern', en: 'Lucerne' },
+  NE: { de: 'Neuenburg', en: 'Neuchâtel' },
+  NW: { de: 'Nidwalden', en: 'Nidwalden' },
+  OW: { de: 'Obwalden', en: 'Obwalden' },
+  SG: { de: 'St. Gallen', en: 'St. Gallen' },
+  SH: { de: 'Schaffhausen', en: 'Schaffhausen' },
+  SO: { de: 'Solothurn', en: 'Solothurn' },
+  SZ: { de: 'Schwyz', en: 'Schwyz' },
+  TG: { de: 'Thurgau', en: 'Thurgau' },
+  TI: { de: 'Tessin', en: 'Ticino' },
+  UR: { de: 'Uri', en: 'Uri' },
+  VD: { de: 'Waadt', en: 'Vaud' },
+  VS: { de: 'Wallis', en: 'Valais' }
 };
 
 export function t(key) { return (STR[lang] && STR[lang][key] !== undefined ? STR[lang] : STR.de)[key]; }

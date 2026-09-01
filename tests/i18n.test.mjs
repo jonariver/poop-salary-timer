@@ -51,3 +51,34 @@ test('lang and region are independent (Swiss region, English language)', () => {
   i18n.setLang('de');
   i18n.buildFormatters();
 });
+
+test('CANTON_NAMES has all 26 cantons with non-empty de/en names, including the 3 available ones', () => {
+  var codes = Object.keys(i18n.CANTON_NAMES);
+  assert.equal(codes.length, 26);
+  codes.forEach(function (code) {
+    var n = i18n.CANTON_NAMES[code];
+    assert.ok(n.de && n.de.length > 0, code + ' missing de name');
+    assert.ok(n.en && n.en.length > 0, code + ' missing en name');
+  });
+  assert.equal(i18n.CANTON_NAMES.ZH.de, 'Zürich');
+  assert.equal(i18n.CANTON_NAMES.ZG.de, 'Zug');
+  assert.equal(i18n.CANTON_NAMES.GE.de, 'Genève');
+});
+
+test('taxHintCh and fundedItemsCh are distinct CH-specific content, not the DE strings', () => {
+  i18n.setLang('de');
+  assert.notEqual(i18n.t('taxHintCh'), i18n.t('taxHint'));
+  assert.ok(i18n.t('taxHintCh').indexOf('€') === -1, 'CH tax hint must not mention €');
+  var itemsCh = i18n.t('fundedItemsCh');
+  var itemsDe = i18n.t('fundedItems');
+  assert.equal(itemsCh.length, 3);
+  assert.notDeepEqual(itemsCh, itemsDe);
+});
+
+test('lblMonthlyCh and lblRateCh mention CHF, not €', () => {
+  i18n.setLang('de');
+  assert.ok(i18n.t('lblMonthlyCh').indexOf('CHF') >= 0);
+  assert.ok(i18n.t('lblMonthlyCh').indexOf('€') === -1);
+  assert.ok(i18n.t('lblRateCh').indexOf('CHF') >= 0);
+  assert.ok(i18n.t('lblRateCh').indexOf('€') === -1);
+});

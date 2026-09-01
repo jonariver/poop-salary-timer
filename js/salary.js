@@ -226,6 +226,12 @@ export function calculateEarnings(durationMs, hourlyRate) {
 // "Damit finanziert": Euro pro Sekunde der Referenzgrößen (grobe Werte, siehe Disclaimer)
 export var FUND_RATES = [563 / 2592000, 60000 / 31536000, 8000000000 / 31536000];
 
+// "Damit finanziert" (Schweiz): Franken pro Sekunde der Referenzgrößen (grobe Werte, siehe Disclaimer).
+// Quellen: SKOS-Grundbedarf-Richtlinie (in Kraft seit 1.1.2025), VPOD-NGO-Lohnstudie 2022
+// (Median-Bereich CHF 73'176–104'400/Jahr, hier gerundet), EDA-Länderprogramm Ukraine 2025–2028
+// (für 2026 reserviertes Jahresbudget).
+export var FUND_RATES_CH = [1061 / 2592000, 80000 / 31536000, 342250000 / 31536000];
+
 // Preis-Meilensteine im Live-Timer (aufsteigend sortiert). Labels/Emoji leben in i18n.js.
 export var MILESTONE_PRICES = [4, 8, 15, 20, 130, 500];
 

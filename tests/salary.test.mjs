@@ -186,3 +186,12 @@ test('computeTaxRates: selecting an available canton increases lst vs. no canton
   assert.ok(withZh.lst > noCanton.lst);
   assert.ok(withZh.total <= 0.9);
 });
+
+import { FUND_RATES_CH } from '../js/salary.js';
+
+test('FUND_RATES_CH has 3 positive, ascending, finite rates (mirrors FUND_RATES shape)', () => {
+  assert.equal(FUND_RATES_CH.length, 3);
+  FUND_RATES_CH.forEach(function (r) { assert.ok(isFinite(r) && r > 0); });
+  assert.ok(FUND_RATES_CH[0] < FUND_RATES_CH[1]);
+  assert.ok(FUND_RATES_CH[1] < FUND_RATES_CH[2]);
+});
