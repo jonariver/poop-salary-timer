@@ -55,7 +55,7 @@ import * as sharing from './share.js';
     var sel = $('inp-kanton');
     var prevValue = sel.value;
     while (sel.options.length > 1) sel.remove(1); // Option 0 ("– (nur Brutto)") bleibt erhalten
-    var available = Object.keys(salary.CH_CANTON_TAX);
+    var available = Object.keys(salary.CH_CANTON_TAX).filter(function (code) { return !!i18n.CANTON_NAMES[code]; });
     available.forEach(function (code) {
       var opt = document.createElement('option');
       opt.value = code;
@@ -88,6 +88,7 @@ import * as sharing from './share.js';
     $('lbl-rate').textContent = land === 'CH' ? t('lblRateCh') : t('lblRate');
     $('tax-hint').textContent = land === 'CH' ? t('taxHintCh') : t('taxHint');
     renderKantonOptions();
+    updateDerived();
   }
   $('land-de').addEventListener('click', function () { land = 'DE'; renderLandSwitch(); });
   $('land-ch').addEventListener('click', function () { land = 'CH'; renderLandSwitch(); });
@@ -102,7 +103,7 @@ import * as sharing from './share.js';
     var m = parseNum($('inp-monthly')), h = parseNum($('inp-hours'));
     if (m > 0 && h > 0) {
       var r = m / (h * 52 / 12);
-      $('derived-value').textContent = i18n.fmtMoney(r);
+      $('derived-value').textContent = i18n.fmtMoneyForRegion(r, land);
       box.classList.remove('hidden');
     } else {
       box.classList.add('hidden');

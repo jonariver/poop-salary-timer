@@ -460,6 +460,17 @@ export function weekdayShortLabelsMonFirst() {
 export function fmtMoneyLive(v) { return fmt4.format(v) + (region === 'CH' ? ' CHF' : ' €'); }
 export function fmtMoney(v) { return fmt2.format(v); }
 export function currencyCode() { return region === 'CH' ? 'CHF' : 'EUR'; }
+// Formats a money value for an explicitly given region, without touching the module's shared
+// in-memory `region`/formatter state — used where a caller needs to preview a not-yet-saved
+// region choice (e.g. the setup form's derived-rate line) without leaking it into every other
+// view that calls fmtMoney().
+export function fmtMoneyForRegion(v, r) {
+  var loc = r === 'CH'
+    ? (lang === 'en' ? 'en-CH' : 'de-CH')
+    : (lang === 'en' ? 'en-GB' : 'de-DE');
+  var currency = r === 'CH' ? 'CHF' : 'EUR';
+  return new Intl.NumberFormat(loc, { style: 'currency', currency: currency }).format(v);
+}
 export function pad(n) { return (n < 10 ? '0' : '') + n; }
 export function fmtElapsed(ms) {
   var s = Math.floor(ms / 1000);

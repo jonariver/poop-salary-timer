@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import * as i18n from '../js/i18n.js';
+import { CH_CANTON_TAX } from '../js/salary.js';
 
 test('default region is DE', () => {
   assert.equal(i18n.getRegion(), 'DE');
@@ -81,4 +82,13 @@ test('lblMonthlyCh and lblRateCh mention CHF, not €', () => {
   assert.ok(i18n.t('lblMonthlyCh').indexOf('€') === -1);
   assert.ok(i18n.t('lblRateCh').indexOf('CHF') >= 0);
   assert.ok(i18n.t('lblRateCh').indexOf('€') === -1);
+});
+
+test('every canton in CH_CANTON_TAX has a matching CANTON_NAMES entry (guards renderKantonOptions against a boot-time crash)', () => {
+  Object.keys(CH_CANTON_TAX).forEach(function (code) {
+    var name = i18n.CANTON_NAMES[code];
+    assert.ok(name, code + ' is in CH_CANTON_TAX but missing from CANTON_NAMES — this would crash renderKantonOptions() at boot for every user');
+    assert.ok(name.de && name.de.length > 0, code + ' missing a German name in CANTON_NAMES');
+    assert.ok(name.en && name.en.length > 0, code + ' missing an English name in CANTON_NAMES');
+  });
 });
