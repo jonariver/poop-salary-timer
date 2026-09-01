@@ -27,13 +27,17 @@
   <!-- ============ SETUP / SETTINGS ============ -->
   <section id="view-setup" class="card hidden" aria-label="Verdienst einstellen">
     <h2 class="section">Was verdienst du eigentlich?</h2>
+    <div class="mode-switch land-switch" id="land-switch" role="group" aria-label="Land">
+      <button id="land-de" aria-pressed="true">Deutschland</button>
+      <button id="land-ch" aria-pressed="false">Schweiz</button>
+    </div>
     <div class="mode-switch" role="group" aria-label="Eingabemodus">
       <button id="mode-monthly" aria-pressed="true">Monatslohn</button>
       <button id="mode-hourly" aria-pressed="false">Stundenlohn</button>
     </div>
     <div id="fields-monthly">
       <div class="field">
-        <label for="inp-monthly">Monatslohn (brutto oder netto — deine Wahl) in €</label>
+        <label for="inp-monthly" id="lbl-monthly">Monatslohn (brutto oder netto — deine Wahl) in €</label>
         <input id="inp-monthly" type="number" inputmode="decimal" min="0" step="50" placeholder="z. B. 3200">
       </div>
       <div class="field">
@@ -43,13 +47,13 @@
     </div>
     <div id="fields-hourly" class="hidden">
       <div class="field">
-        <label for="inp-rate">Stundenlohn in €</label>
+        <label for="inp-rate" id="lbl-rate">Stundenlohn in €</label>
         <input id="inp-rate" type="number" inputmode="decimal" min="0" step="0.5" placeholder="z. B. 18,50">
       </div>
     </div>
     <div class="tax-section">
       <h3 id="tax-title">Netto-Schätzung (optional) 🧾</h3>
-      <div class="field">
+      <div class="field" id="field-taxclass">
         <label for="inp-taxclass" id="lbl-taxclass">Steuerklasse</label>
         <select id="inp-taxclass">
           <option value="">– (nur Brutto)</option>
@@ -61,7 +65,13 @@
           <option value="6">VI</option>
         </select>
       </div>
-      <div class="check-row">
+      <div class="field hidden" id="field-kanton">
+        <label for="inp-kanton" id="lbl-kanton">Kanton</label>
+        <select id="inp-kanton">
+          <option value="">– (nur Brutto)</option>
+        </select>
+      </div>
+      <div class="check-row" id="row-church">
         <input type="checkbox" id="inp-church">
         <label for="inp-church" id="lbl-church">Kirchensteuer</label>
         <select id="inp-church-rate">
