@@ -99,7 +99,54 @@ export function computeChSocialSecurity(annualGross) {
   return { ahvIvEo: ahvIvEo, alv: alv, bvg: bvg, total: ahvIvEo + alv + bvg };
 }
 
-export var CH_CANTON_TAX = {}; // wird in Task 2 dieses Plans mit Kantonsdaten befüllt
+export var CH_CANTON_TAX = {
+  ZH: {
+    taxModelYear: 2026,
+    referenceMunicipality: 'Stadt Zürich',
+    brackets: [
+      { upTo: 7000, rate: 0 }, { upTo: 12000, rate: 0.02 }, { upTo: 16800, rate: 0.03 },
+      { upTo: 24800, rate: 0.04 }, { upTo: 34500, rate: 0.05 }, { upTo: 45700, rate: 0.06 },
+      { upTo: 58800, rate: 0.07 }, { upTo: 76400, rate: 0.08 }, { upTo: 110400, rate: 0.09 },
+      { upTo: 144100, rate: 0.10 }, { upTo: 197400, rate: 0.11 }, { upTo: 266700, rate: 0.12 },
+      { upTo: Infinity, rate: 0.13 }
+    ],
+    gemeindeMultiplier: 2.14 // Kantonssteuerfuss 95% + Stadt Zürich Gemeindesteuerfuss 119%
+  },
+  ZG: {
+    taxModelYear: 2026,
+    referenceMunicipality: 'Stadt Zug',
+    brackets: [
+      { upTo: 1100, rate: 0.005 }, { upTo: 3300, rate: 0.01 }, { upTo: 6100, rate: 0.02 },
+      { upTo: 10100, rate: 0.03 }, { upTo: 15300, rate: 0.0325 }, { upTo: 21100, rate: 0.035 },
+      { upTo: 26900, rate: 0.04 }, { upTo: 34900, rate: 0.045 }, { upTo: 46400, rate: 0.055 },
+      { upTo: 59700, rate: 0.055 }, { upTo: 74700, rate: 0.065 }, { upTo: 94800, rate: 0.08 },
+      { upTo: 120100, rate: 0.10 }, { upTo: 149900, rate: 0.09 }, { upTo: Infinity, rate: 0.08 }
+    ],
+    gemeindeMultiplier: 1.30 // Kantonssteuerfuss 78% + Stadt Zug Gemeindesteuerfuss 52%
+  },
+  GE: {
+    taxModelYear: 2025, // 2026er Kantonsbarème noch nicht publiziert (ge.ch/document/.../2026 → 404, geprüft)
+    referenceMunicipality: 'Ville de Genève',
+    brackets: [
+      { upTo: 18649, rate: 0.000 }, { upTo: 22469, rate: 0.073 }, { upTo: 24716, rate: 0.082 },
+      { upTo: 26962, rate: 0.091 }, { upTo: 29210, rate: 0.100 }, { upTo: 34827, rate: 0.109 },
+      { upTo: 39320, rate: 0.113 }, { upTo: 43815, rate: 0.123 }, { upTo: 48309, rate: 0.128 },
+      { upTo: 77518, rate: 0.132 }, { upTo: 126950, rate: 0.142 }, { upTo: 170764, rate: 0.150 },
+      { upTo: 193234, rate: 0.156 }, { upTo: 276369, rate: 0.158 }, { upTo: 294345, rate: 0.160 },
+      { upTo: 414554, rate: 0.168 }, { upTo: 649355, rate: 0.176 }, { upTo: Infinity, rate: 0.180 }
+    ],
+    // Genf-Mechanik strukturell anders als ZH/ZG: kein einfacher Kanton%+Gemeinde%-Steuerfuss,
+    // sondern eine Kette gesetzlicher Zuschläge/Rabatte, die sich linear zu einem Multiplikator
+    // zusammenfassen lässt: (1.475 kantonaler Zuschlag × 0.88 gesetzlicher 12%-Rabatt + 0.01
+    // Pflegezuschlag) + 0.4549 Gemeinde-Centimes Ville de Genève = 1.7629
+    gemeindeMultiplier: 1.7629
+  }
+};
+
+export function computeChCantonalTax(zvE, cantonCode) {
+  var canton = CH_CANTON_TAX[cantonCode];
+  return canton ? computeBracketTax(zvE, canton.brackets) * canton.gemeindeMultiplier : 0;
+}
 
 // `s.region`/`s.canton` come from pst_settings, the single source of truth for region (see
 // storage.js / i18n.js — app.js keeps i18n.js's in-memory region synced to this same field).
@@ -151,8 +198,7 @@ function computeChTaxRates(s) {
   // als die deutsche Näherung (0.86-Faktor), die hier NICHT wiederverwendet werden darf.
   var zvE = Math.max(0, annualGross - social.total);
   var federalTax = computeChFederalTax(zvE);
-  var canton = CH_CANTON_TAX[s.canton];
-  var cantonalTax = canton ? computeBracketTax(zvE, canton.brackets) * canton.gemeindeMultiplier : 0;
+  var cantonalTax = computeChCantonalTax(zvE, s.canton);
   var lstAnnual = federalTax + cantonalTax;
   var lstRate = Math.max(0, Math.min(0.45, lstAnnual / annualGross));
 

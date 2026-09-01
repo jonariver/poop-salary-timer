@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeChFederalTax, computeChSocialSecurity, computeTaxRates, computeNet } from '../js/salary.js';
+import { computeChFederalTax, computeChSocialSecurity, computeTaxRates, computeNet, computeChCantonalTax } from '../js/salary.js';
 
 test('computeChFederalTax matches the official 2026 Grundtarif (Basel-Landschaft PDF) within rounding tolerance', () => {
   // [zvE, official tax] pairs, verified against the official cantonal
@@ -115,9 +115,9 @@ test('computeTaxRates: CH branch with zero/missing gross returns null', () => {
 
 test('computeTaxRates: CH branch works with no canton selected (cantonal tax contributes 0)', () => {
   var r = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000 });
-  var rWithUnknownCanton = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000, canton: 'ZH' });
-  // ZH isn't in CH_CANTON_TAX yet (next plan adds it) — both must be identical for now.
-  assert.deepEqual(r, rWithUnknownCanton);
+  var rWithUnavailableCanton = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000, canton: 'BE' });
+  // BE (Bern) is not yet in CH_CANTON_TAX — both must be identical.
+  assert.deepEqual(r, rWithUnavailableCanton);
 });
 
 test('computeTaxRates: total never exceeds the 0.9 safety cap for either region', () => {
@@ -143,4 +143,46 @@ test('computeNet: CH net+ded reconstructs gross exactly', () => {
 
 test('computeNet: no taxClass and DE region returns null (unchanged behavior)', () => {
   assert.equal(computeNet(3200, { mode: 'monthly', monthly: 3200 }), null);
+});
+
+test('computeChCantonalTax: Zürich matches the official ESTV Steuerrechner (Stadt Zürich, 2026)', () => {
+  var cases = [[80000, 9351.80], [150000, 23807.50]];
+  cases.forEach(function (c) {
+    var zvE = c[0], expected = c[1];
+    var actual = computeChCantonalTax(zvE, 'ZH');
+    assert.ok(Math.abs(actual - expected) < 1, 'zvE=' + zvE + ': expected ~' + expected + ', got ' + actual);
+  });
+});
+
+test('computeChCantonalTax: Zug matches the official Kanton-Zug Steuerrechner (Stadt Zug, 2026)', () => {
+  var cases = [[80000, 5109.65], [150000, 13434.85]];
+  cases.forEach(function (c) {
+    var zvE = c[0], expected = c[1];
+    var actual = computeChCantonalTax(zvE, 'ZG');
+    assert.ok(Math.abs(actual - expected) < 1, 'zvE=' + zvE + ': expected ~' + expected + ', got ' + actual);
+  });
+});
+
+test('computeChCantonalTax: Genève matches the official AFC-GE barème at verified bracket boundaries (Ville de Genève, 2025)', () => {
+  // Base-tax values (before the combined multiplier) verified to the cent against the official
+  // AFC-GE cumulative tariff table at these exact bracket-boundary incomes; multiplied here by
+  // the independently-derived Ville-de-Genève combined multiplier (1.7629).
+  var cases = [[48309, 5536.21], [77518, 12333.25]];
+  cases.forEach(function (c) {
+    var zvE = c[0], expected = c[1];
+    var actual = computeChCantonalTax(zvE, 'GE');
+    assert.ok(Math.abs(actual - expected) < 1, 'zvE=' + zvE + ': expected ~' + expected + ', got ' + actual);
+  });
+});
+
+test('computeChCantonalTax: unavailable canton returns 0', () => {
+  assert.equal(computeChCantonalTax(80000, 'BE'), 0);
+  assert.equal(computeChCantonalTax(80000, undefined), 0);
+});
+
+test('computeTaxRates: selecting an available canton increases lst vs. no canton', () => {
+  var noCanton = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000 });
+  var withZh = computeTaxRates({ region: 'CH', mode: 'monthly', monthly: 6000, canton: 'ZH' });
+  assert.ok(withZh.lst > noCanton.lst);
+  assert.ok(withZh.total <= 0.9);
 });
